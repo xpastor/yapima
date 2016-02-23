@@ -1,0 +1,178 @@
+## Required variables: ##
+## pipeline_dir
+## qcdir
+## filtered.raw.betas
+## processed.betas
+## pdata
+## genotype.betas
+
+source(file.path(pipeline_dir, 'qc_functions.R'))
+
+library(GenomicRanges)
+library(cluster)
+library(parallel)
+
+#### Data QC ####
+
+### Beta distribution plot ###
+message('Plotting density plots of Beta values...')
+pdf(file.path(qcdir, 'beta_distribution.pdf'))
+plot(density(filtered.raw.betas[,1], na.rm=T), ylim=c(0,6), main='Raw samples', bty='n', lwd=0.1, xlab='Beta')
+for(i in 2:ncol(filtered.raw.betas)) {
+	lines(density(filtered.raw.betas[,i], na.rm=T), lwd=0.1)
+}
+
+plot(density(processed.betas[,1], na.rm=T), ylim=c(0,6), main='Normalized samples', bty='n', lwd=0.1, xlab='Beta')
+for(i in 2:ncol(processed.betas)) {
+	lines(density(processed.betas[,i], na.rm=T), lwd=0.1)
+}
+dev.off()
+message('Finished.')
+
+### Beta density heatmap ###
+message('Plotting density heatmaps of Beta values...')
+library(pheatmap)
+pdf(file.path(qcdir, 'beta_distribution_heatmap.pdf'))
+h <- apply(filtered.raw.betas, 2, function(x) hist(x, breaks=seq(0,1,0.001), plot=F)$counts)
+pheatmap(h, cluster_rows=F, main='Raw beta distribution', scale='none', fontsize_col=6)
+
+h <- apply(processed.betas, 2, function(x) hist(x, breaks=seq(0,1,0.001), plot=F)$counts)
+pheatmap(h, cluster_rows=F, main='Normalized beta distribution', scale='none', fontsize_col=6)
+dev.off()
+message('Finished.')
+
+### PCA analysis ###
+#pdata2 <- pdata[,colSums(! is.na(pdata)) != 0]
+pdata2 <- pdata
+pdata2$Slide <- as.character(pdata2$Slide)
+raw.betas.narm <- filtered.raw.betas[! apply(is.na(filtered.raw.betas), 1, any),]
+processed.betas.narm <- processed.betas[! apply(is.na(processed.betas), 1, any),]
+raw.pca <- prcomp(t(raw.betas.narm))
+pca <- prcomp(t(processed.betas.narm))
+pdata2 <- pdata2[row.names(pca$x),]
+
+## Batch variables ##
+message('PCA plots of batch variables...')
+pdata2$ArrayRow <- gsub('C..', '', pdata2$Array)
+pdata2$ArrayColumn <- gsub('R..', '', pdata2$Array)
+
+plot.vars <- unique(c('Slide', 'ArrayRow', 'ArrayColumn', batch.vars))
+for (batch.var in plot.vars) {
+	groups <- pdata2[,batch.var]
+	names(groups) <- row.names(pdata2)
+	if (class(groups) %in% c('character', 'factor')) {
+		ggsave(file=file.path(qcdir, paste0('raw_batch_PCA_', batch.var, '.png')), plot.pca(raw.pca, groups, batch.var), width=20)
+		ggsave(file=file.path(qcdir, paste0('processed_batch_PCA_', batch.var, '.png')), plot.pca(pca, groups, batch.var), width=20)
+	}
+}
+message('Finished.')
+     
+## Interest variables ##
+message('PCA plots of variables of interest...')
+interest.vars <- variablesOfInterest(pdata, batch.vars)
+if (! isEmpty(interest.vars)) {
+#filtered.betas.narm <- filtered.betas[! apply(is.na(filtered.betas), 1, any),]
+#	raw.pca <- prcomp(t(filtered.raw.betas))
+#	pca <- prcomp(t(processed.betas))
+#	pdata2 <- pdata[row.names(pca$x),]
+
+	for (interest.var in interest.vars) {
+		groups <- pdata2[,interest.var]
+		names(groups) <- row.names(pdata2)
+		if (class(groups) %in% c('character', 'factor')) {
+			ggsave(file=file.path(qcdir, paste0('raw_PCA_', interest.var, '.png')), plot.pca(raw.pca, groups, interest.var), width=20)
+			ggsave(file=file.path(qcdir, paste0('processed_PCA_', interest.var, '.png')), plot.pca(pca, groups, interest.var), width=20)
+		}
+	}
+}
+message('Finished.')
+
+### Correlation between samples ###
+## All probes ##
+#pdf(file.path(qcdir, 'samples_correlation.pdf'))
+message('Plotting sample correlations...')
+sample.cor <- cor(processed.betas, use='na.or.complete')
+pheatmap(sample.cor, show_rownames=T, show_colnames=T, main='All probes', fontsize=6, filename=file.path(qcdir, 'samples_correlation.pdf'))
+message('Finished.')
+
+### Sample genotyping ###
+message('Genotyping samples...')
+snps <- row.names(genotype.betas)
+library(biomaRt)
+mart <- useMart('snp')
+snp.db <- useMart('snp', dataset='hsapiens_snp')
+snp.genotype <- getBM(c('refsnp_id', 'allele'), filters='snp_filter', values=snps, mart=snp.db)
+snp.unmeth <- gsub('[GC/]', '', snp.genotype$allele)
+snp.meth <- ifelse(snp.unmeth=='A', 'G', 'C')
+ref <- gsub('/..*', '', snp.genotype$allele)
+genotypes.df <- data.frame(ref=ref, hipo=paste0(snp.unmeth, snp.unmeth), hemi=paste0(snp.meth,snp.unmeth), hyper=paste0(snp.meth,snp.meth), row.names=snp.genotype$refsnp_id, stringsAsFactors=F)
+
+genotype.sample <- function(snps.betas) {
+    snps <- row.names(snps.betas)
+	require(fpc)
+	asw <- numeric(3)
+	for (k in 2:3) asw[[k]] <- pam(snps.betas,k) $ silinfo $ avg.width
+	k.best <- which.max(asw)
+	
+	hc <- hclust(dist(snps.betas))
+	haplotype <- cutree(hc, k.best)
+	genotype.mean <- aggregate(snps.betas, list(haplotype), mean)
+	hyper <- genotype.mean$Group.1[which.max(genotype.mean$x)]
+	hipo <- genotype.mean$Group.1[which.min(genotype.mean$x)]
+	haplotype <- ifelse(haplotype==hipo, 'hipo', ifelse(haplotype==hyper, 'hyper', 'hemi'))
+}
+
+smpl.genotypes <- apply(genotype.betas, 2, genotype.sample)
+snp.idx <- match(row.names(smpl.genotypes), row.names(genotypes.df))
+genotype.idx <- apply(smpl.genotypes, 2, match, colnames(genotypes.df))
+genotypes <- matrix(genotypes.df[snp.idx + (genotype.idx - 1)*nrow(genotypes.df)], nrow=nrow(smpl.genotypes), ncol=ncol(smpl.genotypes), dimnames=list(row.names(smpl.genotypes), colnames(smpl.genotypes)))
+genotypes <- data.frame(SNP_ID=row.names(genotypes), genotypes)
+write.table(genotypes, file.path(qcdir, '450k_genotypes.txt'), sep="\t", row.names=F, quote=F)
+message('Finished.')
+
+### CNV analysis ###
+message('Running CNV analysis...')
+library(conumee)
+cnv.intensity <- getMeth(filtered.norm.meth) + getUnmeth(filtered.norm.meth)
+colnames(cnv.intensity) <- paste(colnames(cnv.intensity), 'intensity', sep='.')
+library(CopyNumber450kData)
+data(RGcontrolSetEx)
+controls.norm <- NULL
+if (! backgroundCorrection) {
+    controls.norm <- preprocessRaw(RGcontrolSetEx)
+} else {
+    controls.norm <- preprocessNoob(RGcontrolSetEx)
+}
+if (normalization) {
+    controls.norm <- preprocessSWAN(RGcontrolSetEx, mSet=controls.norm)
+}
+
+exclude.gr <- array.annot.gr[exclude]
+
+cnv <- CNV.load(as.data.frame(cnv.intensity), names=sub('\\.intensity$', '', colnames(cnv.intensity)))
+cnv.controls <- CNV.load(controls.norm)
+cnv.annot <- CNV.create_anno(exclude_regions=exclude.gr, chrXY=T)
+dir.create(file.path(qcdir, 'CNV_report'), recursive=T)
+for (pid in names(cnv)) {
+	cat(pid)
+    cnv.analysis <- CNV.fit(cnv[pid], cnv.controls, cnv.annot)
+	cnv.analysis <- CNV.bin(cnv.analysis)
+	cnv.analysis <- CNV.detail(cnv.analysis)
+	cnv.analysis <- CNV.segment(cnv.analysis)
+	cnv.res <- CNV.write(cnv.analysis, what='segments')
+	cnv.probes <- CNV.write(cnv.analysis, what='probes')
+#	dir.create(file.path(qcdir, 'CNV_report', pid))
+#	write.table(cnv.res, file.path(qcdir, 'CNV_report', pid, paste(pid, 'CNV_report.txt', sep='_')), sep="\t", quote=F, row.names=F)
+	write.table(cnv.res, file.path(qcdir, 'CNV_report', paste(pid, 'CNV_report.txt', sep='_')), sep="\t", quote=F, row.names=F)
+	pdf(file.path(qcdir, 'CNV_report', paste(pid, 'CNV_report.pdf', sep='_')), width=2000, height=500)
+#	png(file.path(qcdir, 'CNV_report', pid, paste(pid, 'whole_genome.png', sep='_')), width=2000, height=500)
+	CNV.genomeplot(cnv.analysis)
+#	dev.off()
+	for (chr in row.names(cnv.analysis@anno@genome)) {
+#		png(file.path(qcdir, 'CNV_report', pid, paste(pid, '_', chr, '.png', sep='')), width=2000, height=500)
+		CNV.genomeplot(cnv.analysis, chr=chr)
+#		dev.off()
+	}
+	dev.off()
+}
+message('Finished.')

@@ -1,0 +1,1 @@
+sh $HOME/pipelines/final/yapima/run_yapima.sh -c $HOME/pipelines/final/yapima/config_yapima.sh

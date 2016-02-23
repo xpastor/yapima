@@ -1,0 +1,103 @@
+#!/usr/bin/env Rscript
+
+params <- commandArgs(T)
+
+if (length(params) == 0) {
+	stop("Error:\n\tYou need to specify a configuration file.")
+} else if (length(params) > 1) {
+	message("Warning:\n\tYou specified too many parameters, only one is allowed. The first one will be taken as the configuration file.")
+}
+
+config <- params[1]
+if (!file.exists(config)) {
+	stop(paste0("\n\tThe config file cannot be accessed:\n\t", config))
+}
+
+source(config)
+if (! dir.exists(idat_dir)) {
+	stop(paste0("\n\tThe directory with the IDAT files can not be accessed.\n\t", idat_dir))
+}
+
+if (! dir.exists(pipeline_dir)) {
+	stop(paste0("\n\tThe directory with the pipeline scripts can not be accessed.\n\t", pipeline_dir))
+}
+
+pipeline_scripts <- dir(pipeline_dir)
+if (! 'methylation_preprocessing.R' %in% pipeline_scripts) {
+	stop(paste0("\n\tThe script 'methylation_preprocessing.R' is not present in ", pipeline_dir))
+}
+if (! 'batch_correction.R' %in% pipeline_scripts) {
+	stop(paste0("\n\tThe script 'batch_correction.R' is not present in ", pipeline_dir))
+}
+if (! 'methylation_qc.R' %in% pipeline_scripts) {
+	stop(paste0("\n\tThe script 'methylation_qc.R' is not present in ", pipeline_dir))
+}
+if (! 'probe_selection.R' %in% pipeline_scripts) {
+	stop(paste0("\n\tThe script 'probe_selection.R' is not present in ", pipeline_dir))
+}
+if (! 'qc_functions.R' %in% pipeline_scripts) {
+	stop(paste0("\n\tThe script 'qc_functions.R' is not present in ", pipeline_dir))
+} else {
+	source(file.path(pipeline_dir, 'qc_functions.R'))
+}
+
+if (! file.exists(sample.annotation)) {
+#if (! file.exists(sample.annotation) | ! file.access(sample.annotation)) {
+	stop(paste0("\n\tThe sample sheet could not be accessed.\n\t", sample.annotation))
+}
+
+if (! blacklist == '' & (! file.exists(blacklist) | ! file.access(blacklist))) {
+	stop(paste0("\n\tThe file with blacklisted probes could not be accessed.\n\t", blacklist))
+}
+
+if (! dir.exists(wd)) {
+	success <- try(dir.create(wd, recursive=T, mode='0770'), T)
+	if (! success) {
+		stop(paste0("\n\tThe output directory could not be created.\n\t", wd))
+	}
+}
+
+if (!is.logical(batchCorrection)) {
+	stop("\n\t'batchCorrection' must be a valid R boolean: T, F, TRUE or FALSE.")
+}
+
+if (!is.logical(runQC)) {
+	stop("\n\t'runQC' must be a valid R boolean: T, F, TRUE or FALSE.")
+}
+
+if (!is.logical(probeSelection)) {
+	stop("\n\t'probeSelection' must be a valid R boolean: T, F, TRUE or FALSE.")
+}
+
+if (!is.logical(diffMeth)) {
+	stop("\n\t'diffMeth' must be a valid R boolean: T, F, TRUE or FALSE.")
+}
+
+if (!is.logical(backgroundCorrection)) {
+	stop("\n\t'backgroundCorrection' must be a valid R boolean: T, F, TRUE or FALSE.")
+}
+
+if (!is.logical(normalization)) {
+	stop("\n\t'normalization' must be a valid R boolean: T, F, TRUE or FALSE.")
+}
+
+if (!is.logical(removeEuropeanSNPs)) {
+	stop("\n\t'removeEuropeanSNPs' must be a valid R boolean: T, F, TRUE or FALSE.")
+}
+
+if ((varianceProportion < 0) | (varianceProportion > 1)) {
+	stop("\n\t'varianceProportion' must be a number between 0 and 1.")	
+}
+
+set.seed(seed)
+batch.vars <- unlist(strsplit(batch.vars, ','))
+
+qcdir <- file.path(wd, 'qc')
+dir.create(qcdir, recursive=T)
+
+source(file.path(pipeline_dir, 'methylation_preprocessing.R'))
+if (batchCorrection) source(file.path(pipeline_dir, 'batch_correction.R'))
+if (surrogateCorrection) source(file.path(pipeline_dir, 'surrogate_correction.R'))
+if (runQC) source(file.path(pipeline_dir, 'methylation_qc.R'))
+if (probeSelection) source(file.path(pipeline_dir, 'probe_selection.R'))
+if (diffMeth) source(file.path(pipeline_dir, 'differential_methylation.R'))
