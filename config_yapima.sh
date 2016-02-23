@@ -1,13 +1,10 @@
 #!/usr/bin/bash
 
 NCORES=1
-PIPELINE_DIR=$HOME/pipelines/final/yapima
-#PIPELINE_DIR=/icgc/dkfzlsdf/analysis/hipo/hipo_054/user_folders/pastor/pipelines/yapima
-BASH2R=$PIPELINE_DIR/bash2R.R
+PIPELINE_DIR=$HOME/pipelines/yapima
 
 ### Cluster-related parameters ###
 EMAIL=x.pastorhostench@dkfz-heidelberg.de
-#PBS_RESOURCES="walltime=10:00:00,nodes=1:ppn=$NCORES:lsdf,mem=20g"
 PBS_RESOURCES="walltime=10:00:00,nodes=1:ppn=$NCORES,mem=20g"
 CLUSTER_EO=/ibios/co02/xavier/eo/yapima
 
@@ -31,9 +28,9 @@ BLACKLIST='' # file with additional probes to be discarded from any analysis; ''
 OUTDIR=/icgc/dkfzlsdf/analysis/hipo/hipo_054/user_folders/pastor/test_pipeline
 
 ### Params ###
-BACKGROUND_CORRECTION=1 # Noob correction from the methylumi package
-NORMALIZATION=F # SWAN correction from the minfi package
-REMOVE_EUROPEAN_SNPS=T
+BACKGROUND_CORRECTION=T # T or F; Noob correction from the methylumi package
+NORMALIZATION=F # T or F; SWAN correction from the minfi package
+REMOVE_EUROPEAN_SNPS=T # T or F; remove SNPs that may be present in at least 1 sample
 BATCH_VARS='' # comma separated list of batch variables present in sample.annotation
 VARIANCE_PROPORTION=0.01 # proportion of variance that surrogate variables should explain
 SEED=11

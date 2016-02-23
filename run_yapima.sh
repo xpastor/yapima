@@ -49,5 +49,4 @@ then
 fi
 
 rscript=`qsub -o $CLUSTER_EO -j oe -M $EMAIL -N yapima -l $PBS_RESOURCES -v CONFIG_FILE=$CONFIG_FILE $PIPELINE_DIR/process450k.sh | cut -d '.' -f 1`
-#rscript=`echo "$RSCRIPT_BIN $PIPELINE_DIR/run_process450k.R $BASH2R" | qsub -o $CLUSTER_EO -j oe -M $EMAIL -N yapima -l $PBS_RESOURCES | cut -d '.' -f 1`
 echo "yapima submitted, job ID $rscript"
