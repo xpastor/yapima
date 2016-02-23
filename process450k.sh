@@ -3,8 +3,6 @@
 source $CONFIG_FILE
 #set -x
 
-if [[ $NORMALIZE == 1 ]]; then NORMALIZE=T; fi
-
 export NCORES
 export PIPELINE_DIR
 export OUTDIR
