@@ -65,6 +65,10 @@ if (!is.logical(runQC)) {
 	stop("\n\t'runQC' must be a valid R boolean: T, F, TRUE or FALSE.")
 }
 
+if (!is.logical(surrogateCorrection)) {
+	stop("\n\t'surrogateCorrection' must be a valid R boolean: T, F, TRUE or FALSE.")
+}
+
 if (!is.logical(probeSelection)) {
 	stop("\n\t'probeSelection' must be a valid R boolean: T, F, TRUE or FALSE.")
 }

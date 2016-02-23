@@ -18,8 +18,8 @@ probeSelection <- as.logical(Sys.getenv("RUN_PROBE_SELECTION"))
 diffMeth <- as.logical(Sys.getenv("RUN_DIFFERENTIAL_METHYLATION"))
 
 ### Params ###
-backgroundCorrection <- as.logical(Sys.getenv("BACKGROUND_CORRECTION")) # Noob correction from the methylumi package
-normalization <- as.logical(Sys.getenv("NORMALIZATION")) # SWAN correction from the minfi package
+backgroundCorrection <- as.logical(Sys.getenv("CORRECT_BACKGROUND")) # Noob correction from the methylumi package
+normalization <- as.logical(Sys.getenv("NORMALIZE")) # SWAN correction from the minfi package
 removeEuropeanSNPs <- as.logical(Sys.getenv("REMOVE_EUROPEAN_SNPS"))
 batch.vars <- Sys.getenv("BATCH_VARS") # comma separated list of batch variables present in sample.annotation
 varianceProportion <- Sys.getenv("VARIANCE_PROPORTION") # proportion of variance that surrogate variables should explain
