@@ -14,7 +14,7 @@ RSCRIPT_BIN=/ibios/tbi_cluster/13.1/x86_64/R/R-3.2.0/bin/Rscript
 ### Steps ###
 # The variables must take an R boolean value (T, TRUE, F or FALSE) #
 RUN_BATCH_CORRECTION=F
-RUN_QC=F
+RUN_CNV=T
 RUN_SURROGATE_CORRECTION=F
 RUN_PROBE_SELECTION=F
 RUN_DIFFERENTIAL_METHYLATION=F

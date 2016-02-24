@@ -61,7 +61,7 @@ if (!is.logical(batchCorrection)) {
 	stop("\n\t'batchCorrection' must be a valid R boolean: T, F, TRUE or FALSE.")
 }
 
-if (!is.logical(runQC)) {
+if (!is.logical(runCNV)) {
 	stop("\n\t'runQC' must be a valid R boolean: T, F, TRUE or FALSE.")
 }
 
@@ -101,7 +101,7 @@ dir.create(qcdir, recursive=T)
 
 source(file.path(pipeline_dir, 'methylation_preprocessing.R'))
 if (batchCorrection) source(file.path(pipeline_dir, 'batch_correction.R'))
-if (surrogateCorrection) source(file.path(pipeline_dir, 'surrogate_correction.R'))
-if (runQC) source(file.path(pipeline_dir, 'methylation_qc.R'))
+source(file.path(pipeline_dir, 'methylation_qc.R'))
+if (runCNV) source(file.path(pipeline_dir, 'methylation_CNV.R'))
 if (probeSelection) source(file.path(pipeline_dir, 'probe_selection.R'))
 if (diffMeth) source(file.path(pipeline_dir, 'differential_methylation.R'))
