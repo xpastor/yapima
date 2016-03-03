@@ -99,9 +99,25 @@ batch.vars <- unlist(strsplit(batch.vars, ','))
 qcdir <- file.path(wd, 'qc')
 dir.create(qcdir, recursive=T)
 
+methods <- file.path(wd, 'methods.txt')
+citations.txt <- file.path(wd, 'citations.txt')
+
 source(file.path(pipeline_dir, 'methylation_preprocessing.R'))
 if (batchCorrection) source(file.path(pipeline_dir, 'batch_correction.R'))
 source(file.path(pipeline_dir, 'methylation_qc.R'))
 if (runCNV) source(file.path(pipeline_dir, 'methylation_CNV.R'))
 if (probeSelection) source(file.path(pipeline_dir, 'probe_selection.R'))
 if (diffMeth) source(file.path(pipeline_dir, 'differential_methylation.R'))
+
+source(file.path(pipeline_dir, 'methods.R'))
+source(file.path(pipeline_dir, 'citations.R'))
+
+### sessionInfo() ###
+source('http://bioconductor.org/biocLite.R')
+library(tools)
+session.tex <- file.path(wd, 'session.tex')
+write(paste0('\\documentclass{report}\n\\title{\'yapima\' sessionInfo}\n\n\\usepackage{hyperref}\n\n\\begin{document}\n\\section*{\\centerline{\'yapima\' sessionInfo}}\n\\center{\\today}\n\n\\begin{itemize}\\raggedright\n  \\item Bioconductor version ', biocVersion(), '\n\\end{itemize}'),file=session.tex)
+write(toLatex(sessionInfo()), file=session.tex, append=T)
+write('\n\\end{document}', file=session.tex, append=T)
+setwd(wd)
+texi2pdf(session.tex, clean=T)

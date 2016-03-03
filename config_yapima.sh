@@ -5,7 +5,7 @@ PIPELINE_DIR=$HOME/pipelines/yapima
 
 ### Cluster-related parameters ###
 EMAIL=x.pastorhostench@dkfz-heidelberg.de
-PBS_RESOURCES="walltime=10:00:00,nodes=1:ppn=$NCORES,mem=20g"
+PBS_RESOURCES="walltime=1:00:00,nodes=1:ppn=$NCORES,mem=20g"
 CLUSTER_EO=/ibios/co02/xavier/eo/yapima
 
 ### Binaries ###
@@ -14,7 +14,7 @@ RSCRIPT_BIN=/ibios/tbi_cluster/13.1/x86_64/R/R-3.2.0/bin/Rscript
 ### Steps ###
 # The variables must take an R boolean value (T, TRUE, F or FALSE) #
 RUN_BATCH_CORRECTION=F
-RUN_CNV=T
+RUN_CNV=F
 RUN_SURROGATE_CORRECTION=F
 RUN_PROBE_SELECTION=F
 RUN_DIFFERENTIAL_METHYLATION=F
@@ -29,7 +29,7 @@ OUTDIR=/icgc/dkfzlsdf/analysis/hipo/hipo_054/user_folders/pastor/test_pipeline
 
 ### Params ###
 CORRECT_BACKGROUND=T # T or F; Noob correction from the methylumi package
-NORMALIZE=F # T or F; SWAN correction from the minfi package
+NORMALIZE=T # T or F; SWAN correction from the minfi package
 REMOVE_EUROPEAN_SNPS=T # T or F; remove SNPs that may be present in at least 1 sample
 BATCH_VARS='' # comma separated list of batch variables present in sample.annotation
 VARIANCE_PROPORTION=0.01 # proportion of variance that surrogate variables should explain

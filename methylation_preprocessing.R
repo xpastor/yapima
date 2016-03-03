@@ -104,3 +104,4 @@ write.table(processed.betas, file.path(wd, 'filtered_normalized_betas.txt'), sep
 message("Data ready in the output folder.")
 
 pdata <- pData(filtered.norm.meth)
+write.table(pdata, file.path(wd, 'extended_sample_sheet.csv'), quote=F, row.names=F)
