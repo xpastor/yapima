@@ -5,6 +5,7 @@
 ## pdata
 ## batch.vars
 
+#### Probe selection ####
 source(file.path(pipeline_dir, 'qc_functions.R'))
 
 library(GenomicRanges)
@@ -37,8 +38,9 @@ clust.betas <- head(betas.sorted, nprobes)
 write.table(clust.betas, file.path(wd, paste0('betas_top_', nprobes, '_variable_probes.txt')), sep="\t", quote=F, row.names=T)
 sample.cor.top <- cor(head(betas.sorted, nprobes), use='na.or.complete')
 pheatmap(sample.cor.top, show_rownames=T, show_colnames=T, fontsize=6, filename=file.path(qcdir, 'sample_correlation_top_probes.pdf'), main=paste(nprobes, 'most variable probes'))
+#o#
 
-## PCA analysis on optimal probe set ##
+### PCA analysis on optimal probe set ###
 #pca <- prcomp(t(clust.betas))
 #message("Only variables without 'NA' values will be plotted.")
 #ph.dat <- ph.dat[,colSums(! is.na(ph.dat)) != 0]

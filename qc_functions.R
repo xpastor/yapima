@@ -9,6 +9,7 @@ variablesOfInterest <- function(pdata, batch.vars=NULL)
 	interest.vars  <- colnames(pdata)[!colnames(pdata) %in% c(illumina.vars, batch.vars, not.relevant)]
 	return(interest.vars)
 }
+#o#
 
 ### Functions for PCA plotting ###
 .pca.grob <- function(pca, groups, comp1=1, comp2=2, legend=F)

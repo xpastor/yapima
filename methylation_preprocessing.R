@@ -1,4 +1,6 @@
+# Load libraries
 library(minfi)
+#o#
 
 #### Reading in data ####
 ### Preparing targets data frame ###
@@ -24,12 +26,16 @@ write.table(array.annot, file.path(wd, '450k_annotation.txt'), sep="\t", quote=F
 
 ### Remove ambiguous probes ###
 exclude <- scan(file.path(pipeline_dir, 'data', 'non-specific-probes-Illumina450k.csv'), what='character')
+#o#
 
 ### Remove blacklisted probes ###
 if (blacklist != '') {
+# Load blacklist
 	remove <- scan(blacklist, what='character')
 	exclude <- c(exclude, remove)
+#o#
 }
+# Exclude probes
 exclude <- unique(exclude[!is.na(exclude)])
 
 excluded <- c(array.annot[exclude, 'AddressA'], array.annot[exclude, 'AddressB'])
@@ -38,30 +44,39 @@ filtered.raw.meth <- raw.meth
 sampleNames(filtered.raw.meth) <- targets[sampleNames(filtered.raw.meth), 'Sample_Name']
 assayDataElement(filtered.raw.meth, 'Green')[excluded,] <- NA
 assayDataElement(filtered.raw.meth, 'Red')[excluded,] <- NA
+#o#
 
 ### Output raw tables ###
 filtered.raw.betas <- getBeta(filtered.raw.meth)
 
-save(filtered.raw.meth, file=file.path(wd, 'filtered_raw_meth.RData'))
+#save(filtered.raw.meth, file=file.path(wd, 'filtered_raw_meth.RData'))
 write.table(filtered.raw.betas, file.path(wd, 'filtered_raw_betas.txt'), sep="\t", quote=F, row.names=T)
+#o#
 
 #### Process Data ####
 
 ### Remove background ###
 norm.meth <- NULL
+#o#
 if (! backgroundCorrection) {
+# Produce raw objects
 	norm.meth <- preprocessRaw(filtered.raw.meth) 
+#o#
 } else {
+# Remove background
 	message("Removing the background...")
 	norm.meth <- preprocessNoob(filtered.raw.meth)
 	message("Background corrected.")
+#o#
 }
 
 ### Normalize data ###
 if (normalization) {
+# Normalization
 	message("Normalizing data...")
 	norm.meth <- preprocessSWAN(filtered.raw.meth, mSet=norm.meth)
 	message("Data normalized.")
+#o#
 }
 
 ### Extract genotyping probes ###
@@ -77,15 +92,18 @@ pData(norm.meth)$predictedSex <- gender$predictedSex
 
 ### Remove probes with interrogated CpGs mapping SNPs ###
 remove.probes <- NULL
+#o#
 if (removeEuropeanSNPs) {
+# Process SNPs
 	cpg.snps <- read.csv(file.path(pipeline_dir, 'data', 'polymorphic-CpGs-SNPs-Illumina450k.csv'), stringsAsFactors=F)
 	af <- 1/ncol(norm.meth)
 	european.snps <- unique(cpg.snps$PROBE[cpg.snps$EUR_AF > af])
 	european.snps <- european.snps[!is.na(european.snps)]
 	remove.probes <- c(remove.probes, european.snps)
+#o#
 }
 
-### Filter data ###
+# Mask probes
 filtered.norm.meth <- norm.meth
 assayDataElement(filtered.norm.meth, 'Meth')[remove.probes, ] <- NA
 assayDataElement(filtered.norm.meth, 'Unmeth')[remove.probes, ] <- NA
@@ -101,7 +119,9 @@ processed.betas <- getBeta(filtered.norm.meth)
 processed.mval <- getM(filtered.norm.meth)
 save(filtered.norm.meth, file=file.path(wd, 'filtered_normalized_meth.RData'))
 write.table(processed.betas, file.path(wd, 'filtered_normalized_betas.txt'), sep="\t", quote=F, row.names=T)
+write.table(processed.mval, file.path(wd, 'filtered_normalized_M.txt'), sep="\t", quote=F, row.names=T)
 message("Data ready in the output folder.")
 
 pdata <- pData(filtered.norm.meth)
 write.table(pdata, file.path(wd, 'extended_sample_sheet.csv'), quote=F, row.names=F)
+#o#

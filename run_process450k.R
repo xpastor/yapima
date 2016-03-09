@@ -50,12 +50,14 @@ if (! blacklist == '' & (! file.exists(blacklist) | ! file.access(blacklist))) {
 	stop(paste0("\n\tThe file with blacklisted probes could not be accessed.\n\t", blacklist))
 }
 
+# Create output directory
 if (! dir.exists(wd)) {
 	success <- try(dir.create(wd, recursive=T, mode='0770'), T)
 	if (! success) {
 		stop(paste0("\n\tThe output directory could not be created.\n\t", wd))
 	}
 }
+#o#
 
 if (!is.logical(batchCorrection)) {
 	stop("\n\t'batchCorrection' must be a valid R boolean: T, F, TRUE or FALSE.")
@@ -93,11 +95,14 @@ if ((varianceProportion < 0) | (varianceProportion > 1)) {
 	stop("\n\t'varianceProportion' must be a number between 0 and 1.")	
 }
 
-set.seed(seed)
-batch.vars <- unlist(strsplit(batch.vars, ','))
-
 qcdir <- file.path(wd, 'qc')
 dir.create(qcdir, recursive=T)
+
+# Define the seed
+set.seed(seed)
+#o#
+
+batch.vars <- unlist(strsplit(batch.vars, ','))
 
 methods <- file.path(wd, 'methods.txt')
 citations.txt <- file.path(wd, 'citations.txt')

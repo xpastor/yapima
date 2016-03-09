@@ -12,7 +12,6 @@ wd <- Sys.getenv("OUTDIR")
 
 ### Steps ###
 batchCorrection <- as.logical(Sys.getenv("RUN_BATCH_CORRECTION"))
-surrogateCorrection <- as.logical(Sys.getenv("RUN_SURROGATE_CORRECTION"))
 runCNV <- as.logical(Sys.getenv("RUN_CNV"))
 probeSelection <- as.logical(Sys.getenv("RUN_PROBE_SELECTION"))
 diffMeth <- as.logical(Sys.getenv("RUN_DIFFERENTIAL_METHYLATION"))
@@ -21,6 +20,7 @@ diffMeth <- as.logical(Sys.getenv("RUN_DIFFERENTIAL_METHYLATION"))
 backgroundCorrection <- as.logical(Sys.getenv("CORRECT_BACKGROUND")) # Noob correction from the methylumi package
 normalization <- as.logical(Sys.getenv("NORMALIZE")) # SWAN correction from the minfi package
 removeEuropeanSNPs <- as.logical(Sys.getenv("REMOVE_EUROPEAN_SNPS"))
+surrogateCorrection <- as.logical(Sys.getenv("SURROGATE_CORRECTION"))
 batch.vars <- Sys.getenv("BATCH_VARS") # comma separated list of batch variables present in sample.annotation
 varianceProportion <- Sys.getenv("VARIANCE_PROPORTION") # proportion of variance that surrogate variables should explain
 
