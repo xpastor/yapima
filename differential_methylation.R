@@ -6,10 +6,10 @@
 
 message('Starting differential methylation analysis...')
 
-library(ruv)
-library(missMethyl)
-library(limma)
 library(ggplot2)
+
+#### Differential methylation analysis ####
+library(limma)
 
 ### Variable selection for analysis ###
 interest.vars <- variablesOfInterest(pdata, batch.vars)
@@ -19,7 +19,9 @@ if (isEmpty(interest.vars)) {
 	int.formula <- paste(interest.vars, collapse=' + ')
 	int.formula <- as.formula(paste0('~ ', int.formula))
 	design <- model.matrix(int.formula, data=pdata[,interest.vars,drop=F])
+#o#
 	if (! surrogateCorrection) {
+		# Limma analysis
 		fit <- lmFit(processed.mval, design)
 		fit <- eBayes(fit)
 		coefs <- colnames(fit$coefficients)[-1]
@@ -37,8 +39,11 @@ if (isEmpty(interest.vars)) {
 			filename <- paste(coefs[coef], 'diffMeth.txt', sep='_')
 			write.table(top, file.path(wd, filename), sep="\t", row.names=F, quote=F)
 		}
+		#o#
 	} else {
 		### Selection of negative control probes ###
+		library(ruv)
+		library(missMethyl)
 		test.mval <- processed.mval[! apply(is.na(processed.mval), 1, any),]
 		inc <- getINCs(filtered.raw.meth) # 'missMethyl' package
 		m.inc <- rbind(test.mval, inc)
@@ -70,6 +75,7 @@ if (isEmpty(interest.vars)) {
 			filename <- paste(interest.vars[coef], 'diffMeth.txt', sep='_')
 			write.table(top, file.path(wd, filename), sep="\t", row.names=F, quote=F)
 		}
+		#o#
 	}
 }
 

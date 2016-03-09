@@ -14,6 +14,7 @@ NORMALIZE=`echo $NORMALIZE | tr 01 FT`
 REMOVE_EUROPEAN_SNPS=`echo $REMOVE_EUROPEAN_SNPS | tr 01 FT`
 
 # Export environment variables for R execution
+export RSCRIPT_BIN
 export NCORES
 export PIPELINE_DIR
 export OUTDIR
@@ -32,4 +33,11 @@ export BATCH_VARS
 export VARIANCE_PROPORTION
 export SEED
 
-$RSCRIPT_BIN $PIPELINE_DIR/run_process450k.R $PIPELINE_DIR/config_yapima.R
+#$RSCRIPT_BIN $PIPELINE_DIR/run_process450k.R $PIPELINE_DIR/config_yapima.R
+
+if [[ $? ]]
+then
+	$PIPELINE_DIR/script_analysis.sh > $OUTDIR/script.R
+	echo -e "\n#commit version: `tail -1 $PIPELINE_DIR/.git/logs/HEAD | cut -d' ' -f2`" >> $OUTDIR/methods.txt
+#	echo -e "\n#commit version: `tail -1 $PIPELINE_DIR/.git/logs/HEAD | cut -d' ' -f2 | cut -c-6`" >> $OUTDIR/methods.txt
+fi
