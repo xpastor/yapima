@@ -28,7 +28,7 @@ OUTDIR=/icgc/dkfzlsdf/analysis/hipo/hipo_054/user_folders/pastor/test_pipeline
 
 ### Params ###
 CORRECT_BACKGROUND=T # T or F; Noob correction from the methylumi package
-NORMALIZE=F # T or F; SWAN correction from the minfi package
+NORMALIZE=T # T or F; SWAN correction from the minfi package
 REMOVE_EUROPEAN_SNPS=T # T or F; remove SNPs that may be present in at least 1 sample
 SURROGATE_CORRECTION=F
 BATCH_VARS='' # comma separated list of batch variables present in $SAMPLE_ANNOTATION
