@@ -29,17 +29,19 @@ if (isEmpty(interest.vars)) {
 			message(paste0("Differential methylation analysis on '", interest.vars[coef], "'..."))
 			top <- topTable(fit, coef=coefs[1], number=Inf)
 			sig <- row.names(top)[top$adj.P.Val <= 0.05 & !is.na(top$adj.P.Val)]
+			colnames(top) <- paste(coefs[coef], colnames(top), sep='.')
+			top <- cbind(top, array.annot[row.names(top),])
+			filename <- paste(coefs[coef], 'diffMeth.gz', sep='_')
+			gz <- gzfile(file.path(wd, filename), 'w', compression=9)
+			write.table(top, gz, sep="\t", row.names=F, quote=F)
+			close(gz)
+		#o#
 			sig.meth <- processed.mval[sig,] 
 			sig.meth <- sig.meth[! apply(is.na(sig.meth), 1, any),]
 			pca <- prcomp(t(sig.meth))
 			ggsave(file=file.path(wd, paste0('differentialMethylation_PCA_', coefs[coef], '.png')), plot.pca(pca, groups, interest.vars[coef]), width=20)
 #			hc <- hclust(dist(t(processed.mval[sig,])))
-			colnames(top) <- paste(coefs[coef], colnames(top), sep='.')
-			top <- cbind(top, array.annot[row.names(top),])
-			filename <- paste(coefs[coef], 'diffMeth.txt', sep='_')
-			write.table(top, file.path(wd, filename), sep="\t", row.names=F, quote=F)
 		}
-		#o#
 	} else {
 		### Selection of negative control probes ###
 		library(ruv)
@@ -61,6 +63,14 @@ if (isEmpty(interest.vars)) {
 			fit <- RUVfit(test.mval, design=design, coef=coef, ctl=ctl)
 			fit <- RUVadj(fit)
 			top <- topRUV(fit, number=Inf)
+#			hc <- hclust(dist(t(processed.mval[sig,])))
+			colnames(top) <- paste(interest.vars[coef], colnames(top), sep='.')
+			top <- cbind(top, array.annot[row.names(top),])
+			filename <- paste(interest.vars[coef], 'diffMeth.gz', sep='_')
+			gz <- gzfile(file.path(wd, filename), 'w', compression=9)
+			write.table(top, gz, sep="\t", row.names=F, quote=F)
+			close(gz)
+		#o#
 			#fitvar <- varFit(processed.mval, design=design, coef=seq(length(interest.vars)))
 			#topDV <- topVar(fitvar, coef=coef, num=nrow(top))
 			sig <- row.names(top)[top$p.ebayes.BH <= 0.05]
@@ -69,13 +79,7 @@ if (isEmpty(interest.vars)) {
 			groups <- pdata[,interest.vars[coef]]
 			names(groups) <- row.names(pdata)
 			ggsave(file=file.path(wd, paste0('differentialMethylation_PCA_', interest.vars[coef], '.png')), plot.pca(pca, groups, interest.vars[coef]), width=20)
-#			hc <- hclust(dist(t(processed.mval[sig,])))
-			colnames(top) <- paste(interest.vars[coef], colnames(top), sep='.')
-			top <- cbind(top, array.annot[row.names(top),])
-			filename <- paste(interest.vars[coef], 'diffMeth.txt', sep='_')
-			write.table(top, file.path(wd, filename), sep="\t", row.names=F, quote=F)
 		}
-		#o#
 	}
 }
 

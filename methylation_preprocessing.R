@@ -25,7 +25,10 @@ write.table(array.annot, file.path(wd, '450k_annotation.txt'), sep="\t", quote=F
 #### Filter data ####
 
 ### Remove ambiguous probes ###
-exclude <- scan(file.path(pipeline_dir, 'data', 'non-specific-probes-Illumina450k.csv'), what='character')
+exclude <- read.csv(non_specific_cg, quote='', header=T)
+exclude <- exclude$TargetID
+exclude2 <- read.csv(non_specific_ch, quote='', header=T)
+exclude <- c(exclude, exclude2$TargetID)
 #o#
 
 ### Remove blacklisted probes ###
@@ -50,7 +53,9 @@ assayDataElement(filtered.raw.meth, 'Red')[excluded,] <- NA
 filtered.raw.betas <- getBeta(filtered.raw.meth)
 
 #save(filtered.raw.meth, file=file.path(wd, 'filtered_raw_meth.RData'))
-write.table(filtered.raw.betas, file.path(wd, 'filtered_raw_betas.txt'), sep="\t", quote=F, row.names=T)
+gz <- gzfile(file.path(wd, 'filtered_raw_betas.gz'), 'w', compression=9)
+write.table(filtered.raw.betas, gz, sep="\t", quote=F, row.names=T)
+close(gz)
 #o#
 
 #### Process Data ####
@@ -95,9 +100,9 @@ remove.probes <- NULL
 #o#
 if (removeEuropeanSNPs) {
 # Process SNPs
-	cpg.snps <- read.csv(file.path(pipeline_dir, 'data', 'polymorphic-CpGs-SNPs-Illumina450k.csv'), stringsAsFactors=F)
+	cpg.snps <- read.csv(polymorphic, stringsAsFactors=F)
 	af <- 1/ncol(norm.meth)
-	european.snps <- unique(cpg.snps$PROBE[cpg.snps$EUR_AF > af])
+	european.snps <- unique(cpg.snps$PROBE[cpg.snps[,'EUR_AF'] > af])
 	european.snps <- european.snps[!is.na(european.snps)]
 	remove.probes <- c(remove.probes, european.snps)
 #o#
@@ -118,10 +123,14 @@ message("Writing output...")
 processed.betas <- getBeta(filtered.norm.meth)
 processed.mval <- getM(filtered.norm.meth)
 save(filtered.norm.meth, file=file.path(wd, 'filtered_normalized_meth.RData'))
-write.table(processed.betas, file.path(wd, 'filtered_normalized_betas.txt'), sep="\t", quote=F, row.names=T)
-write.table(processed.mval, file.path(wd, 'filtered_normalized_M.txt'), sep="\t", quote=F, row.names=T)
+gz <- gzfile(file.path(wd, 'filtered_normalized_betas.gz'), 'w', compression=9)
+write.table(processed.betas, gz, sep="\t", quote=F, row.names=T)
+close(gz)
+gz <- gzfile(file.path(wd, 'filtered_normalized_M.gz'), 'w', compression=9)
+write.table(processed.mval, gz, sep="\t", quote=F, row.names=T)
+close(gz)
 message("Data ready in the output folder.")
 
 pdata <- pData(filtered.norm.meth)
-write.table(pdata, file.path(wd, 'extended_sample_sheet.csv'), quote=F, row.names=F)
+write.csv(pdata, file.path(wd, 'extended_sample_sheet.csv'), quote=F, row.names=F)
 #o#

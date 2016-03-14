@@ -16,13 +16,21 @@ echo -e "sample.annotation <- '$SAMPLE_ANNOTATION'"
 echo -e "wd <- '$OUTDIR'"
 echo -e "pipeline_dir <- '$PIPELINE_DIR'"
 echo -e "seed <- $SEED"
+echo -e "non_specific_cg <- '$OUTDIR/$(basename $NON_SPECIFIC_CG)'"
+echo -e "non_specific_ch <- '$OUTDIR/$(basename $NON_SPECIFIC_CH)'"
 if [[ -n $BLACKLIST ]]
 then
 	echo -e "blacklist <- '$BLACKLIST'"
 fi
-if isOn $RUN_BATCH_CORRECTION
+if isOn $RUN_BATCH_CORRECTION | isOn $RUN_PROBE_SELECTION | isOn $RUN_DIFFERENTIAL_METHYLATION
 then
 	echo -e "batch.vars <- '$BATCH_VARS'"
+fi
+
+if isOn $RUN_PROBE_SELECTION
+then
+	echo -e "ncores <- $NCORES"
+	gawk '/Clustering #/,/#o#/' $PIPELINE_DIR/qc_functions.R
 fi
 
 if isOn $RUN_DIFFERENTIAL_METHYLATION
@@ -58,6 +66,7 @@ gawk '/# Extract/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
 
 if isOn $REMOVE_EUROPEAN_SNPS
 then
+	echo -e "polymorphic <- '$OUTDIR/$(basename $POLYMORPHIC)'"
 	gawk '/# Process SNPs/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
 fi
 
@@ -71,7 +80,7 @@ fi
 
 if isOn $RUN_PROBE_SELECTION
 then
-	gawk '/# Probe selection/,/#o#/' $PIPELINE_DIR/probe_selection.R
+	gawk '/# Probe selection/ || /# Output/,/#o#/' $PIPELINE_DIR/probe_selection.R
 fi
 
 if isOn $RUN_DIFFERENTIAL_METHYLATION
@@ -83,4 +92,5 @@ then
 	else
 		gawk '/# Limma/,/#o#/' $PIPELINE_DIR/differential_methylation.R
 	fi
+	echo -e "\t}\n}"
 fi

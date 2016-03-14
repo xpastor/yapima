@@ -54,7 +54,7 @@ bootstrapClustering <- function(n, mat, transpose=F, nboot=100, ncores=1, cl=cl)
 {
 	require(pvclust)
 	print(n)
-	top.mat <- head(mat, nprobes)
+	top.mat <- head(mat, n)
 	if (transpose) {top.mat <- t(top.mat)}
 	clust <- parPvclust(cl, top.mat, method.dist='euclidean', use.cor='na.or.complete', nboot=nboot)
 	return(list(n=n, cluster=clust))
@@ -78,3 +78,4 @@ score.clusters <- function(clustList, num.edges=NULL)
 {
 	sapply(clustList, score.cluster, num.edges)
 }
+#o#

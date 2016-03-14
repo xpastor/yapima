@@ -26,19 +26,21 @@ clust.obj <- lapply(steps, bootstrapClustering, betas.sorted, transpose=F, nboot
 stopCluster(cl)
 save(clust.obj, file=file.path(wd, 'pvclust.RData'))
 scores <- score.clusters(clust.obj)
+#o#
 pdf(file.path(qcdir, 'pvclust_clusters.pdf'), width=30)
 for (i in 1:length(clust.obj)) {
 	plot(clust.obj[[i]]$cluster, main=paste(clust.obj[[i]]$nprobes, ' probes, score=', round(scores[i], 3), sep=''))
 }
 dev.off()
 
+# Output selected probes
 clust <- clust.obj[[which.max(scores)]]
-nprobes <- clust$nprobes
+nprobes <- clust$n
 clust.betas <- head(betas.sorted, nprobes)
 write.table(clust.betas, file.path(wd, paste0('betas_top_', nprobes, '_variable_probes.txt')), sep="\t", quote=F, row.names=T)
+#o#
 sample.cor.top <- cor(head(betas.sorted, nprobes), use='na.or.complete')
 pheatmap(sample.cor.top, show_rownames=T, show_colnames=T, fontsize=6, filename=file.path(qcdir, 'sample_correlation_top_probes.pdf'), main=paste(nprobes, 'most variable probes'))
-#o#
 
 ### PCA analysis on optimal probe set ###
 #pca <- prcomp(t(clust.betas))
@@ -51,7 +53,7 @@ if (! isEmpty(interest.vars)) {
 	pdata2 <- pdata[row.names(pca$x),]
 
 	for (interest.var in interest.vars) {
-		groups <- pdata2[,interst.var]
+		groups <- pdata2[,interest.var]
 		names(groups) <- row.names(pdata2)
 		if (class(groups) %in% c('character', 'factor')) {
 			ggsave(file=file.path(qcdir, paste0('top', nprobes, '_variable_probes_PCA_', interest.var, '.png')), plot.pca(pca, groups, interest.var), width=20)

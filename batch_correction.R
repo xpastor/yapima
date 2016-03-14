@@ -1,6 +1,6 @@
 library(sva)
 
-### Correct batch efects ###
+### Correct batch effects ###
 pdata.narm <- pdata[,colSums(! is.na(pdata)) != 0]
 if ('Sentrix_ID' %in% batch.vars) {
 	colnames(pdata.narm)[grep('Slide', colnames(pdata.narm))] <- 'Sentrix_ID'
@@ -20,6 +20,10 @@ for (my.var in batch.vars) {
 processed.beta <- 2^processed.mval/(1+2^processed.mval)
 message("Saving the results...")
 save(processed.mval, processed.beta, file=file.path(wd, 'batch_corrected.RData'))
-write.table(processed.mval, file.path(wd, 'batch_normalized_M.txt'), sep="\t", quote=F, row.names=T)
-write.table(processed.beta, file.path(wd, 'batch_normalized_betas.txt'), sep="\t", quote=F, row.names=T)
+gz <- gzfile(file.path(wd, 'batch_normalized_M.gz'), 'w', compression=9)
+write.table(processed.mval, gz, sep="\t", quote=F, row.names=T)
+close(gz)
+gz <- gzfile(file.path(wd, 'batch_normalized_betas.gz'), 'w', compression=9)
+write.table(processed.beta, gz, sep="\t", quote=F, row.names=T)
+close(gz)
 message("Batch corrected data already saved.")
