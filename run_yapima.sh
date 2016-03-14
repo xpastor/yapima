@@ -38,15 +38,5 @@ fi
 
 if [[ ! -d $CLUSTER_EO ]]; then mkdir $CLUSTER_EO; fi
 
-if [[ ! -d $OUTDIR ]]
-then
-	mkdir -p $OUTDIR
-fi
-if [[ ! -d $OUTDIR ]]
-then
-	echo "Not possible to create directory $OUTDIR."
-	exit 2
-fi
-
 rscript=`qsub -o $CLUSTER_EO -j oe -M $EMAIL -N yapima -l $PBS_RESOURCES -v CONFIG_FILE=$CONFIG_FILE $PIPELINE_DIR/process450k.sh | cut -d '.' -f 1`
 echo "yapima submitted, job ID $rscript"

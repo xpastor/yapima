@@ -9,6 +9,7 @@ variablesOfInterest <- function(pdata, batch.vars=NULL)
 	interest.vars  <- colnames(pdata)[!colnames(pdata) %in% c(illumina.vars, batch.vars, not.relevant)]
 	return(interest.vars)
 }
+#o#
 
 ### Functions for PCA plotting ###
 .pca.grob <- function(pca, groups, comp1=1, comp2=2, legend=F)
@@ -53,7 +54,7 @@ bootstrapClustering <- function(n, mat, transpose=F, nboot=100, ncores=1, cl=cl)
 {
 	require(pvclust)
 	print(n)
-	top.mat <- head(mat, nprobes)
+	top.mat <- head(mat, n)
 	if (transpose) {top.mat <- t(top.mat)}
 	clust <- parPvclust(cl, top.mat, method.dist='euclidean', use.cor='na.or.complete', nboot=nboot)
 	return(list(n=n, cluster=clust))
@@ -77,66 +78,4 @@ score.clusters <- function(clustList, num.edges=NULL)
 {
 	sapply(clustList, score.cluster, num.edges)
 }
-
-## Function to determine consensus for kmeans clustering ###
-
-get.consensus.kmeans <- function(mat, k=2, ntrials=5, iterations=10, random.seed=F)
-{
-	seeds <- seq(ntrials)
-	kmeans.trials <- matrix(nrow=nrow(mat), ncol=ntrials, dimnames=list(row.names(mat), NULL))
-	for (i in seq(ntrials)) {
-		if (! random.seed) set.seed(seeds[i])
-		x <- kmeans(mat, centers=k, iter.max=iterations)$cluster
-		kmeans.trials[names(x),i] <- x
-	}
-	d <- dist(kmeans.trials)
-	hc <- hclust(d)
-	consensus <- factor(cutree(hc, k))
-	res <- list(k=k, trials=kmeans.trials, consensus=consensus)
-}
-
-get.range.kmeans <- function(mat, maxK=5, ...)
-{
-	res <- list()
-	for (k in 2:maxK) {
-		kmeans.res <- get.consensus.kmeans(mat, ..., k=k)
-		res[[k-1]] <- kmeans.res
-	}
-	return(res)
-}
-
-get.best.kmeans <- function(mat, maxK=2, ntrials=5, iterations=10)
-{
-	## Silhouette plot ##
-	require(fpc)
-	asw <- numeric(20)
-	for (k in 2:20) asw[[k]] <- pam(top.betas,k) $ silinfo $ avg.width
-	best.k <- which.max(asw)
-
-	## Affinity propagation clustering ##
-	require(apcluster)
-	apclus <- apcluster(negDistMat(r=2), top.betas)
-	best.k <- c(best.k, length(apclus@clusters))
-#	heatmap(apclus)
-#	plot(apclus, top.betas)
-	
-	## Gap statistic ##
-	require(cluster)
-	gap <- clusGap(top.betas, kmeans, 10, B=500, verbose=interactive())
-	best.k <- c(best.k, which.max(gap$Tab[,'gap']))
-	maxSE()
-#	plot(1:10, gap$Tab[,'gap'], type='b', xlab='Number of Clusters', ylab='Gap')
-
-	k <- 
-	get.consensus.kmeans(mat, k=k, ntrials=ntrials, iterations=iterations)
-}
-
-get.range.kmeans <- function(mat, maxK=5, ...)
-{
-	res <- list()
-	for (k in 2:maxK) {
-		kmeans.res <- get.consensus.kmeans(top.betas, ..., k=k)
-		res[[k-1]] <- kmeans.res
-	}
-	return(res)
-}
+#o#

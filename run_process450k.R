@@ -14,6 +14,21 @@ if (!file.exists(config)) {
 }
 
 source(config)
+
+# Create output directory
+#now <- strftime(Sys.time(), '%y%m%d%H%M%S')
+#wd <- file.path(wd, paste0('yapima_', now))
+if (! dir.exists(wd)) {
+	success <- try(dir.create(wd, recursive=T, mode='0770'), T)
+	if (! success) {
+		stop(paste0("\n\tThe output directory could not be created.\n\t", wd))
+	}
+} else {
+	stop(paste0('The directory \'', wd, '\' already exists. Specify a non existing directory.'))
+}
+#message(paste0("The results will be stored in:\n\t",wd))
+#o#
+
 if (! dir.exists(idat_dir)) {
 	stop(paste0("\n\tThe directory with the IDAT files can not be accessed.\n\t", idat_dir))
 }
@@ -35,34 +50,53 @@ if (! 'methylation_qc.R' %in% pipeline_scripts) {
 if (! 'probe_selection.R' %in% pipeline_scripts) {
 	stop(paste0("\n\tThe script 'probe_selection.R' is not present in ", pipeline_dir))
 }
-if (! 'qc_functions.R' %in% pipeline_scripts) {
-	stop(paste0("\n\tThe script 'qc_functions.R' is not present in ", pipeline_dir))
-} else {
+if ('qc_functions.R' %in% pipeline_scripts) {
 	source(file.path(pipeline_dir, 'qc_functions.R'))
+} else {
+	stop(paste0("\n\tThe script 'qc_functions.R' is not present in ", pipeline_dir))
 }
 
-if (! file.exists(sample.annotation)) {
+if (! file.exists(sample.annotation) | file.access(sample.annotation) == -1) {
 #if (! file.exists(sample.annotation) | ! file.access(sample.annotation)) {
 	stop(paste0("\n\tThe sample sheet could not be accessed.\n\t", sample.annotation))
 }
 
-if (! blacklist == '' & (! file.exists(blacklist) | ! file.access(blacklist))) {
-	stop(paste0("\n\tThe file with blacklisted probes could not be accessed.\n\t", blacklist))
+if (file.exists(non_specific_cg) & file.access(non_specific_cg) == 0) {
+	header <- read.csv(non_specific_cg, stringsAsFactors=F, header=F, nrows=1)
+	if ('TargetID' %in% header) {
+		file.copy(non_specific_cg, wd)
+	} else {
+		stop(paste0('The file \'', non_specific_cg, '\' must have a \'TargetID\' column with the cg identifier.'))
+	}
+} else {
+	stop(paste0("\n\tThe following file cannot be accessed:\n\t", non_specific_cg))
 }
 
-if (! dir.exists(wd)) {
-	success <- try(dir.create(wd, recursive=T, mode='0770'), T)
-	if (! success) {
-		stop(paste0("\n\tThe output directory could not be created.\n\t", wd))
+if (file.exists(non_specific_ch) & file.access(non_specific_ch) == 0) {
+	header <- read.csv(non_specific_ch, stringsAsFactors=F, header=F, nrows=1)
+	if ('TargetID' %in% header) {
+		file.copy(non_specific_ch, wd)
+	} else {
+		stop(paste0('The file \'', non_specific_ch, '\' must have a \'TargetID\' column with the ch identifier.'))
 	}
+} else {
+	stop(paste0("\n\tThe following file cannot be accessed:\n\t", non_specific_ch))
+}
+
+if ( blacklist != '' & (! file.exists(blacklist) | file.access(blacklist) == -1)) {
+	stop(paste0("\n\tThe file with blacklisted probes could not be accessed.\n\t", blacklist))
 }
 
 if (!is.logical(batchCorrection)) {
 	stop("\n\t'batchCorrection' must be a valid R boolean: T, F, TRUE or FALSE.")
 }
 
-if (!is.logical(runQC)) {
+if (!is.logical(runCNV)) {
 	stop("\n\t'runQC' must be a valid R boolean: T, F, TRUE or FALSE.")
+}
+
+if (!is.logical(surrogateCorrection)) {
+	stop("\n\t'surrogateCorrection' must be a valid R boolean: T, F, TRUE or FALSE.")
 }
 
 if (!is.logical(probeSelection)) {
@@ -81,7 +115,20 @@ if (!is.logical(normalization)) {
 	stop("\n\t'normalization' must be a valid R boolean: T, F, TRUE or FALSE.")
 }
 
-if (!is.logical(removeEuropeanSNPs)) {
+if (is.logical(removeEuropeanSNPs)) {
+	if (removeEuropeanSNPs) {
+		if (file.exists(polymorphic) & file.access(polymorphic) == 0) {
+			header <- read.csv(polymorphic, stringsAsFactors=F, header=F, nrows=1)
+			if (all(c('PROBE', 'EUR_AF') %in% header)) {
+				file.copy(polymorphic, wd)
+			} else {
+				stop(paste0('The file \'', polymorphic, '\' must have a \'PROBE\' column with the cg identifier and a \'EUR_AF\' column with allele frequencies.'))
+			}
+		} else {
+			stop(paste0("\n\tThe file with polymorphisms cannot be accessed:\n\t", polymorphic))
+		}
+	}
+} else {
 	stop("\n\t'removeEuropeanSNPs' must be a valid R boolean: T, F, TRUE or FALSE.")
 }
 
@@ -89,15 +136,34 @@ if ((varianceProportion < 0) | (varianceProportion > 1)) {
 	stop("\n\t'varianceProportion' must be a number between 0 and 1.")	
 }
 
-set.seed(seed)
-batch.vars <- unlist(strsplit(batch.vars, ','))
-
 qcdir <- file.path(wd, 'qc')
 dir.create(qcdir, recursive=T)
 
+# Define the seed
+set.seed(seed)
+#o#
+
+batch.vars <- unlist(strsplit(batch.vars, ','))
+
+methods <- file.path(wd, 'methods.txt')
+citations.txt <- file.path(wd, 'citations.txt')
+
 source(file.path(pipeline_dir, 'methylation_preprocessing.R'))
 if (batchCorrection) source(file.path(pipeline_dir, 'batch_correction.R'))
-if (surrogateCorrection) source(file.path(pipeline_dir, 'surrogate_correction.R'))
-if (runQC) source(file.path(pipeline_dir, 'methylation_qc.R'))
+source(file.path(pipeline_dir, 'methylation_qc.R'))
 if (probeSelection) source(file.path(pipeline_dir, 'probe_selection.R'))
+if (runCNV) source(file.path(pipeline_dir, 'methylation_CNV.R'))
 if (diffMeth) source(file.path(pipeline_dir, 'differential_methylation.R'))
+
+source(file.path(pipeline_dir, 'methods.R'))
+source(file.path(pipeline_dir, 'citations.R'))
+
+### sessionInfo() ###
+source('http://bioconductor.org/biocLite.R')
+library(tools)
+session.tex <- file.path(wd, 'session.tex')
+write(paste0('\\documentclass{report}\n\\title{\'yapima\' sessionInfo}\n\n\\usepackage{hyperref}\n\n\\begin{document}\n\\section*{\\centerline{\'yapima\' sessionInfo}}\n\\center{\\today}\n\n\\begin{itemize}\\raggedright\n  \\item Bioconductor version ', biocVersion(), '\n\\end{itemize}'),file=session.tex)
+write(toLatex(sessionInfo()), file=session.tex, append=T)
+write('\n\\end{document}', file=session.tex, append=T)
+setwd(wd)
+texi2pdf(session.tex, clean=T)
