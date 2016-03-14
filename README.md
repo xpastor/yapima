@@ -239,10 +239,12 @@ The most resources consuming processes are the CNV analysis and the probe select
 <a name="chen_ref"></a>[2] Chen Y, Lemire M, Choufani S, Butcher DT, Grafodatskayak D, Zanke BW, Gallinger S, Hudson TJ and Weksberg R (2013). *Discovery of cross-reactive probes and polymorphic CpGs in the Illumina Infinium Human Methylation450 microarray.* \_Epigenetics\_, \*8\*(2), pp. 203-209.  
 <a name="swan_ref"></a>[[3] Maksimovic J, Gordon L and Oshlack A (2012). *SWAN: Subset quantile Within-Array Normalization for Illumina Infinium HumanMethylation450 BeadChips.* \_Genome Biology\_, \*13\*(6), pp. R44.](http://doi.org/10.1186/gb-2012-13-6-r44)  
 <a name="combat_ref"></a>[4] Johnson WE, Rabinovic A and Li C (2007). *Adjusting batch effects in microarray expression data using Empirical Bayes methods.* \_Biostatistics\_, \*8\*(1), pp. 118-127.  
-<a name="sva_ref"></a>[5] Leek JT, Johnson WE, Parker HS, Fertig EJ, Jaffe AE and Storey JD. *\_sva: Surrogate Variable Analysis\_*. R package version 3.14.0.  
-<a name="pvclust_ref"></a>[[6] Suzuki R and Shimodaira H (2014). \_pvclust: Hierarchical Clustering with P-Values via Multiscale Bootstrap Resampling\_. R package version 1.3-2.](http://CRAN.R-project.org/package=pvclust)  
+<a name="sva_ref"></a>[5] Leek JT, Johnson WE, Parker HS, Fertig EJ, Jaffe AE and Storey JD. *sva: Surrogate Variable Analysis*. R package version 3.14.0.  
+<a name="pvclust_ref"></a>[[6] Suzuki R and Shimodaira H (2014). *pvclust: Hierarchical Clustering with P-Values via Multiscale Bootstrap Resampling*. R package version 1.3-2.](http://CRAN.R-project.org/package=pvclust)  
 <a name="conumee_ref"></a>[[7] Hovestadt V, Zapatka M (2015). *conumee: Enhanced copy-number variation analysis using Illumina 450k methylation arrays.*, R package version 0.99.4.](http://www.bioconductor.org/packages/release/bioc/html/conumee.html)  
 <a name="limma_ref"></a>[8] Ritchie ME, Phipson B, Wu D, Hu Y, Law CW, Shi W and Smyth GK (2015). *limma powers differential expression analyses for RNA-sequencing and microarray studies.* \_Nucleic Acids Research\_, \*43\*(7), pp. e47.  
 <a name="missMethyl_ref"></a>[9] Phipson B and Oshlack A (2014). *DiffVar: A new method for detecting differential variability with application to methylation in cancer and aging.* \_Genome Biology\_, \*15\*(9), pp. 465.  
 <a name="bh_ref"></a>[10] Benjamini Y and Hochberg Y (1995). *Controlling the false discovery rate: a practical and powerful approach to multiple testing.* \_Journal of the Royal Statistical Society Series B\_, \*57\*, pp. 289-300.  
 <a name="10"></a>[11] Du P, Zhang X, Huang C, Jafari N, Kibbe WA, Hou L and Lin SM (2010). *Comparison of Beta-value and M-value methods for quantifying methylation levels by microarray analysis.* \_BMC Bioinformatics\_, \*11\*, pp. 587.  
+___
+This pipeline has been developed by Xavier Pastor (x.pastorhostench@dkfz-heidelberg.de) at DKFZ.
