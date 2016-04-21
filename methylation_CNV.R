@@ -2,7 +2,7 @@
 ## pipeline_dir
 ## qcdir
 ## exclude
-## filtered.raw.betas
+## raw.betas
 ## filtered.norm.meth
 ## processed.betas
 ## pdata

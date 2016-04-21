@@ -47,7 +47,7 @@ if (isEmpty(interest.vars)) {
 		library(ruv)
 		library(missMethyl)
 		test.mval <- processed.mval[! apply(is.na(processed.mval), 1, any),]
-		inc <- getINCs(filtered.raw.meth) # 'missMethyl' package
+		inc <- getINCs(raw.meth) # 'missMethyl' package
 		m.inc <- rbind(test.mval, inc)
 		
 		for (coef in 1:length(interest.vars)) {

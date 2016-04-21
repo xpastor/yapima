@@ -1,7 +1,7 @@
 ## Required variables: ##
 ## pipeline_dir
 ## qcdir
-## filtered.raw.betas
+## raw.betas
 ## processed.betas
 ## pdata
 ## genotype.betas
@@ -18,9 +18,9 @@ library(ggplot2)
 ### Beta distribution plot ###
 message('Plotting density plots of Beta values...')
 pdf(file.path(qcdir, 'beta_distribution.pdf'))
-plot(density(filtered.raw.betas[,1], na.rm=T), ylim=c(0,6), main='Raw samples', bty='n', lwd=0.1, xlab='Beta')
-for(i in 2:ncol(filtered.raw.betas)) {
-	lines(density(filtered.raw.betas[,i], na.rm=T), lwd=0.1)
+plot(density(raw.betas[,1], na.rm=T), ylim=c(0,6), main='Raw samples', bty='n', lwd=0.1, xlab='Beta')
+for(i in 2:ncol(raw.betas)) {
+	lines(density(raw.betas[,i], na.rm=T), lwd=0.1)
 }
 
 plot(density(processed.betas[,1], na.rm=T), ylim=c(0,6), main='Normalized samples', bty='n', lwd=0.1, xlab='Beta')
@@ -34,7 +34,7 @@ message('Finished.')
 message('Plotting density heatmaps of Beta values...')
 library(pheatmap)
 pdf(file.path(qcdir, 'beta_distribution_heatmap.pdf'))
-h <- apply(filtered.raw.betas, 2, function(x) hist(x, breaks=seq(0,1,0.001), plot=F)$counts)
+h <- apply(raw.betas, 2, function(x) hist(x, breaks=seq(0,1,0.001), plot=F)$counts)
 pheatmap(h, cluster_rows=F, main='Raw beta distribution', scale='none', fontsize_col=6)
 
 h <- apply(processed.betas, 2, function(x) hist(x, breaks=seq(0,1,0.001), plot=F)$counts)
@@ -46,7 +46,7 @@ message('Finished.')
 #pdata2 <- pdata[,colSums(! is.na(pdata)) != 0]
 pdata2 <- pdata
 pdata2$Slide <- as.character(pdata2$Slide)
-raw.betas.narm <- filtered.raw.betas[! apply(is.na(filtered.raw.betas), 1, any),]
+raw.betas.narm <- raw.betas[! apply(is.na(raw.betas), 1, any),]
 processed.betas.narm <- processed.betas[! apply(is.na(processed.betas), 1, any),]
 raw.pca <- prcomp(t(raw.betas.narm))
 pca <- prcomp(t(processed.betas.narm))
@@ -73,7 +73,7 @@ message('PCA plots of variables of interest...')
 interest.vars <- variablesOfInterest(pdata, batch.vars)
 if (! isEmpty(interest.vars)) {
 #filtered.betas.narm <- filtered.betas[! apply(is.na(filtered.betas), 1, any),]
-#	raw.pca <- prcomp(t(filtered.raw.betas))
+#	raw.pca <- prcomp(t(raw.betas))
 #	pca <- prcomp(t(processed.betas))
 #	pdata2 <- pdata[row.names(pca$x),]
 
