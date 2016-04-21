@@ -41,18 +41,11 @@ fi
 gawk '/# Create output/,/#o#/' $PIPELINE_DIR/run_process450k.R
 gawk '/# Define/,/#o#/' $PIPELINE_DIR/run_process450k.R
 
-gawk '/# Load libraries/ || /# Reading in data #/ || /# Remove ambiguous/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
-
-if [[ -n $BLACKLIST ]]
-then
-	gawk '/# Load blacklist/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R | sed 's/^\s*//g'
-fi
-
-gawk '/# Exclude probes/ || /# Output raw tables #/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
+gawk '/# Load libraries/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
 
 if isOn $CORRECT_BACKGROUND
 then
-	gawk '/# Remove background/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
+	gawk '/^# Remove background/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
 else
 	gawk '/# Produce raw/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
 fi
@@ -62,7 +55,12 @@ then
 	gawk '/# Normalization/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
 fi
 
-gawk '/# Extract/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
+gawk '/# Filter/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
+
+if [[ -n $BLACKLIST ]]
+then
+	gawk '/# Load blacklist/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R | sed 's/^\s*//g'
+fi
 
 if isOn $REMOVE_EUROPEAN_SNPS
 then
@@ -70,7 +68,7 @@ then
 	gawk '/# Process SNPs/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
 fi
 
-gawk '/# Mask probes/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
+gawk '/# Exclude probes/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
 
 if isOn $RUN_BATCH_CORRECTION
 then

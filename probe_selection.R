@@ -29,7 +29,7 @@ scores <- score.clusters(clust.obj)
 #o#
 pdf(file.path(qcdir, 'pvclust_clusters.pdf'), width=30)
 for (i in 1:length(clust.obj)) {
-	plot(clust.obj[[i]]$cluster, main=paste(clust.obj[[i]]$nprobes, ' probes, score=', round(scores[i], 3), sep=''))
+	plot(clust.obj[[i]]$cluster, main=paste(clust.obj[[i]]$n, ' probes, score=', round(scores[i], 3), sep=''))
 }
 dev.off()
 

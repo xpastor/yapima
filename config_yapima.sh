@@ -1,7 +1,7 @@
 #!/usr/bin/bash
 
 NCORES=1
-PIPELINE_DIR=$HOME/pipelines/yapima
+PIPELINE_DIR=$HOME/pipelines/devel/yapima
 
 ### Cluster-related parameters ###
 EMAIL=x.pastorhostench@dkfz-heidelberg.de
@@ -16,7 +16,7 @@ RSCRIPT_BIN=/ibios/tbi_cluster/13.1/x86_64/R/R-3.2.0/bin/Rscript
 RUN_BATCH_CORRECTION=F
 RUN_PROBE_SELECTION=F
 RUN_CNV=F
-RUN_DIFFERENTIAL_METHYLATION=T
+RUN_DIFFERENTIAL_METHYLATION=F
 
 ### Input data ###
 IDAT_DIR=/icgc/dkfzlsdf/analysis/hipo/hipo_054/infinium450k/idat
@@ -27,11 +27,11 @@ NON_SPECIFIC_CH=/icgc/ngs_share/general/arrayAnnotations/chen/48639-non-specific
 BLACKLIST='' # file with additional probes to be discarded from any analysis; '' to not to remove additional probes
 
 ### Output directory ###
-OUTDIR=/icgc/dkfzlsdf/analysis/hipo/hipo_054/user_folders/pastor/test_yapima
+OUTDIR=/icgc/dkfzlsdf/analysis/hipo/hipo_054/user_folders/pastor/test_yapima_filters_noob_swan
 
 ### Params ###
 CORRECT_BACKGROUND=T # T or F; Noob correction from the methylumi package
-NORMALIZE=F # T or F; SWAN correction from the minfi package
+NORMALIZE=T # T or F; SWAN correction from the minfi package
 REMOVE_EUROPEAN_SNPS=T # T or F; remove SNPs that may be present in at least 1 sample
 SURROGATE_CORRECTION=F
 BATCH_VARS='' # comma separated list of batch variables present in $SAMPLE_ANNOTATION
