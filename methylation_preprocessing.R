@@ -23,6 +23,7 @@ write.table(array.annot, file.path(wd, '450k_annotation.txt'), sep="\t", quote=F
 
 ### Output raw tables ###
 raw.betas <- getBeta(raw.meth)
+colnames(raw.betas) <- targets[colnames(raw.betas), 'Sample_Name']
 
 #save(raw.meth, file=file.path(wd, 'filtered_raw_meth.RData'))
 gz <- gzfile(file.path(wd, 'raw_betas.gz'), 'w', compression=9)
@@ -98,6 +99,7 @@ assayDataElement(filtered.norm.meth, 'Unmeth')[lowQ] <- NA
 
 ### Extract genotyping probes ###
 genotype.betas <- getSnpBeta(raw.meth)
+colnames(genotype.betas) <- targets[colnames(genotype.betas), 'Sample_Name']
 
 ## Output betas of genotyping probes ##
 write.table(genotype.betas, file.path(wd, 'genotyping_betas.txt'), sep="\t", quote=F, row.names=T)
@@ -110,7 +112,9 @@ pData(norm.meth)$predictedSex <- gender$predictedSex
 ### Output preprocessed data ###
 message("Writing output...")
 processed.betas <- getBeta(filtered.norm.meth)
+colnames(processed.betas) <- targets[colnames(processed.betas), 'Sample_Name']
 processed.mval <- getM(filtered.norm.meth)
+colnames(processed.mval) <- targets[colnames(processed.mval), 'Sample_Name']
 save(filtered.norm.meth, file=file.path(wd, 'filtered_normalized_meth.RData'))
 gz <- gzfile(file.path(wd, 'filtered_normalized_betas.gz'), 'w', compression=9)
 write.table(processed.betas, gz, sep="\t", quote=F, row.names=T)
@@ -121,5 +125,6 @@ close(gz)
 message("Data ready in the output folder.")
 
 pdata <- pData(filtered.norm.meth)
+rownames(pdata) <- pdata$Sample_Name
 write.csv(pdata, file.path(wd, 'extended_sample_sheet.csv'), quote=F, row.names=F)
 #o#
