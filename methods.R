@@ -22,9 +22,8 @@ text <- "The Illumina Infinium methylation array analysis was done using the \'y
 ### Preprocessing ###
 
 text <- paste0(text,
-	'The array data were read into the R environment (',
-	paste0('R version ', R.version$major, '.', R.version$minor, ' \'', R.version$nickname, '\'', ', ', R.version$year, '-', R.version$month, '-', R.version$day),
-	') using the \'minfi\' package ', .cite_package('minfi'),'. The values from probes mapping at multiple places (Chen, 2013) were masked.')
+	'The array data were read into the R environment (R version ',
+	R.version$major, '.', R.version$minor, ' \'', R.version$nickname, '\', ', R.version$year, '-', R.version$month, '-', R.version$day, ') using the \'minfi\' package ', .cite_package('minfi'), '.')
 
 if (backgroundCorrection) {
 	text <- paste(text,
@@ -35,9 +34,11 @@ if (normalization) {
 		' The data was normalized aplying the \'SWAN\' normalization mehtod (', .short_citation('minfi', 2), ').')
 }
 
+text <- paste(text, 'The values from probes mapping at multiple places (Chen, 2013) were masked.')
+
 if (removeEuropeanSNPs) {
 	text <- paste0(text,
-		' Probes where the measued CpG overlaps with SNPs present with allele frequency higher than ', round(1/nrow(targets), digits=2),' in european populations (Chen, 2013) were masked (n=', length(european.snps), ').')
+		' Probes with the single base extension (SBE) position overlaping SNPs with allele frequency higher than ', round(1/nrow(targets), digits=2),' in european populations (Chen, 2013) were masked (n=', length(european.snps), ').')
 }
 
 text <- paste(text,
