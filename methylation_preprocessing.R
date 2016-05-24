@@ -3,11 +3,11 @@ library(minfi)
 
 #### Reading in data ####
 ### Preparing targets data frame ###
-header <- readLines(sample.annotation, n=1)
-header <- unlist(strsplit(header, ','))
+#header <- readLines(sample.annotation, n=1)
+#header <- unlist(strsplit(header, ','))
 colClasses <- data.frame(t(rep('character', length(header))), stringsAsFactors=F)
 colnames(colClasses) <- header
-interest.vars <- variablesOfInterest(colClasses, batch.vars)
+#interest.vars <- variablesOfInterest(colClasses, batch.vars)
 colClasses[,batch.vars] <- 'factor'
 colClasses[,interest.vars] <- 'factor'
 targets <- read.csv(sample.annotation, colClasses=colClasses, stringsAsFactors=F)

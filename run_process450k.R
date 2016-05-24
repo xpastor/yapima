@@ -143,7 +143,16 @@ dir.create(qcdir, recursive=T)
 set.seed(seed)
 #o#
 
+# Produce vector with batch variables
 batch.vars <- unlist(strsplit(batch.vars, ','))
+#o#
+
+# Extract variables of interest from sample sheet
+header <- readLines(sample.annotation, n=1)
+header <- unlist(strsplit(header, ','))
+illumina.vars <- c('Sample_Name', 'Sample_Well', 'Sample_Plate', 'Sample_Group', 'Pool_ID', 'Sentrix_ID', 'Sentrix_Position')
+interest.vars <- header[! header %in% c(illumina.vars, batch.vars)]
+#o#
 
 methods <- file.path(wd, 'methods.txt')
 citations.txt <- file.path(wd, 'citations.txt')
@@ -153,8 +162,13 @@ if (batchCorrection) source(file.path(pipeline_dir, 'batch_correction.R'))
 source(file.path(pipeline_dir, 'methylation_qc.R'))
 if (probeSelection) source(file.path(pipeline_dir, 'probe_selection.R'))
 if (runCNV) source(file.path(pipeline_dir, 'methylation_CNV.R'))
-if (diffMeth) source(file.path(pipeline_dir, 'differential_methylation.R'))
-
+if (diffMeth) {
+	if (isEmpty(interest.vars)) {
+	    message("There's no factor eligible for a differential methylation analysis and it will be skipped.")
+	} else {
+		source(file.path(pipeline_dir, 'differential_methylation.R'))
+	}
+}
 source(file.path(pipeline_dir, 'methods.R'))
 source(file.path(pipeline_dir, 'citations.R'))
 

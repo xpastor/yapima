@@ -70,7 +70,7 @@ message('Finished.')
      
 ## Interest variables ##
 message('PCA plots of variables of interest...')
-interest.vars <- variablesOfInterest(pdata, batch.vars)
+#interest.vars <- variablesOfInterest(pdata, batch.vars)
 if (! isEmpty(interest.vars)) {
 #filtered.betas.narm <- filtered.betas[! apply(is.na(filtered.betas), 1, any),]
 #	raw.pca <- prcomp(t(raw.betas))
