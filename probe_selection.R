@@ -27,9 +27,31 @@ stopCluster(cl)
 save(clust.obj, file=file.path(wd, 'pvclust.RData'))
 scores <- score.clusters(clust.obj)
 #o#
-pdf(file.path(qcdir, 'pvclust_clusters.pdf'), width=30)
+#interest.vars <- variablesOfInterest(pdata, batch.vars)
+
+library(ComplexHeatmap)
+char.height <- convertHeight(grobHeight(textGrob("A", gp=gpar(fontsize = 7))), 'inch', valueOnly=T)
+width.mat <- ncol(betas.sorted) * char.height
+width.dev <- width.mat + convertWidth(unit(1, 'cm'), 'inch', valueOnly=T) + 10
+if (! isEmpty(interest.vars)) {
+	longest.title <- interest.vars[which.max(nchar(interest.vars))]
+	width.title <- convertWidth(grobHeight(textGrob("A", gp=gpar(fontsize = 10))), 'inch', valueOnly=T) * (nchar(longest.title))
+	width.dev <- width.dev + width.title
+}
+
+pdf(file.path(qcdir, 'pvclust_clusters.pdf'), width=width.dev)
 for (i in 1:length(clust.obj)) {
-	plot(clust.obj[[i]]$cluster, main=paste(clust.obj[[i]]$n, ' probes, score=', round(scores[i], 3), sep=''))
+	plot(clust.obj[[i]]$cluster, main=paste(clust.obj[[i]]$n, ' probes, score=', round(scores[i], 3), sep=''), cex=0.6)
+	hc <- clust.obj[[i]]$cluster$hclust
+	if (!isEmpty(interest.vars)) {
+		ha <- HeatmapAnnotation(df=pdata[,interest.vars])
+		Heatmap(head(betas.sorted, clust.obj[[i]]$n), name="Beta\nvalues", top_annotation=ha, show_row_hclust=F, cluster_columns=hc, show_row_names=F, column_names_gp=gpar(fontsize=7))
+		#for(ann in colnames(heat.annot2)) {
+		#   decorate_annotation(ann, {grid.text(ann, unit(1, 'npc') + unit(2, 'mm'), just='left')})
+		#}
+	} else {
+		Heatmap(head(betas.sorted, clust.obj[[i]]$n), name="Beta\nvalues", show_row_hclust=F, cluster_columns=hc, show_row_names=F, column_names_gp=gpar(fontsize=7))
+	}
 }
 dev.off()
 
@@ -46,7 +68,6 @@ pheatmap(sample.cor.top, show_rownames=T, show_colnames=T, fontsize=6, filename=
 #pca <- prcomp(t(clust.betas))
 #message("Only variables without 'NA' values will be plotted.")
 #ph.dat <- ph.dat[,colSums(! is.na(ph.dat)) != 0]
-interest.vars <- variablesOfInterest(pdata, batch.vars)
 if (! isEmpty(interest.vars)) {
 #filtered.betas.narm <- filtered.betas[! apply(is.na(filtered.betas), 1, any),]
 	pca <- prcomp(t(clust.betas))

@@ -3,7 +3,14 @@ library(minfi)
 
 #### Reading in data ####
 ### Preparing targets data frame ###
-targets <- read.csv(sample.annotation, stringsAsFactors=F)
+header <- readLines(sample.annotation, n=1)
+header <- unlist(strsplit(header, ','))
+colClasses <- data.frame(t(rep('character', length(header))), stringsAsFactors=F)
+colnames(colClasses) <- header
+interest.vars <- variablesOfInterest(colClasses, batch.vars)
+colClasses[,batch.vars] <- 'factor'
+colClasses[,interest.vars] <- 'factor'
+targets <- read.csv(sample.annotation, colClasses=colClasses, stringsAsFactors=F)
 colnames(targets)[colnames(targets)=='Sentrix_ID'] <- 'Slide'
 colnames(targets)[colnames(targets)=='Sentrix_Position'] <- 'Array'
 targets$Basename <- paste(targets$Slide, targets$Array, sep='_')
@@ -107,7 +114,7 @@ write.table(genotype.betas, file.path(wd, 'genotyping_betas.txt'), sep="\t", quo
 ### Sex determination ###
 ratio.meth <- mapToGenome(norm.meth, mergeManifest=T)
 gender <- getSex(ratio.meth)
-pData(norm.meth)$predictedSex <- gender$predictedSex
+pData(norm.meth)$predictedSex <- factor(gender$predictedSex)
 
 ### Output preprocessed data ###
 message("Writing output...")
