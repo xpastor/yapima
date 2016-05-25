@@ -14,8 +14,8 @@ variablesOfInterest <- function(pdata, batch.vars=NULL)
 ### Functions for PCA plotting ###
 .pca.grob <- function(pca, groups, comp1=1, comp2=2, legend=F)
 {
-	require(ggplot2)
-	require(gridExtra)
+	library(ggplot2)
+	library(gridExtra)
 	xvals <- pca$x[,comp1]
 	yvals <- pca$x[,comp2]
 	df <- data.frame(xvals=xvals, yvals=yvals, groups=groups)
@@ -42,7 +42,8 @@ variablesOfInterest <- function(pdata, batch.vars=NULL)
 }
 
 plot.pca <- function(pca, groups, main=NULL) {
-	require(gridExtra)
+	library(grid)
+	library(gridExtra)
 	grid.newpage()
 	legend.plot <- .pca.grob(pca, groups, 1, 2, legend=T)
 	main <- textGrob(main, gp=gpar(fontsize=20), just='top')
@@ -52,7 +53,7 @@ plot.pca <- function(pca, groups, main=NULL) {
 ### Functions for bootstrap Clustering ###
 bootstrapClustering <- function(n, mat, transpose=F, nboot=100, ncores=1, cl=cl)
 {
-	require(pvclust)
+	library(pvclust)
 	print(n)
 	top.mat <- head(mat, n)
 	if (transpose) {top.mat <- t(top.mat)}

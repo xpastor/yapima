@@ -4,6 +4,7 @@
 ## ncores
 ## pdata
 ## batch.vars
+## interest.vars
 
 #### Probe selection ####
 source(file.path(pipeline_dir, 'qc_functions.R'))
@@ -44,7 +45,7 @@ for (i in 1:length(clust.obj)) {
 	plot(clust.obj[[i]]$cluster, main=paste(clust.obj[[i]]$n, ' probes, score=', round(scores[i], 3), sep=''), cex=0.6)
 	hc <- clust.obj[[i]]$cluster$hclust
 	if (!isEmpty(interest.vars)) {
-		ha <- HeatmapAnnotation(df=pdata[,interest.vars])
+		ha <- HeatmapAnnotation(df=pdata[,interest.vars], gp=gpar(col='black'))
 		Heatmap(head(betas.sorted, clust.obj[[i]]$n), name="Beta\nvalues", top_annotation=ha, show_row_hclust=F, cluster_columns=hc, show_row_names=F, column_names_gp=gpar(fontsize=7))
 		#for(ann in colnames(heat.annot2)) {
 		#   decorate_annotation(ann, {grid.text(ann, unit(1, 'npc') + unit(2, 'mm'), just='left')})
@@ -61,8 +62,20 @@ nprobes <- clust$n
 clust.betas <- head(betas.sorted, nprobes)
 write.table(clust.betas, file.path(wd, paste0('betas_top_', nprobes, '_variable_probes.txt')), sep="\t", quote=F, row.names=T)
 #o#
+
 sample.cor.top <- cor(head(betas.sorted, nprobes), use='na.or.complete')
-pheatmap(sample.cor.top, show_rownames=T, show_colnames=T, fontsize=6, filename=file.path(qcdir, 'sample_correlation_top_probes.pdf'), main=paste(nprobes, 'most variable probes'))
+pdf(file.path(qcdir, paste0('sample_correlation_top_', nprobes,'_variable_probes.pdf')), width=width.dev)
+if (!isEmpty(interest.vars)) {
+	col_annot <- HeatmapAnnotation(df=pdata[,interest.vars], gp=gpar(col='black'))
+	row_annot <- rowAnnotation(df=pdata[,interest.vars], show_legend=F, gp=gpar(col='black'))
+	draw(row_annot + Heatmap(sample.cor.top, name="Correlation", top_annotation=col_annot, column_names_gp=gpar(fontsize=7), row_names_gp=gpar(fontsize=7)), row_dend_side='left')
+	#for(ann in colnames(heat.annot2)) {
+	#   decorate_annotation(ann, {grid.text(ann, unit(1, 'npc') + unit(2, 'mm'), just='left')})
+	#}
+} else {
+	Heatmap(sample.cor.top, name="Correlation", column_names_gp=gpar(fontsize=7), row_names_gp=gpar(fontsize=7))
+}
+dev.off()
 
 ### PCA analysis on optimal probe set ###
 #pca <- prcomp(t(clust.betas))

@@ -111,7 +111,7 @@ genotypes.df <- data.frame(ref=ref, hipo=paste0(snp.unmeth, snp.unmeth), hemi=pa
 
 genotype.sample <- function(snps.betas) {
     snps <- row.names(snps.betas)
-	require(fpc)
+	library(fpc)
 	asw <- numeric(3)
 	for (k in 2:3) asw[[k]] <- pam(snps.betas,k) $ silinfo $ avg.width
 	k.best <- which.max(asw)

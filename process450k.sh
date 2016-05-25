@@ -42,6 +42,7 @@ if [[ $? ]]
 then
 	cp $CONFIG_FILE $OUTDIR
 	$PIPELINE_DIR/script_analysis.sh > $OUTDIR/script.R
+	echo -e "\n#yapima `cd $PIPELINE_DIR/;git tag | tail -1`" >> $OUTDIR/methods.txt
 	echo -e "\n#commit version: `tail -1 $PIPELINE_DIR/.git/logs/HEAD | cut -d' ' -f2`" >> $OUTDIR/methods.txt
 #	echo -e "\n#commit version: `tail -1 $PIPELINE_DIR/.git/logs/HEAD | cut -d' ' -f2 | cut -c-6`" >> $OUTDIR/methods.txt
 fi

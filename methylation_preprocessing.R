@@ -112,9 +112,9 @@ colnames(genotype.betas) <- targets[colnames(genotype.betas), 'Sample_Name']
 write.table(genotype.betas, file.path(wd, 'genotyping_betas.txt'), sep="\t", quote=F, row.names=T)
 
 ### Sex determination ###
-ratio.meth <- mapToGenome(norm.meth, mergeManifest=T)
+ratio.meth <- mapToGenome(filtered.norm.meth, mergeManifest=T)
 gender <- getSex(ratio.meth)
-pData(norm.meth)$predictedSex <- factor(gender$predictedSex)
+pData(filtered.norm.meth)$predictedSex <- factor(gender$predictedSex)
 
 ### Output preprocessed data ###
 message("Writing output...")

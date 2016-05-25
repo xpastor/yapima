@@ -34,7 +34,7 @@ if (normalization) {
 		' The data was normalized aplying the \'SWAN\' normalization mehtod (', .short_citation('minfi', 2), ').')
 }
 
-text <- paste(text, 'The values from probes mapping at multiple places (Chen, 2013) were masked.')
+text <- paste(text, 'The values from crossreactive probes (Chen, 2013) were masked.')
 
 if (removeEuropeanSNPs) {
 	text <- paste0(text,
