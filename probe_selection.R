@@ -31,17 +31,14 @@ scores <- score.clusters(clust.obj)
 #interest.vars <- variablesOfInterest(pdata, batch.vars)
 
 library(ComplexHeatmap)
-width.dev <- .get_dev_width(betas.sorted, annotation_names=interest.vars)
+plot.vars <- c(interest.vars, 'predictedSex')
+width.dev <- .get_dev_width(betas.sorted, annotation_names=plot.vars)
 
 pdf(file.path(qcdir, 'pvclust_clusters.pdf'), width=width.dev)
 for (i in 1:length(clust.obj)) {
 	plot(clust.obj[[i]]$cluster, main=paste(clust.obj[[i]]$n, ' probes, score=', round(scores[i], 3), sep=''), cex=0.6)
 	hc <- clust.obj[[i]]$cluster$hclust
-	if (!isEmpty(interest.vars)) {
-		Heatmap2(head(betas.sorted, clust.obj[[i]]$n), name="Beta\nvalues", column_annotation=pdata[,interest.vars], show_row_dend=F, cluster_columns=hc, show_row_names=F, heatmap_legend_param=list(at=seq(0,1,length.out=6)))
-	} else {
-		Heatmap2(head(betas.sorted, clust.obj[[i]]$n), name="Beta\nvalues", show_row_dend=F, cluster_columns=hc, show_row_names=F, heatmap_legend_param=list(at=seq(0,1,length.out=6)))
-	}
+	Heatmap2(head(betas.sorted, clust.obj[[i]]$n), name="Beta\nvalues", column_annotation=pdata[,plot.vars], show_row_dend=F, cluster_columns=hc, show_row_names=F, heatmap_legend_param=list(at=seq(0,1,length.out=6)))
 }
 dev.off()
 
@@ -54,27 +51,21 @@ write.table(clust.betas, file.path(wd, paste0('betas_top_', nprobes, '_variable_
 
 sample.cor.top <- cor(head(betas.sorted, nprobes), use='na.or.complete')
 pdf(file.path(qcdir, paste0('sample_correlation_top_', nprobes,'_variable_probes.pdf')), width=width.dev)
-if (!isEmpty(interest.vars)) {
-	Heatmap2(sample.cor.top, name="Correlation", column_annotation=pdata[,interest.vars], row_annotation=pdata[,interest.vars])
-} else {
-	Heatmap2(sample.cor.top, name="Correlation")
-}
+Heatmap2(sample.cor.top, name="Correlation", column_annotation=pdata[,plot.vars], row_annotation=pdata[,plot.vars])
 dev.off()
 
 ### PCA analysis on optimal probe set ###
 #pca <- prcomp(t(clust.betas))
 #message("Only variables without 'NA' values will be plotted.")
 #ph.dat <- ph.dat[,colSums(! is.na(ph.dat)) != 0]
-if (! isEmpty(interest.vars)) {
 #filtered.betas.narm <- filtered.betas[! apply(is.na(filtered.betas), 1, any),]
-	pca <- prcomp(t(clust.betas))
-	pdata2 <- pdata[row.names(pca$x),]
+pca <- prcomp(t(clust.betas))
+pdata2 <- pdata[row.names(pca$x),]
 
-	for (interest.var in interest.vars) {
-		groups <- pdata2[,interest.var]
-		names(groups) <- row.names(pdata2)
-		if (class(groups) %in% c('character', 'factor')) {
-			ggsave(file=file.path(qcdir, paste0('top', nprobes, '_variable_probes_PCA_', interest.var, '.png')), plot.pca(pca, groups, interest.var), width=20)
-		}
+for (interest.var in plot.vars) {
+	groups <- pdata2[,interest.var]
+	names(groups) <- row.names(pdata2)
+	if (class(groups) %in% c('character', 'factor')) {
+		ggsave(file=file.path(qcdir, paste0('top', nprobes, '_variable_probes_PCA_', interest.var, '.png')), plot.pca(pca, groups, interest.var), width=20)
 	}
 }
