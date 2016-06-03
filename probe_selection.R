@@ -4,9 +4,10 @@
 ## ncores
 ## pdata
 ## batch.vars
+## interest.vars
 
 #### Probe selection ####
-source(file.path(pipeline_dir, 'qc_functions.R'))
+source(file.path(pipeline_dir, 'functions.R'))
 
 library(GenomicRanges)
 library(cluster)
@@ -27,9 +28,20 @@ stopCluster(cl)
 save(clust.obj, file=file.path(wd, 'pvclust.RData'))
 scores <- score.clusters(clust.obj)
 #o#
-pdf(file.path(qcdir, 'pvclust_clusters.pdf'), width=30)
+#interest.vars <- variablesOfInterest(pdata, batch.vars)
+
+library(ComplexHeatmap)
+width.dev <- .get_dev_width(betas.sorted, annotation_names=interest.vars)
+
+pdf(file.path(qcdir, 'pvclust_clusters.pdf'), width=width.dev)
 for (i in 1:length(clust.obj)) {
-	plot(clust.obj[[i]]$cluster, main=paste(clust.obj[[i]]$n, ' probes, score=', round(scores[i], 3), sep=''))
+	plot(clust.obj[[i]]$cluster, main=paste(clust.obj[[i]]$n, ' probes, score=', round(scores[i], 3), sep=''), cex=0.6)
+	hc <- clust.obj[[i]]$cluster$hclust
+	if (!isEmpty(interest.vars)) {
+		Heatmap2(head(betas.sorted, clust.obj[[i]]$n), name="Beta\nvalues", column_annotation=pdata[,interest.vars], show_row_dend=F, cluster_columns=hc, show_row_names=F, heatmap_legend_param=list(at=seq(0,1,length.out=6)))
+	} else {
+		Heatmap2(head(betas.sorted, clust.obj[[i]]$n), name="Beta\nvalues", show_row_dend=F, cluster_columns=hc, show_row_names=F, heatmap_legend_param=list(at=seq(0,1,length.out=6)))
+	}
 }
 dev.off()
 
@@ -39,14 +51,20 @@ nprobes <- clust$n
 clust.betas <- head(betas.sorted, nprobes)
 write.table(clust.betas, file.path(wd, paste0('betas_top_', nprobes, '_variable_probes.txt')), sep="\t", quote=F, row.names=T)
 #o#
+
 sample.cor.top <- cor(head(betas.sorted, nprobes), use='na.or.complete')
-pheatmap(sample.cor.top, show_rownames=T, show_colnames=T, fontsize=6, filename=file.path(qcdir, 'sample_correlation_top_probes.pdf'), main=paste(nprobes, 'most variable probes'))
+pdf(file.path(qcdir, paste0('sample_correlation_top_', nprobes,'_variable_probes.pdf')), width=width.dev)
+if (!isEmpty(interest.vars)) {
+	Heatmap2(sample.cor.top, name="Correlation", column_annotation=pdata[,interest.vars], row_annotation=pdata[,interest.vars])
+} else {
+	Heatmap2(sample.cor.top, name="Correlation")
+}
+dev.off()
 
 ### PCA analysis on optimal probe set ###
 #pca <- prcomp(t(clust.betas))
 #message("Only variables without 'NA' values will be plotted.")
 #ph.dat <- ph.dat[,colSums(! is.na(ph.dat)) != 0]
-interest.vars <- variablesOfInterest(pdata, batch.vars)
 if (! isEmpty(interest.vars)) {
 #filtered.betas.narm <- filtered.betas[! apply(is.na(filtered.betas), 1, any),]
 	pca <- prcomp(t(clust.betas))

@@ -6,7 +6,7 @@
 ## pdata
 ## genotype.betas
 
-source(file.path(pipeline_dir, 'qc_functions.R'))
+source(file.path(pipeline_dir, 'functions.R'))
 
 library(GenomicRanges)
 library(cluster)
@@ -32,13 +32,15 @@ message('Finished.')
 
 ### Beta density heatmap ###
 message('Plotting density heatmaps of Beta values...')
-library(pheatmap)
+heatmap.params <- list(cluster_rows=F, show_heatmap_legend=F)
 pdf(file.path(qcdir, 'beta_distribution_heatmap.pdf'))
 h <- apply(raw.betas, 2, function(x) hist(x, breaks=seq(0,1,0.001), plot=F)$counts)
-pheatmap(h, cluster_rows=F, main='Raw beta distribution', scale='none', fontsize_col=6)
+do.call(Heatmap2, c(list(mat=h, column_title='Raw beta distribution'), heatmap.params))
+#densityHeatmap(raw.betas, title='Raw beta distribution', range=c(0,1), column_names_gp=gpar(fontsize=7))
 
 h <- apply(processed.betas, 2, function(x) hist(x, breaks=seq(0,1,0.001), plot=F)$counts)
-pheatmap(h, cluster_rows=F, main='Normalized beta distribution', scale='none', fontsize_col=6)
+do.call(Heatmap2, c(list(mat=h, column_title='Normalized beta distribution'), heatmap.params))
+#densityHeatmap(processed.betas, title='Normalized beta distribution', range=c(0,1), column_names_gp=gpar(fontsize=7))
 dev.off()
 message('Finished.')
 
@@ -70,7 +72,7 @@ message('Finished.')
      
 ## Interest variables ##
 message('PCA plots of variables of interest...')
-interest.vars <- variablesOfInterest(pdata, batch.vars)
+#interest.vars <- variablesOfInterest(pdata, batch.vars)
 if (! isEmpty(interest.vars)) {
 #filtered.betas.narm <- filtered.betas[! apply(is.na(filtered.betas), 1, any),]
 #	raw.pca <- prcomp(t(raw.betas))
@@ -93,7 +95,11 @@ message('Finished.')
 #pdf(file.path(qcdir, 'samples_correlation.pdf'))
 message('Plotting sample correlations...')
 sample.cor <- cor(processed.betas, use='na.or.complete')
-pheatmap(sample.cor, show_rownames=T, show_colnames=T, main='All probes', fontsize=6, filename=file.path(qcdir, 'samples_correlation.pdf'))
+dev.width <- .get_dev_width(sample.cor, name='Correlation', annotation_names=interest.vars)
+dev.height <- .get_dev_width(sample.cor, name='AAA')
+pdf(file.path(qcdir, 'samples_correlation.pdf'), width=dev.width, height <- dev.height)
+Heatmap2(sample.cor, name='Correlation', column_annotation=pdata[,interest.vars], row_annotation=pdata[,interest.vars], column_title='All probes')
+dev.off()
 message('Finished.')
 
 ### Sample genotyping ###
@@ -111,7 +117,7 @@ genotypes.df <- data.frame(ref=ref, hipo=paste0(snp.unmeth, snp.unmeth), hemi=pa
 
 genotype.sample <- function(snps.betas) {
     snps <- row.names(snps.betas)
-	require(fpc)
+	library(fpc)
 	asw <- numeric(3)
 	for (k in 2:3) asw[[k]] <- pam(snps.betas,k) $ silinfo $ avg.width
 	k.best <- which.max(asw)

@@ -13,7 +13,7 @@ echo -e "#!/usr/bin/env $RSCRIPT_BIN\n"
 echo -e "# Variables initialization"
 echo -e "idat_dir <- '$IDAT_DIR'"
 echo -e "sample.annotation <- '$SAMPLE_ANNOTATION'"
-echo -e "wd <- '$OUTDIR'"
+echo -e "wd <- '${OUTDIR}_rep'"
 echo -e "pipeline_dir <- '$PIPELINE_DIR'"
 echo -e "seed <- $SEED"
 echo -e "non_specific_cg <- '$OUTDIR/$(basename $NON_SPECIFIC_CG)'"
@@ -22,24 +22,26 @@ if [[ -n $BLACKLIST ]]
 then
 	echo -e "blacklist <- '$BLACKLIST'"
 fi
-if isOn $RUN_BATCH_CORRECTION | isOn $RUN_PROBE_SELECTION | isOn $RUN_DIFFERENTIAL_METHYLATION
-then
-	echo -e "batch.vars <- '$BATCH_VARS'"
-fi
+echo -e "batch.vars <- '$BATCH_VARS'"
 
 if isOn $RUN_PROBE_SELECTION
 then
 	echo -e "ncores <- $NCORES"
-	gawk '/Clustering #/,/#o#/' $PIPELINE_DIR/qc_functions.R
+	gawk '/Clustering #/,/#o#/' $PIPELINE_DIR/functions.R
 fi
 
-if isOn $RUN_DIFFERENTIAL_METHYLATION
-then
-	gawk '/variables #/,/#o#/' $PIPELINE_DIR/qc_functions.R
-fi
+#if isOn $RUN_DIFFERENTIAL_METHYLATION
+#then
+#	gawk '/variables #/,/#o#/' $PIPELINE_DIR/functions.R
+#fi
 
 gawk '/# Create output/,/#o#/' $PIPELINE_DIR/run_process450k.R
 gawk '/# Define/,/#o#/' $PIPELINE_DIR/run_process450k.R
+gawk '/# Extract/,/#o#/' $PIPELINE_DIR/run_process450k.R
+if [[ -n $BATCH_VARS ]]
+then
+	gawk '/# Produce/,/#o#/' $PIPELINE_DIR/run_process450k.R
+fi
 
 gawk '/# Load libraries/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
 
