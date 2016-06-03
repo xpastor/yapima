@@ -50,10 +50,10 @@ if (! 'methylation_qc.R' %in% pipeline_scripts) {
 if (! 'probe_selection.R' %in% pipeline_scripts) {
 	stop(paste0("\n\tThe script 'probe_selection.R' is not present in ", pipeline_dir))
 }
-if ('qc_functions.R' %in% pipeline_scripts) {
-	source(file.path(pipeline_dir, 'qc_functions.R'))
+if ('functions.R' %in% pipeline_scripts) {
+	source(file.path(pipeline_dir, 'functions.R'))
 } else {
-	stop(paste0("\n\tThe script 'qc_functions.R' is not present in ", pipeline_dir))
+	stop(paste0("\n\tThe script 'functions.R' is not present in ", pipeline_dir))
 }
 
 if (! file.exists(sample.annotation) | file.access(sample.annotation) == -1) {
@@ -143,15 +143,17 @@ dir.create(qcdir, recursive=T)
 set.seed(seed)
 #o#
 
-# Produce vector with batch variables
-batch.vars <- unlist(strsplit(batch.vars, ','))
-#o#
-
 # Extract variables of interest from sample sheet
 header <- readLines(sample.annotation, n=1)
 header <- unlist(strsplit(header, ','))
 illumina.vars <- c('Sample_Name', 'Sample_Well', 'Sample_Plate', 'Sample_Group', 'Pool_ID', 'Sentrix_ID', 'Sentrix_Position')
-interest.vars <- header[! header %in% c(illumina.vars, batch.vars)]
+interest.vars <- header[! header %in% illumina.vars]
+#o#
+
+# Produce vector with batch variables
+batch.vars <- unlist(strsplit(batch.vars, ','))
+# Remove batch variables from list of variables for analysis
+interest.vars <- interest.vars[! interest.vars %in% batch.vars]
 #o#
 
 methods <- file.path(wd, 'methods.txt')

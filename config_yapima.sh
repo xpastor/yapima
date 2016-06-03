@@ -9,7 +9,7 @@ PBS_RESOURCES="walltime=00:15:00,nodes=1:ppn=$NCORES,mem=5g"
 CLUSTER_EO=/ibios/co02/xavier/eo/yapima
 
 ### Binaries ###
-RSCRIPT_BIN=/ibios/tbi_cluster/13.1/x86_64/R/R-3.2.0/bin/Rscript
+RSCRIPT_BIN=/ibios/tbi_cluster/13.1/x86_64/R/R-3.3.0/bin/Rscript
 
 ### Steps ###
 # The variables must take an R boolean value (T, TRUE, F or FALSE) #

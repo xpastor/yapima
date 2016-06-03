@@ -18,7 +18,8 @@ row.names(targets) <- targets$Basename
 
 ### Reading methylation data ###
 message("Reading in methylation files...")
-raw.meth <- read.450k.exp(idat_dir, targets, extended=T)
+#raw.meth <- read.450k.exp(idat_dir, targets, extended=T, recursive=T)
+raw.meth <- read.metharray.exp(idat_dir, targets, extended=T, recursive=T)
 message("Data read.")
 
 #### Fetching array annotation ####

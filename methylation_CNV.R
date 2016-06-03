@@ -8,7 +8,7 @@
 ## pdata
 ## genotype.betas
 
-#source(file.path(pipeline_dir, 'qc_functions.R'))
+#source(file.path(pipeline_dir, 'functions.R'))
 
 library(GenomicRanges)
 #library(cluster)

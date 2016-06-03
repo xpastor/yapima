@@ -47,7 +47,7 @@ plot.pca <- function(pca, groups, main=NULL) {
 	grid.newpage()
 	legend.plot <- .pca.grob(pca, groups, 1, 2, legend=T)
 	main <- textGrob(main, gp=gpar(fontsize=20), just='top')
-	return(arrangeGrob(.pca.grob(pca, groups, 1, 2), .pca.grob(pca, groups, 3, 4), .pca.grob(pca, groups, 5, 6), .legend.grob(legend.plot), widths=c(4, 4, 4, 1), ncol=4, main=main))
+	return(arrangeGrob(.pca.grob(pca, groups, 1, 2), .pca.grob(pca, groups, 3, 4), .pca.grob(pca, groups, 5, 6), .legend.grob(legend.plot), widths=c(4, 4, 4, 1), ncol=4, top=main))
 }
 
 ### Functions for bootstrap Clustering ###
@@ -80,3 +80,76 @@ score.clusters <- function(clustList, num.edges=NULL)
 	sapply(clustList, score.cluster, num.edges)
 }
 #o#
+
+### Function to produce Heatmaps with ComplexHeatmap ###
+Heatmap2 <- function(mat, column_annotation=NULL, row_annotation=NULL, column_names_gp=gpar(fontsize=7), row_names_gp=column_names_gp, row_dend_side='left', ...)
+{
+	library(ComplexHeatmap)
+	heatmap.params <- list(matrix=mat, column_names_gp=column_names_gp, row_names_gp=row_names_gp, row_dend_side=row_dend_side, ...)
+	if (! is.null(column_annotation)) {
+		ha_cols <- .annotation_colors(column_annotation)
+		ha <- HeatmapAnnotation(df=column_annotation, col=ha_cols, gp=gpar(col='black'), na_col='white')
+		heatmap.params$top_annotation=ha
+	}
+	hm <- do.call(Heatmap, args=heatmap.params)
+	if (is.null(row_annotation)) {
+		draw(hm)
+	} else {
+		row_annot_params <- list(df=row_annotation, gp=column_names_gp, show_legend=!identical(row_annotation, column_annotation))
+		if (identical(column_annotation, row_annotation)) {
+			col <- list()
+			for (anno in names(ha@anno_list)) {
+				col[[anno]] <- ha@anno_list[[anno]]@color_mapping@colors
+			}
+			row_annot_params <- c(row_annot_params, col=list(col), na_col='white')
+		} else {
+			col <- .annotation_colors(row_annotation)
+			row_annot_params <- c(row_annot_params, col=list(col))
+		}
+		row_annot <- do.call(rowAnnotation, row_annot_params)
+		draw(row_annot + hm, row_dend_side=row_dend_side)
+	}
+	if (! is.null(column_annotation)) {
+		for(ann in colnames(column_annotation)) {
+		  	decorate_annotation(ann, {grid.text(ann, unit(1, 'npc') + unit(2, 'mm'), just='left')})
+		}
+	}
+}
+
+.get_dev_width <- function(mat, name='matrix_0', annotation_names=NULL, fontsize=7)
+{
+	library(grid)
+	char.height <- convertHeight(grobHeight(textGrob("A", gp=gpar(fontsize = fontsize))), 'inch', valueOnly=T)
+	width.mat <- ncol(mat) * char.height
+	nchar.name <- max(nchar(unlist(strsplit(name, '\n'))))
+	width.name <- convertWidth(grobHeight(textGrob('A', gp=gpar(fontsize=10))), 'inch', valueOnly=T) * nchar.name
+	width.dev <- width.mat + convertWidth(unit(1, 'cm'), 'inch', valueOnly=T) + width.name + 4
+	if (! is.null(annotation_names)) {
+	    length.title <- max(nchar(annotation_names))
+		width.title <- convertWidth(grobHeight(textGrob("A", gp=gpar(fontsize = 10))), 'inch', valueOnly=T) * length.title
+		width.dev <- width.dev + width.title
+	}
+	return(width.dev)
+}
+
+.annotation_colors <- function(df)
+{
+	cols <- c('darkgrey', 'black', 'red', 'yellow', 'blue', 'orange', 'cyan', 'magenta', 'darkgreen')
+	annot_cols <- list()
+	groups <- NULL
+	for (annot in colnames(df)) {
+		groups <- NULL
+		x <- df[,annot]
+		if (is.character(x)) {
+			groups <- unique(x)
+		} else if (is.factor(x)) {
+			groups <- levels(x)
+		}
+		if (length(groups) <= length(cols)) {
+			group_cols <- cols[seq(length(groups))]
+			names(group_cols) <- groups
+			annot_cols[[annot]] <- group_cols
+		}
+	}
+	return(annot_cols)
+}
