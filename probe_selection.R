@@ -38,7 +38,7 @@ pdf(file.path(qcdir, 'pvclust_clusters.pdf'), width=width.dev)
 for (i in 1:length(clust.obj)) {
 	plot(clust.obj[[i]]$cluster, main=paste(clust.obj[[i]]$n, ' probes, score=', round(scores[i], 3), sep=''), cex=0.6)
 	hc <- clust.obj[[i]]$cluster$hclust
-	Heatmap2(head(betas.sorted, clust.obj[[i]]$n), name="Beta\nvalues", column_annotation=pdata[,plot.vars], show_row_dend=F, cluster_columns=hc, show_row_names=F, heatmap_legend_param=list(at=seq(0,1,length.out=6)))
+	Heatmap2(head(betas.sorted, clust.obj[[i]]$n), name="Beta\nvalues", column_annotation=pdata[,plot.vars,drop=F], show_row_dend=F, cluster_columns=hc, show_row_names=F, heatmap_legend_param=list(at=seq(0,1,length.out=6)))
 }
 dev.off()
 
@@ -49,9 +49,9 @@ clust.betas <- head(betas.sorted, nprobes)
 write.table(clust.betas, file.path(wd, paste0('betas_top_', nprobes, '_variable_probes.txt')), sep="\t", quote=F, row.names=T)
 #o#
 
-sample.cor.top <- cor(head(betas.sorted, nprobes), use='na.or.complete')
+sample.cor.top <- cor(clust.betas, use='na.or.complete')
 pdf(file.path(qcdir, paste0('sample_correlation_top_', nprobes,'_variable_probes.pdf')), width=width.dev)
-Heatmap2(sample.cor.top, name="Correlation", column_annotation=pdata[,plot.vars], row_annotation=pdata[,plot.vars])
+Heatmap2(sample.cor.top, name="Correlation", column_annotation=pdata[,plot.vars,drop=F], row_annotation=pdata[,plot.vars,drop=F])
 dev.off()
 
 ### PCA analysis on optimal probe set ###
@@ -62,6 +62,7 @@ dev.off()
 pca <- prcomp(t(clust.betas))
 pdata2 <- pdata[row.names(pca$x),]
 
+library(ggplot2)
 for (interest.var in plot.vars) {
 	groups <- pdata2[,interest.var]
 	names(groups) <- row.names(pdata2)
