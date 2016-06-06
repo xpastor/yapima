@@ -59,7 +59,7 @@ message('PCA plots of batch variables...')
 pdata2$ArrayRow <- gsub('C..', '', pdata2$Array)
 pdata2$ArrayColumn <- gsub('R..', '', pdata2$Array)
 
-plot.vars <- unique(c('Slide', 'ArrayRow', 'ArrayColumn', batch.vars))
+plot.vars <- unique(c('Slide', 'ArrayRow', 'ArrayColumn', 'predictedSex', batch.vars))
 for (batch.var in plot.vars) {
 	groups <- pdata2[,batch.var]
 	names(groups) <- row.names(pdata2)
@@ -95,10 +95,11 @@ message('Finished.')
 #pdf(file.path(qcdir, 'samples_correlation.pdf'))
 message('Plotting sample correlations...')
 sample.cor <- cor(processed.betas, use='na.or.complete')
-dev.width <- .get_dev_width(sample.cor, name='Correlation', annotation_names=interest.vars)
+plot.vars <- c(interest.vars, 'predictedSex')
+dev.width <- .get_dev_width(sample.cor, name='Correlation', annotation_names=plot.vars)
 dev.height <- .get_dev_width(sample.cor, name='AAA')
 pdf(file.path(qcdir, 'samples_correlation.pdf'), width=dev.width, height <- dev.height)
-Heatmap2(sample.cor, name='Correlation', column_annotation=pdata[,interest.vars], row_annotation=pdata[,interest.vars], column_title='All probes')
+Heatmap2(sample.cor, name='Correlation', column_annotation=pdata[,plot.vars,drop=F], row_annotation=pdata[,plot.vars,drop=F], column_title='All probes')
 dev.off()
 message('Finished.')
 
