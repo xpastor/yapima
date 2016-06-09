@@ -34,13 +34,13 @@ if (! surrogateCorrection) {
 		adjP <- grep('adj.P.Val', colnames(top))
 	#o#
 		sig <- row.names(top)[top[,adjP] <= 0.05 & !is.na(top[,adjP])]
-#		sig.meth <- processed.mval[sig,] 
-#		sig.meth <- sig.meth[! apply(is.na(sig.meth), 1, any),]
-#		pca <- prcomp(t(sig.meth))
-#		groups <- pdata[,interest.vars[coef]]
-#		names(groups) <- row.names(pdata)
-#		ggsave(file=file.path(wd, paste0('differentialMethylation_PCA_', coefs[coef], '.png')), plot.pca(pca, groups, interest.vars[coef]), width=20)
-#		hc <- hclust(dist(t(processed.mval[sig,])))
+		sig.meth <- processed.mval[sig,] 
+		sig.meth <- sig.meth[! apply(is.na(sig.meth), 1, any),]
+		pca <- prcomp(t(sig.meth))
+		groups <- pdata[,interest.vars[coef]]
+		names(groups) <- row.names(pdata)
+		ggsave(file=file.path(wd, paste0('differentialMethylation_PCA_', coefs[coef], '.png')), plot.pca(pca, groups, interest.vars[coef]), width=20)
+		hc <- hclust(dist(t(processed.mval[sig,])))
 	}
 } else {
 	### Selection of negative control probes ###
@@ -74,19 +74,13 @@ if (! surrogateCorrection) {
 		#fitvar <- varFit(processed.mval, design=design, coef=seq(length(interest.vars)))
 		#topDV <- topVar(fitvar, coef=coef, num=nrow(top))
 		sig <- row.names(top)[top$p.ebayes.BH <= 0.05]
-#		sig.meth <- processed.mval[sig,]
-#		sig.meth <- sig.meth[! apply(is.na(sig.meth), 1, any),]
-#		pca <- prcomp(t(sig.meth))
-#		groups <- pdata[,interest.vars[coef]]
-#		names(groups) <- row.names(pdata)
-#		ggsave(file=file.path(wd, paste0('differentialMethylation_PCA_', interest.vars[coef], '.png')), plot.pca(pca, groups, interest.vars[coef]), width=20)
+		sig.meth <- processed.mval[sig,]
+		sig.meth <- sig.meth[! apply(is.na(sig.meth), 1, any),]
+		pca <- prcomp(t(sig.meth))
+		groups <- pdata[,interest.vars[coef]]
+		names(groups) <- row.names(pdata)
+		ggsave(file=file.path(wd, paste0('differentialMethylation_PCA_', interest.vars[coef], '.png')), plot.pca(pca, groups, interest.vars[coef]), width=20)
 	}
-	sig.meth <- processed.mval[sig,] 
-	sig.meth <- sig.meth[! apply(is.na(sig.meth), 1, any),]
-	pca <- prcomp(t(sig.meth))
-	groups <- pdata[,interest.vars[coef]]
-	names(groups) <- row.names(pdata)
-	ggsave(file=file.path(wd, paste0('differentialMethylation_PCA_', interest.vars[coef], '.png')), plot.pca(pca, groups, interest.vars[coef]), width=20)
 }
 
 message('Differential methylation analysis finished.')
