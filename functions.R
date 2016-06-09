@@ -82,18 +82,24 @@ score.clusters <- function(clustList, num.edges=NULL)
 #o#
 
 ### Function to produce Heatmaps with ComplexHeatmap ###
-Heatmap2 <- function(mat, column_annotation=NULL, row_annotation=NULL, column_names_gp=gpar(fontsize=7), row_names_gp=column_names_gp, row_dend_side='left', ...)
+Heatmap2 <- function(mat, column_annotation=NULL, row_annotation=NULL, column_names_gp=gpar(fontsize=7), row_names_gp=column_names_gp, row_dend_side='right', row_names_side='left', ...)
 {
 	library(ComplexHeatmap)
-	heatmap.params <- list(matrix=mat, column_names_gp=column_names_gp, row_names_gp=row_names_gp, row_dend_side=row_dend_side, ...)
+	heatmap.params <- list(matrix=mat, column_names_gp=column_names_gp, row_names_gp=row_names_gp, row_dend_side=row_dend_side, row_names_side=row_names_side, ...)
+	annotation.width <- unit(2, 'mm')
 	if (! is.null(column_annotation)) {
 		ha_cols <- .annotation_colors(column_annotation)
 		ha <- HeatmapAnnotation(df=column_annotation, col=ha_cols, gp=gpar(col='black'), na_col='white')
-		heatmap.params$top_annotation=ha
+		heatmap.params$top_annotation <- ha
+		annotation.width <- grobWidth(textGrob(colnames(column_annotation), gp=gpar(fontsize=12))) + unit(1, 'mm') - grobWidth(textGrob(rownames(mat), gp=gpar(fontsize=7)))
 	}
 	hm <- do.call(Heatmap, args=heatmap.params)
+	rows_hc <- ifelse(is.null(heatmap.params$cluster_rows), T, heatmap.params$cluster_rows)
+	show_rows_hc <- ifelse(is.null(heatmap.params$show_row_dend), T, heatmap.params$show_row_dend)
+	if (convertWidth(annotation.width, 'mm', valueOnly=T) < 0) annotation.width <- unit(2, 'mm')
+	padding <- unit.c(unit(2, 'mm'), annotation.width, unit(2,'mm'), unit(2, 'mm'))
 	if (is.null(row_annotation)) {
-		draw(hm)
+		draw(hm, padding=padding)
 	} else {
 		row_annot_params <- list(df=row_annotation, gp=column_names_gp, show_legend=!identical(row_annotation, column_annotation))
 		if (identical(column_annotation, row_annotation)) {
@@ -107,11 +113,15 @@ Heatmap2 <- function(mat, column_annotation=NULL, row_annotation=NULL, column_na
 			row_annot_params <- c(row_annot_params, col=list(col))
 		}
 		row_annot <- do.call(rowAnnotation, row_annot_params)
-		draw(row_annot + hm, row_dend_side=row_dend_side)
+		draw(hm + row_annot, row_dend_side=row_dend_side, padding=padding)
 	}
 	if (! is.null(column_annotation)) {
 		for(ann in colnames(column_annotation)) {
-		  	decorate_annotation(ann, {grid.text(ann, unit(1, 'npc') + unit(2, 'mm'), just='left')})
+			if(rows_hc & show_rows_hc) {
+					decorate_annotation(ann, {grid.text(ann, unit(0, 'npc') - unit(2, 'mm'), just='right')})
+			} else {
+				  	decorate_annotation(ann, {grid.text(ann, unit(1, 'npc') + unit(2, 'mm'), just='left')})
+			}
 		}
 	}
 }
