@@ -94,6 +94,7 @@ if (removeEuropeanSNPs) {
 
 # Exclude probes
 exclude <- unique(exclude[!is.na(exclude)])
+exclude <- exclude[exclude %in% array.annot$Name]
 
 # Mask probes
 filtered.norm.meth <- norm.meth

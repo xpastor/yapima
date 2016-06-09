@@ -38,7 +38,7 @@ export SEED
 
 $RSCRIPT_BIN $PIPELINE_DIR/run_process450k.R $PIPELINE_DIR/config_yapima.R
 
-if [[ $? ]]
+if [[ $? == 0 ]]
 then
 	cp $CONFIG_FILE $OUTDIR
 	$PIPELINE_DIR/script_analysis.sh > $OUTDIR/script.R
