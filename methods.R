@@ -25,24 +25,19 @@ text <- paste0(text,
 	'The array data were read into the R environment (R version ',
 	R.version$major, '.', R.version$minor, ' \'', R.version$nickname, '\', ', R.version$year, '-', R.version$month, '-', R.version$day, ') using the \'minfi\' package ', .cite_package('minfi'), '.')
 
-if (backgroundCorrection) {
-	text <- paste(text,
-		'The intensities were adjusted using the \'noob\' background correction available in the \'minfi\' package.')}
-
-if (normalization) {
-	text <- paste0(text,
-		' The data was normalized aplying the \'SWAN\' normalization mehtod (', .short_citation('minfi', 2), ').')
-}
-
-text <- paste(text, 'The values from crossreactive probes (Chen, 2013) were masked.')
+text <- paste(text, 'The crossreactive probes (Chen, 2013) were flagged.')
 
 if (removeEuropeanSNPs) {
 	text <- paste0(text,
-		' Probes with the single base extension (SBE) position overlaping SNPs with allele frequency higher than ', round(1/nrow(targets), digits=2),' in european populations (Chen, 2013) were masked (n=', length(european.snps), ').')
+		' Probes with the single base extension (SBE) position overlaping SNPs with allele frequency higher than ', round(1/nrow(targets), digits=2),' in european populations (Chen, 2013) were also flagged (n=', length(european.snps), ').')
 }
 
 text <- paste(text,
-	'Values with a detection P-value higher than 0.01, as estimated by \'minfi\' and tipically of low quality, were masked.')
+	'The intensities were adjusted with the \'ENmix\' background correction available in the \'ENmix\' package, using the out-of-band probes to estimate the background and enabling dye bias correction and normalized applying the \'SWAN\' normalization mehtod (', .short_citation('minfi', 2), ').')
+#norm.meth <- preprocessENmix(rgset, bpParaEst='oob', dyeCorr=T, QCinfo=NULL, exQCsample=F, exQCcpg=F, exSample=NULL, exCpG=NULL, nCores=ncores)
+
+text <- paste(text,
+	'Measures with a detection P-value higher than 0.01, as estimated by \'minfi\' and tipically of low quality, were masked.')
 
 ### ComBat batch effect correction ###
 if (batchCorrection) {
@@ -53,21 +48,15 @@ if (batchCorrection) {
 ### Probe selection ###
 if (probeSelection) {
 	text <- paste0(text, '\n',
- 		'To find the most stable unsupervised clustering of the samples, 12 sets of probes were analysed. The probes with the highest variation in their beta-values were chosen for the 12 sets, from 1000 to 12000 probes in steps of 1000 probes. The bootstrap clustering approach implemented by the \'pvclust\' package ', .cite_package('pvclust'), ' from bioconductor was applied, with 10000 iterations for each using the euclidean distance measure. Finally, to find the most stable set of probes a score was defined as the sum of the pvalue of the  top ', round((nrow(targets)-1)*0.25), ' edges multiplied by the height of the edge, and the set of probes with the highest score was chosen.')
+ 		'To find the most stable unsupervised clustering of the samples, 12 sets of probes were analysed. Initially, the flagged probes were removed and from the remaining, the ones with the highest variation in their beta-values were chosen for the 12 sets, from 1000 to 12000 probes in steps of 1000 probes. The bootstrap clustering approach implemented by the \'pvclust\' package ', .cite_package('pvclust'), ' from bioconductor was applied, with 10000 iterations for each using the euclidean distance measure. Finally, to find the most stable set of probes a score was defined as the sum of the pvalue of the  top ', round((nrow(targets)-1)*0.25), ' edges multiplied by the height of the edge, and the set of probes with the highest score was chosen.')
 }
 
 ### Differential methylation analysis ###
 if (diffMeth) {
 	if (! isEmpty(interest.vars)) {
-		if (! surrogateCorrection) {
-			limmaURL <- 'http://bioconductor.org/packages/3.1/bioc/vignettes/limma/inst/doc/usersguide.pdf'
-			text <- paste0(text, '\n',
-				'Differential methylation analysis was done on the M-values using the biconductor \'limma\' package ', .cite_package('limma'), ' and multiple testing correction was applied (Benjamini, 1995) (protocol described in ', limmaURL, ').')
-		} else {
-			missMethylURL <- 'http://bioconductor.org/packages/3.2/bioc/vignettes/missMethyl/inst/doc/missMethyl.pdf'
-			text <- paste0(text, '\n',
-				'Differential methylation analysis was done on the M-values using the bioconductor \'missMethyl\' package ', .cite_package('missMethyl'), ' and following a 2-stage approach, RUVm, based on RUV-inverse (protocol described in ', missMethylURL, ').')
-		}
+		limmaURL <- 'http://bioconductor.org/packages/3.1/bioc/vignettes/limma/inst/doc/usersguide.pdf'
+		text <- paste0(text, '\n',
+			'Differential methylation analysis was done on the M-values using the biconductor \'limma\' package ', .cite_package('limma'), ' and multiple testing correction was applied (Benjamini, 1995) (protocol described in ', limmaURL, ').')
 	}
 }
 

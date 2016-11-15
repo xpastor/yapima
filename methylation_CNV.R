@@ -18,18 +18,13 @@ library(GenomicRanges)
 message('Running CNV analysis...')
 library(conumee)
 cnv.intensity <- getMeth(filtered.norm.meth) + getUnmeth(filtered.norm.meth)
-colnames(cnv.intensity) <- paste(colnames(cnv.intensity), 'intensity', sep='.')
+colnames(cnv.intensity) <- paste(targets[colnames(cnv.intensity), 'Sample_Name'], 'intensity', sep='.')
+#annotation(filtered.norm.meth)$array == 'IlluminaHumanMethylation450k'
 library(CopyNumber450kData)
 data(RGcontrolSetEx)
-controls.norm <- NULL
-if (! backgroundCorrection) {
-    controls.norm <- preprocessRaw(RGcontrolSetEx)
-} else {
-    controls.norm <- preprocessNoob(RGcontrolSetEx)
-}
-if (normalization) {
-    controls.norm <- preprocessSWAN(RGcontrolSetEx, mSet=controls.norm)
-}
+#annotation(filtered.norm.meth)$array == 'IlluminaHumanMethylationEPIC'
+controls.norm <- preprocessENmix(RGcontrolSetEx)
+controls.norm <- preprocessSWAN(RGcontrolSetEx, mSet=controls.norm)
 
 exclude.gr <- array.annot.gr[exclude]
 
@@ -48,7 +43,7 @@ for (pid in names(cnv)) {
 #	dir.create(file.path(qcdir, 'CNV_report', pid))
 #	write.table(cnv.res, file.path(qcdir, 'CNV_report', pid, paste(pid, 'CNV_report.txt', sep='_')), sep="\t", quote=F, row.names=F)
 	write.table(cnv.res, file.path(qcdir, 'CNV_report', paste(pid, 'CNV_report.txt', sep='_')), sep="\t", quote=F, row.names=F)
-	pdf(file.path(qcdir, 'CNV_report', paste(pid, 'CNV_report.pdf', sep='_')), width=2000, height=500)
+	pdf(file.path(qcdir, 'CNV_report', paste(pid, 'CNV_report.pdf', sep='_')), width=20, height=5)
 #	png(file.path(qcdir, 'CNV_report', pid, paste(pid, 'whole_genome.png', sep='_')), width=2000, height=500)
 	CNV.genomeplot(cnv.analysis)
 #	dev.off()

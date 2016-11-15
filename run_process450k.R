@@ -95,24 +95,12 @@ if (!is.logical(runCNV)) {
 	stop("\n\t'runQC' must be a valid R boolean: T, F, TRUE or FALSE.")
 }
 
-if (!is.logical(surrogateCorrection)) {
-	stop("\n\t'surrogateCorrection' must be a valid R boolean: T, F, TRUE or FALSE.")
-}
-
 if (!is.logical(probeSelection)) {
 	stop("\n\t'probeSelection' must be a valid R boolean: T, F, TRUE or FALSE.")
 }
 
 if (!is.logical(diffMeth)) {
 	stop("\n\t'diffMeth' must be a valid R boolean: T, F, TRUE or FALSE.")
-}
-
-if (!is.logical(backgroundCorrection)) {
-	stop("\n\t'backgroundCorrection' must be a valid R boolean: T, F, TRUE or FALSE.")
-}
-
-if (!is.logical(normalization)) {
-	stop("\n\t'normalization' must be a valid R boolean: T, F, TRUE or FALSE.")
 }
 
 if (is.logical(removeEuropeanSNPs)) {
@@ -132,8 +120,14 @@ if (is.logical(removeEuropeanSNPs)) {
 	stop("\n\t'removeEuropeanSNPs' must be a valid R boolean: T, F, TRUE or FALSE.")
 }
 
-if ((varianceProportion < 0) | (varianceProportion > 1)) {
-	stop("\n\t'varianceProportion' must be a number between 0 and 1.")	
+ncores <- as.integer(ncores)
+if (is.na(ncores)) {
+	stop("'ncores' must be integer.")
+}
+
+seed <- as.integer(seed)
+if (is.na(seed)) {
+	stop("'seed' must be integer.")
 }
 
 qcdir <- file.path(wd, 'qc')
@@ -148,7 +142,6 @@ header <- readLines(sample.annotation, n=1)
 header <- unlist(strsplit(header, ','))
 illumina.vars <- c('Sample_Name', 'Sample_Well', 'Sample_Plate', 'Sample_Group', 'Pool_ID', 'Sentrix_ID', 'Sentrix_Position')
 interest.vars <- header[! header %in% illumina.vars]
-#o#
 
 # Produce vector with batch variables
 batch.vars <- unlist(strsplit(batch.vars, ','))

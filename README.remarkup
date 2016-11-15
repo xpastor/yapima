@@ -74,17 +74,22 @@ Tumor6,,,,,1234567890,R06C02,Tumor,BBB
 Since the pipeline is implemented in R and the config file is just a bash front-end for the pipeline, the values passed to the variables that control the processess switching need valid R logical values or expressions that can be evaluated in R context, not in bash. However, to make it easier for users of our usual pipelines, it's also possible to switch on/off the processes with 0/1.
 
 === Preprocessing
-The data is loaded into the R environment using the //minfi// (1) package from bioconductor. Initially, ambiguous probes as described by Chen et al (2) are removed and afterwards //Noob// background correction and //SWAN// normalization (3) are performe if required. Finally, if selected, probes with SNPs at the SBE position that could be present in at least one sample regarding to its allele frequency in european populations as estimated by Chen et al (2) will be removed from the analysis.
+The data is loaded into the R environment using the //minfi// (1) package from bioconductor. Initially, probes are flagged using the following values and summed accordingly, being 0 the value for probes that pass all the filters:
+* 4: probes provided in **BLACKLIST**
+* 2: crossreactive probes as described by Chen et al (2),
+* 1: if selected, probes with SNPs at the SBE position that could be present in at least one sample regarding to its allele frequency in european populations as estimated by Chen et al (2)
+
+Afterwards, //ENmix// background correction (3) is performed and SWAN normalization (4) is applied. Measures with low detection are replaced by 'NA'.
 
 === Batch correction
 This step should be run if some batch effect is detected in the samples. Some typical examples of batch issues are samples hybridized in different array batches or effects related to the position of the samples in the array due to consistent habits during array preparation.
 
-The batch correction is done using the implementation of //ComBat// (4) from the //sva// (5) package and it cannot correct all the effects at once, but needs to be applied one after the other. Therefore, it would be convenient to first correct for the strongest effect and leave the mildest at the end. Because the variables to be corrected are taken in the order they are given to **BATCH_VARS** it is convenient to put first the variable with the strongest effect and at the end the one with the mildest effect.
+The batch correction is done using the implementation of //ComBat// (5) from the //sva// package and it cannot correct all the effects at once, but needs to be applied one after the other. Therefore, it would be convenient to first correct for the strongest effect and leave the mildest at the end. Because the variables to be corrected are taken in the order they are given to **BATCH_VARS** it is convenient to put first the variable with the strongest effect and at the end the one with the mildest effect.
 
 It is important to notice that in case some batch variable is strongly related to a variable of interest, the results on the analyses of such variable cannot be trusted and the experimental design should be reviewed.
 
 === Probe selection
-In some cases it is of interest to try to define some classifier lacking of biological information. To achieve that the pipelines provide the most stable clustering among different probe sets based on bootstraping clustering using the //pvclust// (6) package.
+In some cases it is of interest to try to define some classifier lacking of biological information. To achieve that the pipelines provide the most stable clustering among different probe sets based on bootstraping clustering using the //pvclust// package (6).
 
 This is currently the most challenging (and maybe controversial) part of the pipeline and quite probably needs to be discussed.
 
@@ -96,28 +101,19 @@ The CNV analysis is done using the //conumee// (7) package from bioconductor. Th
 This analysis may provide a good idea about chromosomal aberrations although it shouldn't replace an analysis at genomic level, and it proofs to be of value to detect sample swaps when compared to CNV analysis using sequencing data.
 
 === Differential Methylation Analysis
-There are two different implementations of the differential methylation analysis, and the choice of the approach depends on the value of the variable **SURROGATE_CORRECTION**.
-
-* When **SURROGATE_CORRECTION** is **switched off** the analysis is done using an implementation of the //[limma](https://bioconductor.org/packages/release/bioc/html/limma.html)// (8) package from bioconductor
-* When **SURROGATE_CORRECTION** is **switched on** the analysis is done using the //[missMethyl](http://bioconductor.org/packages/release/bioc/html/missMethyl.html)// (9) package, that also relies on //limma// but that additionally can estimate surrogate variables and correct the results based on it
-
-Both approaches work in the same way. They are limited to an unpaired analysis and report tables with P-values and adjusted P-values (Benjamini & Hochberg (10)), and they consider as variables of interest all the extra columns of the SampleSheet except the provided in the **BATCH_VARS** variable.
-
-==== A few words about the Surrogate Variable Analysis
-Very often, and specially in cancer, there may be sources of variation between samples not related to the specific biological questions and that may mask the results and that cannot be identified, either technical (extractions by pathologists, ...) or biological (cellular heterogeneity, tissue of origen, gender, ...).
-
-There are currently a good number of packages that estimate possible sources of variation and provide ways to correct them. Although at the moment the pipeline does not provide a way to report corrected values, it can include the estimated surrogate variables to correct the differential methylation analysis
+The analysis is done using the //[limma](https://bioconductor.org/packages/release/bioc/html/limma.html)// (8) package from bioconductor.
+It is limited to an unpaired analysis and reports tables with P-values and adjusted P-values (Benjamini & Hochberg (9)), and take as variables of interest all the extra columns of the SampleSheet except the provided in the **BATCH_VARS** variable.
 
 == Output
 === Basic output
 When the pipeline is run without switching on any of the steps the following files are produced:
 
-* **450k_annotation.txt**: tab delimited file with annotation for each probe in InfiniumHumanMethylation450k arrays
-* **filtered_raw_betas.gz**: compressed file with a matrix of beta values before any transformation
+* **annotation.txt**: tab delimited file with annotation for each probe in InfiniumHumanMethylation450k arrays
+* **filtered_raw_betas.gz**: compressed BED file with beta values before any transformation
 * **genotyping_betas.txt**: matrix of beta values of 65 genotyping probes present in the array
-* **filtered_normalized_meth.RData**: an object of class //MethylSet// produced after transforming data with //minfi// functions
-* **filtered_normalized_betas.gz**: compressed file with a matrix of transformed beta-values, ready for analysis
-* **filtered_normalized_M.gz**: compressed file with a matrix of transformed M-values, suited for statistical analysis
+* **filtered_normalized_meth.RData**: an object of class //MethylSet// produced after transforming data with //ENmix// background correction and //SWAN// normalization
+* **filtered_normalized_betas.gz**: a compressed BED file with transformed beta-values, ready for analysis
+* **filtered_normalized_M.gz**: compressed BED file with transformed M-values, suited for statistical analysis
 * **extended_sample_sheet.csv**: SampleSheet with an additional column for the predicted gender of the samples
 
 ==== Reproducible research
@@ -139,7 +135,7 @@ By default, the following QC files are also produced:
 * **qc/raw_batch_PCA_***: PCA plots of samples before transformation identifying the samples by groups of batch variables
 * **processed_batch_PCA_***: PCA plots of samples after transformation identifying the samples by groups of batch variables
 * **qc/samples_correlation.pdf**: heatmaps showing sample correlations using beta values after transformation
-* **qc/450k_genotypes.txt**: inferred genotypes of the samples using the beta values of 65 genotyping probes
+* **qc/genotypes.txt**: BED file with inferred genotypes of the samples using the beta values of genotyping probes
 
 Additionally, if there are columns in the SampleSheet other than the basic ones or identified as batch effects the following plots are produced:
 
@@ -173,20 +169,18 @@ This is mostly a QC step that produces two files per sample:
 Each column in the SampleSheet that does not correspond to a basic column or a batch variables is used to define a differential methylation analysis, and for each of them the following files are produced:
 
 * **differentialMethylation_PCA_?.png**: PCA plot using the probes with an adjusted P-value smaller than 0.05
-* **?_diffMeth.gz**: compressed tab delimited file with some statistical parameters (//limma//; //missMethyl//) like the log fold change ('logFC'; ), average methylation ('AveExpr'; ), the P-value ('P.value'; 'p.bayes') and the adjusted P-value('adj.P.Value'; 'p.ebayes.BH'), together with array annotation
+* **?_diffMeth.gz**: compressed tab delimited file with some statistical parameters (//limma//) like the log fold change ('logFC'), average methylation ('AveExpr'), the P-value ('P.value') and the adjusted P-value('adj.P.Value'), together with array annotation
 
 == Computational requirements
 Depending on the type of analysis the requirements for the analysis may vary a lot. Here is just a short list of examples considering 20 samples each:
 
-* **Raw**: walltime=00:05:00,nodes=1:ppn=1,mem=4gb
-* **Background correction**: walltime=00:07:00,nodes=1:ppn=1,mem=4gb
-* **Background correction + normalization**: walltime=00:08:00,nodes=1:ppn=1,mem=4gb
-* **Full Correction + CNV analysis**: walltime=00:45:00,nodes=1:ppn=1,mem=8gb
-* **Full Correction + batch adjustment**: walltime=00:10:00,nodes=1:ppn=1,mem=4gb
-* **Full Correction + probe selection**: walltime=03:00:00,nodes=1:ppn=6,mem=30g (user time=01:45:00, cpu time=10:00:00, mem=27gb)
-* **Full Correction + probe selection (65 samples)**: walltime=24:00:00,nodes=1:ppn=6,mem=75g (user time=20:15:00, cpu time=120:00:00, mem=65gb)
-* **Full Correction + differential methylation analysis**: walltime=00:10:00,nodes=1:ppn=1,mem=5gb (for 1 variable)
-* **Full Correction + probe selection + differential methylation**: walltime=03:00:00,nodes=1:ppn=6,mem=30g (user time=01:55:00, cpu time=10:30:00)
+* **Preprocessing**: walltime=00:08:00,nodes=1:ppn=1,mem=4gb
+* **Preprocessing + CNV analysis**: walltime=00:45:00,nodes=1:ppn=1,mem=8gb
+* **Preprocessing + batch adjustment**: walltime=00:10:00,nodes=1:ppn=1,mem=4gb
+* **Preprocessing + probe selection**: walltime=03:00:00,nodes=1:ppn=6,mem=30g (user time=01:45:00, cpu time=10:00:00, mem=27gb)
+* **Preprocessing + probe selection (65 samples)**: walltime=24:00:00,nodes=1:ppn=6,mem=75g (user time=20:15:00, cpu time=120:00:00, mem=65gb)
+* **Preprocessing + differential methylation analysis**: walltime=00:10:00,nodes=1:ppn=1,mem=5gb (for 1 variable)
+* **Preprocessing + probe selection + differential methylation**: walltime=03:00:00,nodes=1:ppn=6,mem=30g (user time=01:55:00, cpu time=10:30:00)
 
 The most resources consuming processes are the CNV analysis and the probe selection. In the first case it just means a considerable increase on the total time needed for the analysis but without much penalization on the computational requirements. Regarding the probe selection, the computational requirements scale up depending on the number of processors used for the analysis, since for each processor a copy of the contents in the memory is produced, multiplying the amount of memory needed for the analysis. Additionally, this is a extremely slow step, so taken all together, unless it's of real interest this option souldn't be switched on.
 
@@ -195,11 +189,11 @@ The most resources consuming processes are the CNV analysis and the probe select
 
 [(2)](http://www.tandfonline.com/doi/citedby/10.4161/epi.23470) Chen Y, Lemire M, Choufani S, Butcher DT, Grafodatskayak D, Zanke BW, Gallinger S, Hudson TJ and Weksberg R (2013). //Discovery of cross-reactive probes and polymorphic CpGs in the Illumina Infinium Human Methylation450 microarray.// _Epigenetics_, *8*(2), pp. 203-209.
 
-[(3)](http://doi.org/10.1186/gb-2012-13-6-r44) Maksimovic J, Gordon L and Oshlack A (2012). //SWAN: Subset quantile Within-Array Normalization for Illumina Infinium HumanMethylation450 BeadChips.// _Genome Biology_, *13*(6), pp. R44.
+[(3)](http://nar.oxfordjournals.org/content/44/3/e20.long) Xu Z, Niu L, Li L and Taylor J (2015). //ENmix: a novel background correction method for Illumina HumanMethylation450 BeadChip// _Nucleic Acids Research_, *44*(3):e20.
 
-[(4)](http://biostatistics.oxfordjournals.org/content/8/1/118.long) Johnson WE, Rabinovic A and Li C (2007). //Adjusting batch effects in microarray expression data using Empirical Bayes methods.// _Biostatistics_, *8*(1), pp. 118-127.
+[(4)](http://doi.org/10.1186/gb-2012-13-6-r44) Maksimovic J, Gordon L and Oshlack A (2012). //SWAN: Subset quantile Within-Array Normalization for Illumina Infinium HumanMethylation450 BeadChips.// _Genome Biology_, *13*(6), pp. R44.
 
-[(5)](https://www.bioconductor.org/packages/release/bioc/html/sva.html) Leek JT, Johnson WE, Parker HS, Fertig EJ, Jaffe AE and Storey JD. //sva: Surrogate Variable Analysis//. R package version 3.14.0.
+[(5)](http://biostatistics.oxfordjournals.org/content/8/1/118.long) Johnson WE, Rabinovic A and Li C (2007). //Adjusting batch effects in microarray expression data using Empirical Bayes methods.// _Biostatistics_, *8*(1), pp. 118-127.
 
 [(6)](http://CRAN.R-project.org/package=pvclust) Suzuki R and Shimodaira H (2014). //pvclust: Hierarchical Clustering with P-Values via Multiscale Bootstrap Resampling//. R package version 1.3-2.
 
@@ -207,10 +201,8 @@ The most resources consuming processes are the CNV analysis and the probe select
 
 [(8)](http://nar.oxfordjournals.org/content/43/7/e47.long) Ritchie ME, Phipson B, Wu D, Hu Y, Law CW, Shi W and Smyth GK (2015). //limma powers differential expression analyses for RNA-sequencing and microarray studies.// _Nucleic Acids Research_, *43*(7), pp. e47.
 
-[(9)](http://genomebiology.biomedcentral.com/articles/10.1186/s13059-014-0465-4) Phipson B and Oshlack A (2014). //DiffVar: A new method for detecting differential variability with application to methylation in cancer and aging.// _Genome Biology_, *15*(9), pp. 465.
+[(9)](http://www.jstor.org/stable/2346101) Benjamini Y and Hochberg Y (1995). //Controlling the false discovery rate: a practical and powerful approach to multiple testing.// _Journal of the Royal Statistical Society Series B_, *57*, pp. 2benjamini hochberg controlling the false discovery rate89-300.  
 
-[(10)](http://www.jstor.org/stable/2346101) Benjamini Y and Hochberg Y (1995). //Controlling the false discovery rate: a practical and powerful approach to multiple testing.// _Journal of the Royal Statistical Society Series B_, *57*, pp. 2benjamini hochberg controlling the false discovery rate89-300.  
-
-[(11)](http://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-11-587) Du P, Zhang X, Huang C, Jafari N, Kibbe WA, Hou L and Lin SM (2010). //Comparison of Beta-value and M-value methods for quantifying methylation levels by microarray analysis.// _BMC Bioinformatics_, *11*, pp. 587.  
+[(10)](http://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-11-587) Du P, Zhang X, Huang C, Jafari N, Kibbe WA, Hou L and Lin SM (2010). //Comparison of Beta-value and M-value methods for quantifying methylation levels by microarray analysis.// _BMC Bioinformatics_, *11*, pp. 587.  
 ___
 This pipeline has been developed by Xavier Pastor <x.pastorhostench@dkfz-heidelberg.de> at DKFZ.

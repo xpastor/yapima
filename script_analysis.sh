@@ -45,20 +45,6 @@ fi
 
 gawk '/# Load libraries/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
 
-if isOn $CORRECT_BACKGROUND
-then
-	gawk '/^# Remove background/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
-else
-	gawk '/# Produce raw/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
-fi
-
-if isOn $NORMALIZE
-then
-	gawk '/# Normalization/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
-fi
-
-gawk '/# Filter/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
-
 if [[ -n $BLACKLIST ]]
 then
 	gawk '/# Load blacklist/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R | sed 's/^\s*//g'
@@ -70,7 +56,7 @@ then
 	gawk '/# Process SNPs/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
 fi
 
-gawk '/# Exclude probes/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
+gawk '/^# Exclude probes/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
 
 if isOn $RUN_BATCH_CORRECTION
 then
@@ -85,12 +71,7 @@ fi
 
 if isOn $RUN_DIFFERENTIAL_METHYLATION
 then
-	gawk '/# Differential methylation analysis #/,/#o#/' $PIPELINE_DIR/differential_methylation.R	
-	if isOn $SURROGATE_CORRECTION
-	then
-		gawk '/# Selection/,/#o#/' $PIPELINE_DIR/differential_methylation.R
-	else
-		gawk '/# Limma/,/#o#/' $PIPELINE_DIR/differential_methylation.R
-	fi
-	echo -e "\t}\n}"
+	gawk '/# Differential methylation/,/#o#/' $PIPELINE_DIR/differential_methylation.R
+	gawk '/# Limma/,/#o#/' $PIPELINE_DIR/differential_methylation.R
+	echo -e "\n}"
 fi

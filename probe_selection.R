@@ -16,8 +16,9 @@ library(parallel)
 ### Optimal probe set ###
 #clust.betas <- corrected.betas
 ## most variable probes ##
-betas.sd <- apply(processed.betas, 1, sd)
-betas.sorted <- processed.betas[order(betas.sd, decreasing=T),]
+betas.pass <- processed.betas[annot.bed[rownames(processed.betas), 'score'] == 0,]
+betas.sd <- apply(betas.pass, 1, sd)
+betas.sorted <- betas.pass[order(betas.sd, decreasing=T),]
 
 ## bootstrap clustering ##
 library(pvclust)
@@ -33,6 +34,7 @@ scores <- score.clusters(clust.obj)
 library(ComplexHeatmap)
 plot.vars <- c(interest.vars, 'predictedSex')
 width.dev <- .get_dev_width(betas.sorted, annotation_names=plot.vars)
+height.dev <- .get_dev_width(betas.sorted, name='AAA')
 
 pdf(file.path(qcdir, 'pvclust_clusters.pdf'), width=width.dev)
 for (i in 1:length(clust.obj)) {
@@ -50,8 +52,8 @@ write.table(clust.betas, file.path(wd, paste0('betas_top_', nprobes, '_variable_
 #o#
 
 sample.cor.top <- cor(clust.betas, use='na.or.complete')
-pdf(file.path(qcdir, paste0('sample_correlation_top_', nprobes,'_variable_probes.pdf')), width=width.dev)
-Heatmap2(sample.cor.top, name="Correlation", column_annotation=pdata[,plot.vars,drop=F], row_annotation=pdata[,plot.vars,drop=F])
+pdf(file.path(qcdir, paste0('sample_correlation_top_', nprobes,'_variable_probes.pdf')), width=width.dev, height=height.dev)
+Heatmap2(sample.cor.top, name="Correlation", column_annotation=pdata[,plot.vars,drop=F], row_annotation=pdata[,plot.vars,drop=F], col=c('lightyellow', 'black'))
 dev.off()
 
 ### PCA analysis on optimal probe set ###

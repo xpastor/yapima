@@ -82,15 +82,16 @@ score.clusters <- function(clustList, num.edges=NULL)
 #o#
 
 ### Function to produce Heatmaps with ComplexHeatmap ###
-Heatmap2 <- function(mat, column_annotation=NULL, row_annotation=NULL, column_names_gp=gpar(fontsize=7), row_names_gp=column_names_gp, row_dend_side='right', row_names_side='left', ...)
+Heatmap2 <- function(mat, ..., column_annotation=NULL, row_annotation=NULL, column_names_gp=gpar(fontsize=7), row_names_gp=column_names_gp, row_dend_side='right', row_names_side='left', heatmap_legend_param=list(color_bar='continuous', legend_height=unit(3, 'cm')))
 {
 	library(ComplexHeatmap)
-	heatmap.params <- list(matrix=mat, column_names_gp=column_names_gp, row_names_gp=row_names_gp, row_dend_side=row_dend_side, row_names_side=row_names_side, ...)
+	heatmap.params <- list(matrix=mat, column_names_gp=column_names_gp, row_names_gp=row_names_gp, row_dend_side=row_dend_side, row_names_side=row_names_side, heatmap_legend_param=heatmap_legend_param, ...)
 	annotation.width <- unit(2, 'mm')
 	if (! is.null(column_annotation)) {
 		ha_cols <- .annotation_colors(column_annotation)
 		ha <- HeatmapAnnotation(df=column_annotation, col=ha_cols, gp=gpar(col='black'), na_col='white')
 		heatmap.params$top_annotation <- ha
+#		annotation.width <- grobWidth(textGrob(colnames(column_annotation), gp=gpar(fontsize=12))) + unit(1, 'mm') - grobWidth(textGrob(rownames(mat), gp=gpar(fontsize=7)))
 		annotation.width <- grobWidth(textGrob(colnames(column_annotation), gp=gpar(fontsize=12))) + unit(1, 'mm') - grobWidth(textGrob(rownames(mat), gp=gpar(fontsize=7)))
 	}
 	hm <- do.call(Heatmap, args=heatmap.params)
@@ -118,9 +119,9 @@ Heatmap2 <- function(mat, column_annotation=NULL, row_annotation=NULL, column_na
 	if (! is.null(column_annotation)) {
 		for(ann in colnames(column_annotation)) {
 			if(rows_hc & show_rows_hc) {
-					decorate_annotation(ann, {grid.text(ann, unit(0, 'npc') - unit(2, 'mm'), just='right')})
+					decorate_annotation(ann, {grid.text(ann, unit(0, 'npc') - unit(2, 'mm'), just='right', gp=gpar(fontsize=10))})
 			} else {
-				  	decorate_annotation(ann, {grid.text(ann, unit(1, 'npc') + unit(2, 'mm'), just='left')})
+				  	decorate_annotation(ann, {grid.text(ann, unit(1, 'npc') + unit(2, 'mm'), just='left', gp=gpar(fontsize=10))})
 			}
 		}
 	}
@@ -133,6 +134,7 @@ Heatmap2 <- function(mat, column_annotation=NULL, row_annotation=NULL, column_na
 	width.mat <- ncol(mat) * char.height
 	nchar.name <- max(nchar(unlist(strsplit(name, '\n'))))
 	width.name <- convertWidth(grobHeight(textGrob('A', gp=gpar(fontsize=10))), 'inch', valueOnly=T) * nchar.name
+	if (width.name < 0) width.name <- 0
 	width.dev <- width.mat + convertWidth(unit(1, 'cm'), 'inch', valueOnly=T) + width.name + 4
 	if (! is.null(annotation_names)) {
 	    length.title <- max(nchar(annotation_names))
@@ -144,7 +146,7 @@ Heatmap2 <- function(mat, column_annotation=NULL, row_annotation=NULL, column_na
 
 .annotation_colors <- function(df)
 {
-	cols <- c('darkgrey', 'black', 'red', 'yellow', 'blue', 'orange', 'cyan', 'magenta', 'darkgreen')
+	cols <- c('darkgrey', 'black', 'red', 'yellow', 'blue', 'orange', 'cyan', 'magenta', 'darkgreen', 'khaki')
 	annot_cols <- list()
 	groups <- NULL
 	for (annot in colnames(df)) {
@@ -162,4 +164,10 @@ Heatmap2 <- function(mat, column_annotation=NULL, row_annotation=NULL, column_na
 		}
 	}
 	return(annot_cols)
+}
+
+gr2bed <- function(gr, name=NULL, score=NULL, additional=NULL)
+{
+	ifNull <- rep('.', length(gr))
+	data.frame(chrom=runValue(seqnames(gr)), chromStart=start(gr), chromEnd=end(gr), name=ifelse(is.null(name), ifNull, name), score=ifelse(is.null(score), ifNull, score), strand=strand(gr), stringsAsFactors=F)
 }
