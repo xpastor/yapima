@@ -63,12 +63,18 @@ pdata2$ArrayRow <- gsub('C..', '', pdata2$Array)
 pdata2$ArrayColumn <- gsub('R..', '', pdata2$Array)
 
 plot.vars <- unique(c('Slide', 'ArrayRow', 'ArrayColumn', 'predictedSex', batch.vars))
-for (batch.var in plot.vars) {
-	groups <- pdata2[,batch.var]
-	names(groups) <- row.names(pdata2)
-	if (class(groups) %in% c('character', 'factor')) {
-		ggsave(file=file.path(qcdir, paste0('raw_batch_PCA_', batch.var, '.png')), plot.pca(raw.pca, groups, batch.var), width=20)
-		ggsave(file=file.path(qcdir, paste0('processed_batch_PCA_', batch.var, '.png')), plot.pca(pca, groups, batch.var), width=20)
+n.comp <- min(ncol(pca$x), 6)
+n.grobs <- ceiling(n.comp/2)
+width.unit <- 13/20
+width <- n.grobs*2*4 + width.unit
+if (n.comp > 2) {
+	for (batch.var in plot.vars) {
+		groups <- pdata2[,batch.var]
+		names(groups) <- row.names(pdata2)
+		if (class(groups) %in% c('character', 'factor')) {
+			ggsave(filename=file.path(qcdir, paste0('raw_batch_PCA_', batch.var, '.png')), plot=plot.pca(raw.pca, groups, batch.var), width=width)
+			ggsave(filename=file.path(qcdir, paste0('processed_batch_PCA_', batch.var, '.png')), plot=plot.pca(pca, groups, batch.var), width=width)
+		}
 	}
 }
 message('Finished.')
@@ -76,18 +82,14 @@ message('Finished.')
 ## Interest variables ##
 message('PCA plots of variables of interest...')
 #interest.vars <- variablesOfInterest(pdata, batch.vars)
-if (! isEmpty(interest.vars)) {
+if (! isEmpty(interest.vars) & n.comp > 2) {
 #filtered.betas.narm <- filtered.betas[! apply(is.na(filtered.betas), 1, any),]
-#	raw.pca <- prcomp(t(raw.betas))
-#	pca <- prcomp(t(processed.betas))
-#	pdata2 <- pdata[row.names(pca$x),]
-
 	for (interest.var in interest.vars) {
 		groups <- pdata2[,interest.var]
 		names(groups) <- row.names(pdata2)
 		if (class(groups) %in% c('character', 'factor')) {
-			ggsave(file=file.path(qcdir, paste0('raw_PCA_', interest.var, '.png')), plot.pca(raw.pca, groups, interest.var), width=20)
-			ggsave(file=file.path(qcdir, paste0('processed_PCA_', interest.var, '.png')), plot.pca(pca, groups, interest.var), width=20)
+			ggsave(filename=file.path(qcdir, paste0('raw_PCA_', interest.var, '.png')), plot=plot.pca(raw.pca, groups, interest.var), width=width)
+			ggsave(filename=file.path(qcdir, paste0('processed_PCA_', interest.var, '.png')), plot=plot.pca(pca, groups, interest.var), width=width)
 		}
 	}
 }

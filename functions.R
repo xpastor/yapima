@@ -42,12 +42,28 @@ variablesOfInterest <- function(pdata, batch.vars=NULL)
 }
 
 plot.pca <- function(pca, groups, main=NULL) {
-	library(grid)
-	library(gridExtra)
-	grid.newpage()
-	legend.plot <- .pca.grob(pca, groups, 1, 2, legend=T)
-	main <- textGrob(main, gp=gpar(fontsize=20), just='top')
-	return(arrangeGrob(.pca.grob(pca, groups, 1, 2), .pca.grob(pca, groups, 3, 4), .pca.grob(pca, groups, 5, 6), .legend.grob(legend.plot), widths=c(4, 4, 4, 1), ncol=4, top=main))
+	n.comp <- min(ncol(pca$x), 6)
+	if (n.comp > 1) {
+		library(grid)
+		library(gridExtra)
+		grid.newpage()
+		legend.plot <- .pca.grob(pca, groups, 1, 2, legend=T)
+		main <- textGrob(main, gp=gpar(fontsize=20), just='top')
+		n.grobs <- n.comp%/%2
+		rep.comp <- n.comp < 6 & n.comp%%2 == 1
+		list.grobs <- list()
+		for (i in seq(n.grobs)) {
+			list.grobs[[i]] <- .pca.grob(pca, groups, 2*i-1, 2*i)
+		}
+		if (rep.comp) {
+			list.grobs[[length(list.grobs)+1]] <- .pca.grob(pca, groups, n.comp-1, n.comp)
+		}
+		widths <- rep(4, length(list.grobs))
+		list.grobs[[length(list.grobs) + 1]] <-.legend.grob(legend.plot)
+		widths <- c(widths, 1)
+#		return(arrangeGrob(.pca.grob(pca, groups, 1, 2), .pca.grob(pca, groups, 3, 4), .pca.grob(pca, groups, 5, 6), .legend.grob(legend.plot), widths=c(4, 4, 4, 1), ncol=4, top=main))
+		return(arrangeGrob(grobs=list.grobs, widths=widths, ncol=length(widths), top=main))
+	}
 }
 
 ### Functions for bootstrap Clustering ###
