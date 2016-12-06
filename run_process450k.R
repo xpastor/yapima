@@ -61,28 +61,6 @@ if (! file.exists(sample.annotation) | file.access(sample.annotation) == -1) {
 	stop(paste0("\n\tThe sample sheet could not be accessed.\n\t", sample.annotation))
 }
 
-if (file.exists(non_specific_cg) & file.access(non_specific_cg) == 0) {
-	header <- read.csv(non_specific_cg, stringsAsFactors=F, header=F, nrows=1)
-	if ('TargetID' %in% header) {
-		file.copy(non_specific_cg, wd)
-	} else {
-		stop(paste0('The file \'', non_specific_cg, '\' must have a \'TargetID\' column with the cg identifier.'))
-	}
-} else {
-	stop(paste0("\n\tThe following file cannot be accessed:\n\t", non_specific_cg))
-}
-
-if (file.exists(non_specific_ch) & file.access(non_specific_ch) == 0) {
-	header <- read.csv(non_specific_ch, stringsAsFactors=F, header=F, nrows=1)
-	if ('TargetID' %in% header) {
-		file.copy(non_specific_ch, wd)
-	} else {
-		stop(paste0('The file \'', non_specific_ch, '\' must have a \'TargetID\' column with the ch identifier.'))
-	}
-} else {
-	stop(paste0("\n\tThe following file cannot be accessed:\n\t", non_specific_ch))
-}
-
 if ( blacklist != '' & (! file.exists(blacklist) | file.access(blacklist) == -1)) {
 	stop(paste0("\n\tThe file with blacklisted probes could not be accessed.\n\t", blacklist))
 }
@@ -103,20 +81,7 @@ if (!is.logical(diffMeth)) {
 	stop("\n\t'diffMeth' must be a valid R boolean: T, F, TRUE or FALSE.")
 }
 
-if (is.logical(removeEuropeanSNPs)) {
-	if (removeEuropeanSNPs) {
-		if (file.exists(polymorphic) & file.access(polymorphic) == 0) {
-			header <- read.csv(polymorphic, stringsAsFactors=F, header=F, nrows=1)
-			if (all(c('PROBE', 'EUR_AF') %in% header)) {
-				file.copy(polymorphic, wd)
-			} else {
-				stop(paste0('The file \'', polymorphic, '\' must have a \'PROBE\' column with the cg identifier and a \'EUR_AF\' column with allele frequencies.'))
-			}
-		} else {
-			stop(paste0("\n\tThe file with polymorphisms cannot be accessed:\n\t", polymorphic))
-		}
-	}
-} else {
+if (!is.logical(removeEuropeanSNPs)) {
 	stop("\n\t'removeEuropeanSNPs' must be a valid R boolean: T, F, TRUE or FALSE.")
 }
 
@@ -152,6 +117,7 @@ interest.vars <- interest.vars[! interest.vars %in% batch.vars]
 methods <- file.path(wd, 'methods.txt')
 citations.txt <- file.path(wd, 'citations.txt')
 
+library(tools)
 source(file.path(pipeline_dir, 'methylation_preprocessing.R'))
 if (batchCorrection) source(file.path(pipeline_dir, 'batch_correction.R'))
 source(file.path(pipeline_dir, 'methylation_qc.R'))
@@ -169,7 +135,6 @@ source(file.path(pipeline_dir, 'citations.R'))
 
 ### sessionInfo() ###
 source('http://bioconductor.org/biocLite.R')
-library(tools)
 session.tex <- file.path(wd, 'session.tex')
 write(paste0('\\documentclass{report}\n\\title{\'yapima\' sessionInfo}\n\n\\usepackage{hyperref}\n\n\\begin{document}\n\\section*{\\centerline{\'yapima\' sessionInfo}}\n\\center{\\today}\n\n\\begin{itemize}\\raggedright\n  \\item Bioconductor version ', biocVersion(), '\n\\end{itemize}'),file=session.tex)
 write(toLatex(sessionInfo()), file=session.tex, append=T)

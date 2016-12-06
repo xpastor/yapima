@@ -5,9 +5,6 @@ pipeline_dir <- Sys.getenv("PIPELINE_DIR")
 ### Input data ###
 idat_dir <- Sys.getenv("IDAT_DIR")
 sample.annotation <- Sys.getenv("SAMPLE_ANNOTATION") # Illumina's sample sheet with additional columns for sample annotation
-polymorphic <- Sys.getenv("POLYMORPHIC")
-non_specific_cg <- Sys.getenv("NON_SPECIFIC_CG")
-non_specific_ch <- Sys.getenv("NON_SPECIFIC_CH")
 blacklist <- Sys.getenv("BLACKLIST") # file with additional probes to be discarded from any analysis; '' to not to remove additional probes
 
 ### Output directory ###

@@ -21,15 +21,23 @@ text <- "The Illumina Infinium methylation array analysis was done using the \'y
 
 ### Preprocessing ###
 
+flag.ref <- NULL
+if (array.type == 'IlluminaHumanMethylation450k') {
+	flag.ref <- '(Chen, 2013)'
+} else if (array.type == 'IlluminaHumanMethylationEPIC') {
+	flag.ref <- '(McCartney, 2016)'
+}
+
 text <- paste0(text,
 	'The array data were read into the R environment (R version ',
 	R.version$major, '.', R.version$minor, ' \'', R.version$nickname, '\', ', R.version$year, '-', R.version$month, '-', R.version$day, ') using the \'minfi\' package ', .cite_package('minfi'), '.')
 
-text <- paste(text, 'The crossreactive probes (Chen, 2013) were flagged.')
+text <- paste(text, 'The crossreactive probes', flag.ref, 'were flagged.')
+
 
 if (removeEuropeanSNPs) {
 	text <- paste0(text,
-		' Probes with the single base extension (SBE) position overlaping SNPs with allele frequency higher than ', round(1/nrow(targets), digits=2),' in european populations (Chen, 2013) were also flagged (n=', length(european.snps), ').')
+		' Probes with the single base extension (SBE) position overlaping SNPs with allele frequency higher than ', round(1/nrow(targets), digits=2),' in european populations ', flag.ref, ' were also flagged (n=', length(european.snps), ').')
 }
 
 text <- paste(text,

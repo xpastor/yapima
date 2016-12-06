@@ -4,8 +4,13 @@ biblib <- NULL
 biblib <- citation('minfi')[1]
 
 ### Probe filtering ###
-chen <- bibentry(bibtype='Article', author='Yi-an Chen, Mathieu Lemire, Sanaa Choufani, Darci T. Butcher, Daria Grafodatskayak, Brent W. Zanke, Steven Gallinger, Thomas J. Hudson and Rosanna Weksberg', title='Discovery of cross-reactive probes and polymorphic CpGs in the Illumina Infinium Human Methylation450 microarray.', journal='Epigenetics', year='2013', volume='8', number='2', pages='203-209')
-biblib <- c(biblib, chen)
+if (array.type == 'IlluminaHumanMethylation450k') {
+	chen <- bibentry(bibtype='Article', author='Yi-an Chen, Mathieu Lemire, Sanaa Choufani, Darci T. Butcher, Daria Grafodatskayak, Brent W. Zanke, Steven Gallinger, Thomas J. Hudson and Rosanna Weksberg', title='Discovery of cross-reactive probes and polymorphic CpGs in the Illumina Infinium Human Methylation450 microarray.', journal='Epigenetics', year='2013', volume='8', number='2', pages='203-209')
+	biblib <- c(biblib, chen)
+} else if (array.type == 'IlluminaHumanMethylationEPIC') {
+	mccartney <- bibentry(bibtype='Article', author='Daniel L. McCartney, Rosie M. Walker, Stewart W. Morris, Andrew M. McIntosh, David J. Porteous and Kathryn L. Evans', title='Identification of polymorphic and off-target probe binding sites on the Illumina Infinium MethylationEPIC BeadChip', journal='Genomics Data', year='2016', volume='9', pages='22-24')
+	biblib <- c(biblib, mccartney)
+}
 
 ### ENmix background correction ###
 biblib <- c(biblib, citation('ENmix'))

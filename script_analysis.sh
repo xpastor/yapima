@@ -16,8 +16,8 @@ echo -e "sample.annotation <- '$SAMPLE_ANNOTATION'"
 echo -e "wd <- '${OUTDIR}_rep'"
 echo -e "pipeline_dir <- '$PIPELINE_DIR'"
 echo -e "seed <- $SEED"
-echo -e "non_specific_cg <- '$OUTDIR/$(basename $NON_SPECIFIC_CG)'"
-echo -e "non_specific_ch <- '$OUTDIR/$(basename $NON_SPECIFIC_CH)'"
+echo -e "ncores <- $NCORES"
+
 if [[ -n $BLACKLIST ]]
 then
 	echo -e "blacklist <- '$BLACKLIST'"
@@ -26,7 +26,6 @@ echo -e "batch.vars <- '$BATCH_VARS'"
 
 if isOn $RUN_PROBE_SELECTION
 then
-	echo -e "ncores <- $NCORES"
 	gawk '/Clustering #/,/#o#/' $PIPELINE_DIR/functions.R
 fi
 
@@ -52,11 +51,10 @@ fi
 
 if isOn $REMOVE_EUROPEAN_SNPS
 then
-	echo -e "polymorphic <- '$OUTDIR/$(basename $POLYMORPHIC)'"
 	gawk '/# Process SNPs/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
 fi
 
-gawk '/^# Exclude probes/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
+gawk '/# Output raw/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
 
 if isOn $RUN_BATCH_CORRECTION
 then

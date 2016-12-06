@@ -21,9 +21,6 @@ RUN_DIFFERENTIAL_METHYLATION=F
 ### Input data ###
 IDAT_DIR=/icgc/dkfzlsdf/analysis/hipo/hipo_054/infinium450k/idat
 SAMPLE_ANNOTATION=/icgc/dkfzlsdf/analysis/hipo/hipo_054/user_folders/pastor/methylation/sample_sheet_H054.csv # Illumina's sample sheet with additional columns for sample annotation
-POLYMORPHIC=/icgc/ngs_share/general/arrayAnnotations/chen/48640-polymorphic-CpGs-Illumina450k_polymorphic-SBE.csv
-NON_SPECIFIC_CG=/icgc/ngs_share/general/arrayAnnotations/chen/48639-non-specific-probes-Illumina450k_nonspecific-cg-probes.csv
-NON_SPECIFIC_CH=/icgc/ngs_share/general/arrayAnnotations/chen/48639-non-specific-probes-Illumina450k_nonspecific-ch-probes.csv
 BLACKLIST='' # file with additional probes to be discarded from any analysis; '' to not to remove additional probes
 
 ### Output directory ###
