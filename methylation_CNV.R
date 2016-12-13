@@ -17,21 +17,38 @@ library(GenomicRanges)
 ### CNV analysis ###
 message('Running CNV analysis...')
 library(conumee)
+cnv.dir <- file.path(qcdir, 'CNV_report')
+dir.create(cnv.dir, recursive=T)
 cnv.intensity <- getMeth(filtered.norm.meth) + getUnmeth(filtered.norm.meth)
 colnames(cnv.intensity) <- paste(targets[colnames(cnv.intensity), 'Sample_Name'], 'intensity', sep='.')
 #annotation(filtered.norm.meth)$array == 'IlluminaHumanMethylation450k'
-library(CopyNumber450kData)
-data(RGcontrolSetEx)
+if (array.type == 'IlluminaHumanMethylation450k') {
+	library(CopyNumber450kData)
+	data(RGcontrolSetEx)
 #annotation(filtered.norm.meth)$array == 'IlluminaHumanMethylationEPIC'
+} else if (array.type == 'IlluminaHumanMethylationEPIC') {
+	library(GEOquery)
+	geos <- c('GSM2309177', 'GSM2309178', 'GSM2309179', 'GSM2309172')
+	geo.idatDir <- file.path(cnv.dir, 'idat')
+	dir.create(geo.idatDir, recursive=T)
+	sapply(geos, getGEOSuppFiles, makeDirectory=F, baseDir=geo.idatDir)
+#	sapply(geos, getGEOidat, makeDirectory=F, baseDir=geo.idatDir)
+	geo.files <- list.files(geo.idatDir, full.names=T)
+	sapply(geo.files, gunzip)
+	geo.files <- list.files(geo.idatDir, pattern='_Red', full.names=T)
+	RGcontrolSetEx <- read.metharray(geo.files, extended=T)
+	unlink(geo.idatDir, recursive=T, force=T)
+}
 controls.norm <- preprocessENmix(RGcontrolSetEx)
 controls.norm <- preprocessSWAN(RGcontrolSetEx, mSet=controls.norm)
 
+exclude <- unique(exclude)
 exclude.gr <- array.annot.gr[exclude]
 
 cnv <- CNV.load(as.data.frame(cnv.intensity), names=sub('\\.intensity$', '', colnames(cnv.intensity)))
 cnv.controls <- CNV.load(controls.norm)
-cnv.annot <- CNV.create_anno(exclude_regions=exclude.gr, chrXY=T)
-dir.create(file.path(qcdir, 'CNV_report'), recursive=T)
+conumee.array <- c(IlluminaHumanMethylation450k='450k', IlluminaHumanMethylationEPIC='EPIC')
+cnv.annot <- CNV.create_anno(exclude_regions=exclude.gr, chrXY=T, array_type=conumee.array[array.type])
 for (pid in names(cnv)) {
 	cat(pid)
     cnv.analysis <- CNV.fit(cnv[pid], cnv.controls, cnv.annot)
@@ -42,8 +59,8 @@ for (pid in names(cnv)) {
 	cnv.probes <- CNV.write(cnv.analysis, what='probes')
 #	dir.create(file.path(qcdir, 'CNV_report', pid))
 #	write.table(cnv.res, file.path(qcdir, 'CNV_report', pid, paste(pid, 'CNV_report.txt', sep='_')), sep="\t", quote=F, row.names=F)
-	write.table(cnv.res, file.path(qcdir, 'CNV_report', paste(pid, 'CNV_report.txt', sep='_')), sep="\t", quote=F, row.names=F)
-	pdf(file.path(qcdir, 'CNV_report', paste(pid, 'CNV_report.pdf', sep='_')), width=20, height=5)
+	write.table(cnv.res, file.path(cnv.dir, paste(pid, 'CNV_report.txt', sep='_')), sep="\t", quote=F, row.names=F)
+	pdf(file.path(cnv.dir, paste(pid, 'CNV_report.pdf', sep='_')), width=20, height=5)
 #	png(file.path(qcdir, 'CNV_report', pid, paste(pid, 'whole_genome.png', sep='_')), width=2000, height=500)
 	CNV.genomeplot(cnv.analysis)
 #	dev.off()

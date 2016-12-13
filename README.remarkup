@@ -94,7 +94,9 @@ This is currently the most challenging (and maybe controversial) part of the pip
 This is by far the longest step and may take several hours, processors and a good amount of memory to accomplish it, so unless it is of real interest it may be more convenient to switch it off.
 
 === Copy Number Variation
-The CNV analysis is done using the //conumee// (8) package from bioconductor. This is one of the longest parts of the pipelines. In general, for 20 samples the basic execution of the pipeline (normalization, batch correction and differential methylation analysis) may take around 10 minutes, but the CNV analysis may need other 45 minutes, so when executing the pipeline for exploratory purposes it may be convenient to switch off this part.
+The CNV analysis is done using the //conumee// (8) package from bioconductor. This is one of the longest parts of the pipeline. In general, for 20 samples the basic execution of the pipeline (normalization, batch correction and differential methylation analysis) may take around 10 minutes, but the CNV analysis may need other 45 minutes, so when executing the pipeline for exploratory purposes it may be convenient to switch off this part.
+
+//conumee// requires a sample set without chromosomal aberrations. For the IlluminaHumanMethylation450k array //yapima// uses the samples provided in the //CopyNumber450kData// package. For the //IlluminaHumanMethylationEPIC// array there are not so many samples available yet, so it downloads 'GSM2309177', 'GSM2309178', 'GSM2309179' and 'GSM2309172' from GEO.
 
 This analysis may provide a good idea about chromosomal aberrations although it shouldn't replace an analysis at genomic level, and it proofs to be of value to detect sample swaps when compared to CNV analysis using sequencing data.
 
@@ -182,6 +184,29 @@ Depending on the type of analysis the requirements for the analysis may vary a l
 * **Preprocessing + probe selection + differential methylation**: walltime=03:00:00,nodes=1:ppn=6,mem=30g (user time=01:55:00, cpu time=10:30:00)
 
 The most resources consuming processes are the CNV analysis and the probe selection. In the first case it just means a considerable increase on the total time needed for the analysis but without much penalization on the computational requirements. Regarding the probe selection, the computational requirements scale up depending on the number of processors used for the analysis, since for each processor a copy of the contents in the memory is produced, multiplying the amount of memory needed for the analysis. Additionally, this is a extremely slow step, so taken all together, unless it's of real interest this option souldn't be switched on.
+
+=== Dependencies
+The current version of yapima requires R-3.3 (>=3.3.1 recommended) and Bioconductor 3.4. The following packages and their dependencies must be installed:
+* biomaRt
+* cluster
+* ComplexHeatmap
+* conumee
+* CopyNumber450kData
+* ENmix
+* fpc
+* GenomicRanges
+* ggplot2
+* grid
+* gridExtra
+* limma
+* minfi
+* parallel
+* pbapply
+* plyr
+* pvclust
+* sva
+* tools
+* XML
 
 == References
 [(1)](http://doi.org/10.1093/bioinformatics/btu049) Aryee MJ, Jaffe AE, Corrada-Bravo H, Ladd-Acosta C, Feinberg AP, Hansen KD and Irizarry RA (2014). //Minfi: A flexible and comprehensive Bioconductor package for the analysis of Infinium DNA Methylation microarrays.// _Bioinformatics_, *30*(10), pp. 1363-1369.

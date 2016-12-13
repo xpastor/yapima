@@ -37,7 +37,7 @@ if (! dir.exists(pipeline_dir)) {
 	stop(paste0("\n\tThe directory with the pipeline scripts can not be accessed.\n\t", pipeline_dir))
 }
 
-pipeline_scripts <- dir(pipeline_dir)
+pipeline_scripts <- list.files(pipeline_dir)
 if (! 'methylation_preprocessing.R' %in% pipeline_scripts) {
 	stop(paste0("\n\tThe script 'methylation_preprocessing.R' is not present in ", pipeline_dir))
 }

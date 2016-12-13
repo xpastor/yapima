@@ -27,7 +27,7 @@ message("Data read.")
 ### Fetching array annotation ###
 array.type <- annotation(rgset)['array'] # IlluminaHumanMethylation450k / IlluminaHumanMethylationEPIC
 array.annot <- getAnnotation(rgset)
-array.annot.gr <- GRanges(array.annot$chr, ranges=IRanges(array.annot$pos, array.annot$pos+1), mcols=array.annot[,! colnames(array.annot) %in% c('chr', 'pos')])
+array.annot.gr <- GRanges(array.annot$chr, ranges=IRanges(array.annot$pos, array.annot$pos+1), strand=NULL, array.annot[,! colnames(array.annot) %in% c('chr', 'pos', 'strand')])
 annot.bed <- data.frame(chrom=array.annot$chr, chromStart=array.annot$pos-1, chromEnd=array.annot$pos, name=array.annot$Name, score=rep(0, nrow(array.annot)), strand=array.annot$strand, stringsAsFactors=F, row.names=array.annot$Name)
 colnames(annot.bed)[1] <- paste0('#', colnames(annot.bed)[1])
 
@@ -35,6 +35,11 @@ colnames(annot.bed)[1] <- paste0('#', colnames(annot.bed)[1])
 write.table(array.annot, file.path(wd, 'annotation.txt'), sep="\t", quote=F, row.names=T)
 
 ### Filter data ###
+
+## Flag low quality probes ##
+lowQ <- detectionP(rgset) > 0.01
+lowQ.probes <- rowSums(lowQ)/ncol(lowQ) >= 0.5
+annot.bed$score[lowQ.probes] <- annot.bed$score[lowQ.probes] + 8
 
 ## Load crossreactive probes ##
 crossreactive <- NULL
@@ -52,6 +57,7 @@ if (array.type == 'IlluminaHumanMethylation450k') {
 }
 
 crossreactive <- crossreactive[crossreactive %in% annot.bed$name]
+exclude <- crossreactive
 annot.bed[crossreactive, 'score'] <- annot.bed[crossreactive, 'score'] + 2
 #o#
 
@@ -60,7 +66,7 @@ if (blacklist != '') {
 # Load blacklist
 	remove <- scan(blacklist, what='character')
 	remove <- remove[remove %in% annot.bed$name]
-#	exclude <- c(exclude, remove)
+	exclude <- c(exclude, remove)
 	annot.bed[remove, 'score'] <- annot.bed[remove, 'score'] + 4
 #o#
 }
@@ -81,7 +87,7 @@ if (removeEuropeanSNPs) {
 	european.snps <- european.snps[european.snps %in% annot.bed$name]
 	annot.bed[european.snps, 'score'] <- annot.bed[european.snps, 'score'] + 1
 #o#
-#	exclude <- c(exclude, european.snps)
+	exclude <- c(exclude, european.snps)
 }
 
 # Exclude probes
@@ -115,7 +121,6 @@ filtered.norm.meth <- norm.meth
 #assayDataElement(filtered.norm.meth, 'Unmeth')[exclude, ] <- NA
 
 ## Remove measures with low detection ###
-lowQ <- detectionP(rgset) > 0.01
 assayDataElement(filtered.norm.meth, 'Meth')[lowQ] <- NA
 assayDataElement(filtered.norm.meth, 'Unmeth')[lowQ] <- NA
 message("Masking done.")
