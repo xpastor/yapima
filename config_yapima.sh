@@ -1,11 +1,12 @@
 #!/usr/bin/bash
 
-NCORES=1
+NCORES=6
 PIPELINE_DIR=$HOME/pipelines/devel/yapima
 
 ### Cluster-related parameters ###
 EMAIL=x.pastorhostench@dkfz-heidelberg.de
-PBS_RESOURCES="walltime=00:15:00,nodes=1:ppn=$NCORES,mem=5g"
+PBS_RESOURCES="walltime=10:00:00,nodes=1:ppn=$NCORES,mem=60g"
+#PBS_RESOURCES="walltime=10:00:00,nodes=1:ppn=$NCORES,mem=121g -q highmem" # for jobs with more than 120 gb
 CLUSTER_EO=/ibios/co02/xavier/eo/yapima
 
 ### Binaries ###
@@ -28,5 +29,6 @@ OUTDIR=/icgc/dkfzlsdf/analysis/hipo/hipo_054/user_folders/pastor/test_yapima_fil
 
 ### Params ###
 REMOVE_EUROPEAN_SNPS=T # T or F; remove SNPs that may be present in at least 1 sample
+USE_PREDICTED_SEX=T
 BATCH_VARS='' # comma separated list of batch variables present in $SAMPLE_ANNOTATION
 SEED=11

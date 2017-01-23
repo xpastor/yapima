@@ -29,6 +29,7 @@ for(i in 2:ncol(processed.betas)) {
 }
 dev.off()
 message('Finished.')
+#gc()
 
 ### Beta density heatmap ###
 message('Plotting density heatmaps of Beta values...')
@@ -46,6 +47,7 @@ do.call(Heatmap2, c(list(mat=h, column_title='Normalized beta distribution'), he
 #densityHeatmap(processed.betas, title='Normalized beta distribution', range=c(0,1), column_names_gp=gpar(fontsize=7))
 dev.off()
 message('Finished.')
+gc()
 
 ### PCA analysis ###
 #pdata2 <- pdata[,colSums(! is.na(pdata)) != 0]
@@ -56,6 +58,7 @@ processed.betas.narm <- processed.betas[! apply(is.na(processed.betas), 1, any),
 raw.pca <- prcomp(t(raw.betas.narm))
 pca <- prcomp(t(processed.betas.narm))
 pdata2 <- pdata2[row.names(pca$x),]
+gc()
 
 ## Batch variables ##
 message('PCA plots of batch variables...')
@@ -100,11 +103,14 @@ message('Finished.')
 #pdf(file.path(qcdir, 'samples_correlation.pdf'))
 message('Plotting sample correlations...')
 sample.cor <- cor(processed.betas, use='na.or.complete')
-plot.vars <- c(interest.vars, 'predictedSex')
+plot.vars <- interest.vars
+if (usePredictedSex) plot.vars <- c(plot.vars, 'predictedSex')
+categorical <- colnames(pdata)[sapply(pdata, class) %in% c('character', 'factor')]
+plot.vars <- plot.vars[plot.vars %in% categorical]
 dev.width <- .get_dev_width(sample.cor, name='Correlation', annotation_names=plot.vars)
 dev.height <- .get_dev_width(sample.cor, name='AAA')
 pdf(file.path(qcdir, 'samples_correlation.pdf'), width=dev.width, height=dev.height)
-Heatmap2(sample.cor, name='Correlation', column_annotation=pdata[,plot.vars,drop=F], row_annotation=pdata[,plot.vars,drop=F], column_title='All probes', col=c('lightyellow', 'black'))
+Heatmap2(mat=sample.cor, name='Correlation', column_annotation=pdata[,plot.vars,drop=F], row_annotation=pdata[,plot.vars,drop=F], column_title='All probes', col=c('lightyellow', 'black'))
 dev.off()
 message('Finished.')
 
@@ -146,3 +152,6 @@ genotypes <- data.frame(chrom=snp.genotype[rownames(genotypes), 'chr_name'], chr
 colnames(genotypes)[1] <- paste0('#', colnames(genotypes)[1])
 write.table(genotypes, file.path(qcdir, 'genotypes.bed'), sep="\t", row.names=F, quote=F)
 message('Finished.')
+
+rm('genotype.betas', 'genotypes', 'genotypes.df', 'h', 'pca', 'polymorphic', 'processed.betas.narm', 'raw.betas', 'raw.betas.narm', 'raw.pca', 'smpl.genotypes', 'snp.genotype', 'snp.idx', 'snp.meth', 'snp.unmeth', 'snps')
+gc()

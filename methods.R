@@ -45,7 +45,7 @@ text <- paste(text,
 #norm.meth <- preprocessENmix(rgset, bpParaEst='oob', dyeCorr=T, QCinfo=NULL, exQCsample=F, exQCcpg=F, exSample=NULL, exCpG=NULL, nCores=ncores)
 
 text <- paste(text,
-	'Measures with a detection P-value higher than 0.01, as estimated by \'minfi\' and tipically of low quality, were masked.')
+	'Measures with a detection P-value higher than 0.01, as estimated by \'minfi\' and tipically of low quality, were masked. Probes with low quality in at least 50% of the samples were also flagged.')
 
 ### ComBat batch effect correction ###
 if (batchCorrection) {
@@ -63,8 +63,11 @@ if (probeSelection) {
 if (diffMeth) {
 	if (! isEmpty(interest.vars)) {
 		limmaURL <- 'http://bioconductor.org/packages/3.1/bioc/vignettes/limma/inst/doc/usersguide.pdf'
+		dmrcateURL <- 'https://www.bioconductor.org/packages/release/bioc/vignettes/DMRcate/inst/doc/DMRcate.pdf'
 		text <- paste0(text, '\n',
-			'Differential methylation analysis was done on the M-values using the biconductor \'limma\' package ', .cite_package('limma'), ' and multiple testing correction was applied (Benjamini, 1995) (protocol described in ', limmaURL, ').')
+			'The analysis of differentially methylated positions (DMP) was done on the M-values of the reliable probes (i.e. flag=0) using the biconductor \'limma\' package ', .cite_package('limma'), ' and multiple testing correction was applied (Benjamini, 1995) (protocol described in ', limmaURL, ').')
+		text <- paste0(text, '\n',
+			'The detection of differentially methylated regions (DMR) was done using the bioconductor \'DMRcate\' package ', .cite_package('DMRcate'), '. For two groups comparisons, the t statistics from the DMP analysis were used and the beta log fold change was computed running the standard \'limma\' workflow on the beta values. For comparisons with more than two groups the squared F statistics from the DMP analysis were provided and the beta log fold change was set to 0. All the other parameters were left as default.')
 	}
 }
 

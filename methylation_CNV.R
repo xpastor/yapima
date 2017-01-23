@@ -19,9 +19,11 @@ message('Running CNV analysis...')
 library(conumee)
 cnv.dir <- file.path(qcdir, 'CNV_report')
 dir.create(cnv.dir, recursive=T)
+#load(file.path(wd, 'filtered_normalized_meth.RData'))
 cnv.intensity <- getMeth(filtered.norm.meth) + getUnmeth(filtered.norm.meth)
 colnames(cnv.intensity) <- paste(targets[colnames(cnv.intensity), 'Sample_Name'], 'intensity', sep='.')
 #annotation(filtered.norm.meth)$array == 'IlluminaHumanMethylation450k'
+rm(filtered.norm.meth)
 if (array.type == 'IlluminaHumanMethylation450k') {
 	library(CopyNumber450kData)
 	data(RGcontrolSetEx)

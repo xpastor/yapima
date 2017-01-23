@@ -1,7 +1,7 @@
 = yapima
 
 == Description
-//yapima// is a pipeline developed to simplify and standardize the preprocessing of the Illumina InfiniumHumanMethylation450k arrays in order to easily produce tables with beta-values and/or M-values that can be later used for further analysis.
+//yapima// is a pipeline developed to simplify and standardize the preprocessing of the Illumina InfiniumHumanMethylation arrays in order to easily produce tables with beta-values and/or M-values that can be later used for further analysis.
 
 For the sake of simplicity in the usage and comprehension of the pipeline most of the options are hardcoded, and the interaction with it almost reduced to input/output definition and processes switches.
 
@@ -73,6 +73,7 @@ Since the pipeline is implemented in R and the config file is just a bash front-
 
 === Preprocessing
 The data is loaded into the R environment using the //minfi// (1) package from bioconductor. Initially, probes are flagged using the following values and summed accordingly, being 0 the value for probes that pass all the filters:
+* 8: probes with low quality in at least half of the samples in a cohort
 * 4: probes provided in **BLACKLIST**
 * 2: crossreactive probes as described by Chen et al (2) for the IlluminaHumanMethylation450k array, and by McCartney et al (3) for the IlluminaHumanMethylationEPIC array
 * 1: if selected, probes with SNPs at the SBE position that could be present in at least one sample regarding to its allele frequency in european populations as estimated by Chen et al (2) for the IlluminaHumanMethylation450k array, and by McCartney et al (3) for the IlluminaHumanMethylationEPIC array
@@ -101,8 +102,9 @@ The CNV analysis is done using the //conumee// (8) package from bioconductor. Th
 This analysis may provide a good idea about chromosomal aberrations although it shouldn't replace an analysis at genomic level, and it proofs to be of value to detect sample swaps when compared to CNV analysis using sequencing data.
 
 === Differential Methylation Analysis
-The analysis is done using the //[limma](https://bioconductor.org/packages/release/bioc/html/limma.html)// (9) package from bioconductor.
-It is limited to an unpaired analysis and reports tables with P-values and adjusted P-values (Benjamini & Hochberg (10)), and take as variables of interest all the extra columns of the SampleSheet except the provided in the **BATCH_VARS** variable.
+The analysis of differentially methylated positions (DMP) is done using the //[limma](https://bioconductor.org/packages/release/bioc/html/limma.html)// (9) package from bioconductor and following the procedures detailed by the authors. It is limited to an unpaired analysis and reports tables with P-values and adjusted P-values (Benjamini & Hochberg (11)), and take as variables of interest all the extra columns of the SampleSheet except the provided in the **BATCH_VARS** variable.
+
+The detection of differentially methylated regions (DMR) is done using the //[DMRcate](https://www.bioconductor.org/packages/release/bioc/html/DMRcate.html)// (10) package from bioconductor. For two groups comparisons, the t statistics from the DMP analysis are used, and the beta log fold change is computed running the standard limma workflow on the beta values. For comparisons with more than two groups the squared F statistics from the DMP analysis are provided and the beta log fold change is set to 0. All the other parameters are left as default.
 
 == Output
 === Basic output
@@ -124,9 +126,14 @@ The pipeline also produces some files to explain how the analysis was done and t
 * **session.pdf**: pdf file giving all the necessary information on R and bioconductor packages version in order to precisely reproduce the environment for the analysis
 * **script.R**: R script that reproduces a transparent analysis to repeat the results produced by the pipeline, with all the conditions evaluated by the pipeline already removed
 
-Additionally, if the array is //IlluminaHumanMethylation450k//:
-* **48639-non-specific-probes-Illumina450k_nonspecific-probes.xlsx**: Excel file with crossreactive probes and provided by Chen et al (2)
-* **48640-polymorphic-CpGs-Illumina450k_polymorphic-SBE.xlsx**: Excel file with polymorphic probes at the single base extension (SBE) site or at the interrogated CpG, provided by Chen et al (2); only copied if SNPs present in european populations are flagged
+For //IlluminaHumanMethylation450k// arrays:
+* **crossreactive.xlsx**: Excel file with crossreactive probes and provided by Chen et al (2)
+* **polymorphic.xlsx**: Excel file with polymorphic probes at the single base extension (SBE) site or at the interrogated CpG, provided by Chen et al (2); only copied if SNPs present in european populations are flagged
+
+For //IlluminaHumanMethylationEPIC// arrays:
+* **crossreactive_cg.txt**: tab delimited file with cg crossreactive probes and provided by McCartney et al (3)
+* **crossreactive_ch.txt**: tab delimited file with ch crossreactive probes and provided by McCartney et al (3)
+* **polymorphic.txt**: tab delimited file with polymorphic probes at the single base extension (SBE) site or at the interrogated CpG, provided by McCartney et al (3); only copied if SNPs present in european populations are flagged
 
 ==== QC
 By default, the following QC files are also produced:
@@ -169,8 +176,11 @@ This is mostly a QC step that produces two files per sample:
 === Differential Methylation Analysis
 Each column in the SampleSheet that does not correspond to a basic column or a batch variables is used to define a differential methylation analysis, and for each of them the following files are produced:
 
-* **differentialMethylation_PCA_?.png**: PCA plot using the probes with an adjusted P-value smaller than 0.05
-* **?_diffMeth.gz**: compressed tab delimited file with some statistical parameters (//limma//) like the log fold change ('logFC'), average methylation ('AveExpr'), the P-value ('P.value') and the adjusted P-value('adj.P.Value'), together with array annotation
+* **DMP/DMP_?.bed.gz**: compressed BED file with some statistical parameters (//limma//) like the log fold change ('logFC'), average methylation ('AveExpr'), the P-value ('P.value') and the adjusted P-value('adj.P.Value'), together with array annotation
+* **DMP/DMP_PCA_?.png**: PCA plot using the probes with an adjusted P-value smaller than 0.05
+* **DMP/DMP_cluster_?.pdf: hierarchical clustering of the samples using the probes with and adjusted P-value <= 0.05
+* **DMR/DMR_?.bed: BED file with the identified DMRs
+* **DMR/DMR_heatmap_?.pdf: heatmap of CpGs from the top DMRs that sum up to 500 CpGs. The top DMRs must have a minimum FDR below or equal to 0.01; from these a score is computed as follows: rank(minfdr) + 2*rank(-abs(meanbetafc)) + 2*rank(-no.cpgs). The DMRs with the minimum score are chosen.
 
 == Computational requirements
 Depending on the type of analysis the requirements for the analysis may vary a lot. Here is just a short list of examples considering 20 samples each:
@@ -188,10 +198,12 @@ The most resources consuming processes are the CNV analysis and the probe select
 === Dependencies
 The current version of yapima requires R-3.3 (>=3.3.1 recommended) and Bioconductor 3.4. The following packages and their dependencies must be installed:
 * biomaRt
+* circlize
 * cluster
 * ComplexHeatmap
 * conumee
 * CopyNumber450kData
+* DMRcate
 * ENmix
 * fpc
 * GenomicRanges
@@ -223,12 +235,14 @@ The current version of yapima requires R-3.3 (>=3.3.1 recommended) and Bioconduc
 
 [(7)](http://CRAN.R-project.org/package=pvclust) Suzuki R and Shimodaira H (2014). //pvclust: Hierarchical Clustering with P-Values via Multiscale Bootstrap Resampling//. R package version 1.3-2.
 
-[(8)](http://www.bioconductor.org/packages/release/bioc/html/conumee.html) Hovestadt V, Zapatka M (2015). //conumee: Enhanced copy-number variation analysis using Illumina 450k methylation arrays.//, R package version 0.99.4.
+[(8)](http://www.bioconductor.org/packages/release/bioc/html/conumee.html) Hovestadt V, Zapatka M (2015). //conumee: Enhanced copy-number variation analysis using Illumina 450k methylation arrays.// R package version 0.99.4.
 
 [(9)](http://nar.oxfordjournals.org/content/43/7/e47.long) Ritchie ME, Phipson B, Wu D, Hu Y, Law CW, Shi W and Smyth GK (2015). //limma powers differential expression analyses for RNA-sequencing and microarray studies.// _Nucleic Acids Research_, *43*(7), pp. e47.
 
-[(10)](http://www.jstor.org/stable/2346101) Benjamini Y and Hochberg Y (1995). //Controlling the false discovery rate: a practical and powerful approach to multiple testing.// _Journal of the Royal Statistical Society Series B_, *57*, pp. 2benjamini hochberg controlling the false discovery rate89-300.  
+[(10)](https://epigeneticsandchromatin.biomedcentral.com/articles/10.1186/1756-8935-8-6) Peters TJ, Buckley MJ, Statham AL, Pidsley R, Samaras K, Lord RV, Clark SJ and Molloy PL (2015). //De novo identification of differentially methylated regions in the human genome.// Epigenetics & Chromatin, 8:6
 
-[(11)](http://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-11-587) Du P, Zhang X, Huang C, Jafari N, Kibbe WA, Hou L and Lin SM (2010). //Comparison of Beta-value and M-value methods for quantifying methylation levels by microarray analysis.// _BMC Bioinformatics_, *11*, pp. 587.  
+[(11)](http://www.jstor.org/stable/2346101) Benjamini Y and Hochberg Y (1995). //Controlling the false discovery rate: a practical and powerful approach to multiple testing.// _Journal of the Royal Statistical Society Series B_, *57*, pp. 289-300.  
+
+[(12)](http://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-11-587) Du P, Zhang X, Huang C, Jafari N, Kibbe WA, Hou L and Lin SM (2010). //Comparison of Beta-value and M-value methods for quantifying methylation levels by microarray analysis.// _BMC Bioinformatics_, *11*, pp. 587.  
 ___
 This pipeline has been developed by Xavier Pastor <x.pastorhostench@dkfz-heidelberg.de> at DKFZ.

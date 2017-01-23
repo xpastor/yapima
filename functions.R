@@ -11,6 +11,22 @@ variablesOfInterest <- function(pdata, batch.vars=NULL)
 }
 #o#
 
+### Function to convert GenomicRanges objects into BED-like data frames
+gr2bed <- function(gr, name=NULL, score=NULL, additional=NULL)
+{
+	library(GenomicRanges)
+	#ifNull <- rep('.', length(gr))
+	if (is.null(name)) {
+		name <- as.character(gr)
+	}
+	if (is.null(score)) {
+		score <- '.'
+	}
+	ifNull <- as.character(gr)
+	data.frame(chrom=as.character(seqnames(gr)), chromStart=start(gr)-1, chromEnd=end(gr), name=name, score=score, strand=strand(gr), stringsAsFactors=F)
+}
+#o#
+
 ### Functions for PCA plotting ###
 .pca.grob <- function(pca, groups, comp1=1, comp2=2, legend=F)
 {
@@ -122,7 +138,11 @@ Heatmap2 <- function(mat, ..., column_annotation=NULL, row_annotation=NULL, colu
 		if (identical(column_annotation, row_annotation)) {
 			col <- list()
 			for (anno in names(ha@anno_list)) {
-				col[[anno]] <- ha@anno_list[[anno]]@color_mapping@colors
+				if (class(row_annotation[,anno]) %in% c('character', 'factor')) {
+					col[[anno]] <- ha@anno_list[[anno]]@color_mapping@colors
+				} else {
+					col[[anno]] <- .annotation_colors(row_annotation[,anno, drop=F])[[anno]]
+				}
 			}
 			row_annot_params <- c(row_annot_params, col=list(col), na_col='white')
 		} else {
@@ -141,6 +161,7 @@ Heatmap2 <- function(mat, ..., column_annotation=NULL, row_annotation=NULL, colu
 			}
 		}
 	}
+	gc()
 }
 
 .get_dev_width <- function(mat, name='matrix_0', annotation_names=NULL, fontsize=7)
@@ -162,10 +183,12 @@ Heatmap2 <- function(mat, ..., column_annotation=NULL, row_annotation=NULL, colu
 
 .annotation_colors <- function(df)
 {
+#	library(circlize)
 	cols <- c('darkgrey', 'black', 'red', 'yellow', 'blue', 'orange', 'cyan', 'magenta', 'darkgreen', 'khaki')
 	annot_cols <- list()
 	groups <- NULL
-	for (annot in colnames(df)) {
+	categorical <- colnames(df)[sapply(df, class) %in% c('character', 'factor')]
+	for (annot in categorical) {
 		groups <- NULL
 		x <- df[,annot]
 		if (is.character(x)) {
@@ -173,17 +196,51 @@ Heatmap2 <- function(mat, ..., column_annotation=NULL, row_annotation=NULL, colu
 		} else if (is.factor(x)) {
 			groups <- levels(x)
 		}
+		groups <- groups[!is.na(groups)]
 		if (length(groups) <= length(cols)) {
 			group_cols <- cols[seq(length(groups))]
-			names(group_cols) <- groups
-			annot_cols[[annot]] <- group_cols
+		} else {
+			group_cols <- rainbow(length(groups))
 		}
+		names(group_cols) <- groups
+		annot_cols[[annot]] <- group_cols
 	}
+	other <- colnames(df)[!colnames(df) %in% categorical]
+	cols <- cols[-1]
+	numeric_cols <- seq_along(other)
+	names(numeric_cols) <- other
+#	numeric_cols <- lapply(numeric_cols, function(x) colorRampPalette(c('white', x)))
+#	numeric_cols <- lapply(numeric_cols, function(x) colorRamp(c('white', x)))
+#	numeric_cols <- lapply(numeric_cols, function(x) colorRamp2(c(0,10), c('white', x)))
+	annot_cols <- c(annot_cols, numeric_cols)
+	for (i in seq_along(other)) {
+		my.col <- cols[(i-1) %% length(cols) + 1]
+		my.col.func <- colorRampPalette(c('white', my.col))
+
+		annot_cols[[other[i]]] <- .col_mapping(c('white', my.col), range(df[,other[i]], na.rm=T))
+	}
+	annot_cols <- annot_cols[colnames(df)]
 	return(annot_cols)
 }
 
-gr2bed <- function(gr, name=NULL, score=NULL, additional=NULL)
+.col_mapping <- function(colors, breaks)
 {
-	ifNull <- rep('.', length(gr))
-	data.frame(chrom=runValue(seqnames(gr)), chromStart=start(gr), chromEnd=end(gr), name=ifelse(is.null(name), ifNull, name), score=ifelse(is.null(score), ifNull, score), strand=strand(gr), stringsAsFactors=F)
+	if (length(breaks) != 2) {
+		stop('The vector \'ends\' must have 2 values.')
+	}
+	ends <- sort(breaks)
+	attr <- list(breaks=breaks, colors=colors)
+	fun <- function(x) {
+		width.breaks <- breaks[2] - breaks[1]
+		x[x < breaks[1]] <- breaks[1]
+		x[x > breaks[2]] <- breaks[2]
+		x <- (x-breaks[1])/width.breaks
+		my.col <- colorRamp(colors, alpha=T)(x)
+		my.col <- apply(my.col, 1, function(rgb) paste(as.hexmode(as.integer(rgb)), collapse=''))
+		my.col <- paste0('#', toupper(my.col))
+		my.col[is.na(x)] <- 'FFFFFFFF'
+		return(my.col)
+	}
+	attributes(fun) <- attr
+	return(fun)
 }

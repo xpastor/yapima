@@ -17,6 +17,7 @@ echo -e "wd <- '${OUTDIR}_rep'"
 echo -e "pipeline_dir <- '$PIPELINE_DIR'"
 echo -e "seed <- $SEED"
 echo -e "ncores <- $NCORES"
+echo -e "usePredictedSex <- '$USE_PREDICTED_SEX'"
 
 if [[ -n $BLACKLIST ]]
 then
@@ -27,6 +28,12 @@ echo -e "batch.vars <- '$BATCH_VARS'"
 if isOn $RUN_PROBE_SELECTION
 then
 	gawk '/Clustering #/,/#o#/' $PIPELINE_DIR/functions.R
+fi
+
+if isOn $RUN_DIFFERENTIAL_METHYLATION
+then
+	gawk '/BED-like/,/#o#/' $PIPELINE_DIR/functions.R
+	cat $PIPELINE_DIR/extractCoords.R
 fi
 
 #if isOn $RUN_DIFFERENTIAL_METHYLATION
@@ -71,5 +78,6 @@ if isOn $RUN_DIFFERENTIAL_METHYLATION
 then
 	gawk '/# Differential methylation/,/#o#/' $PIPELINE_DIR/differential_methylation.R
 	gawk '/# Limma/,/#o#/' $PIPELINE_DIR/differential_methylation.R
-	echo -e "\n}"
+	gawk '/# DMR/, /#o#/' $PIPELINE_DIR/differential_methylation.R
+	echo -e "\n\t}\n}"
 fi

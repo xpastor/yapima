@@ -18,6 +18,7 @@ diffMeth <- as.logical(Sys.getenv("RUN_DIFFERENTIAL_METHYLATION"))
 
 ### Params ###
 removeEuropeanSNPs <- as.logical(Sys.getenv("REMOVE_EUROPEAN_SNPS"))
+usePredictedSex <- as.logical(Sys.getenv("USE_PREDICTED_SEX"))
 #surrogateCorrection <- as.logical(Sys.getenv("SURROGATE_CORRECTION"))
 batch.vars <- Sys.getenv("BATCH_VARS") # comma separated list of batch variables present in sample.annotation
 #varianceProportion <- Sys.getenv("VARIANCE_PROPORTION") # proportion of variance that surrogate variables should explain

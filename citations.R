@@ -36,6 +36,9 @@ if (diffMeth) {
 ## limma for standard differential methylation analysis ##
 	biblib <- c(biblib, citation('limma'))
 
+## DMRcate for DMR detection
+	biblib <- c(biblib, citation('DMRcate'))
+
 ## Benjamini & Hochberg multiple testing correction (fdr) ##
 	bh <- bibentry(bibtype='Article', author='Y Benjamini and Y Hochberg', title='Controlling the false discovery rate: a practical and powerful approach to multiple testing.', year='1995', journal='Journal of the Royal Statistical Society Series B', volume='57', pages='289-300')
 	biblib <- c(biblib, bh)

@@ -10,25 +10,28 @@ library(GenomicRanges)
 colClasses <- data.frame(t(rep('character', length(header))), stringsAsFactors=F)
 colnames(colClasses) <- header
 #interest.vars <- variablesOfInterest(colClasses, batch.vars)
-colClasses[,batch.vars] <- 'factor'
-colClasses[,interest.vars] <- 'factor'
+colClasses[,batch.vars] <- NA
+colClasses[,interest.vars] <- NA
 targets <- read.csv(sample.annotation, colClasses=colClasses, stringsAsFactors=F)
 colnames(targets)[colnames(targets)=='Sentrix_ID'] <- 'Slide'
 colnames(targets)[colnames(targets)=='Sentrix_Position'] <- 'Array'
 targets$Basename <- paste(targets$Slide, targets$Array, sep='_')
 row.names(targets) <- targets$Basename
 
+not.unique <- colnames(targets)[apply(targets, 2, function(x) length(unique(x)) > 1)]
+interest.vars <- interest.vars[interest.vars %in% not.unique]
+
 ### Reading methylation data ###
 message("Reading in methylation files...")
-#raw.meth <- read.450k.exp(idat_dir, targets, extended=T, recursive=T)
 rgset <- read.metharray.exp(idat_dir, targets, extended=T, recursive=T)
 message("Data read.")
 
 ### Fetching array annotation ###
 array.type <- annotation(rgset)['array'] # IlluminaHumanMethylation450k / IlluminaHumanMethylationEPIC
 array.annot <- getAnnotation(rgset)
-array.annot.gr <- GRanges(array.annot$chr, ranges=IRanges(array.annot$pos, array.annot$pos+1), strand=NULL, array.annot[,! colnames(array.annot) %in% c('chr', 'pos', 'strand')])
+array.annot.gr <- GRanges(array.annot$chr, ranges=IRanges(array.annot$pos, array.annot$pos+1), strand=NULL, array.annot[,! colnames(array.annot) %in% c('chr', 'pos', 'strand')], seqinfo=Seqinfo(paste0('chr', c(1:22, 'X', 'Y'))))
 annot.bed <- data.frame(chrom=array.annot$chr, chromStart=array.annot$pos-1, chromEnd=array.annot$pos, name=array.annot$Name, score=rep(0, nrow(array.annot)), strand=array.annot$strand, stringsAsFactors=F, row.names=array.annot$Name)
+annot.bed <- annot.bed[with(annot.bed, order(chrom, chromStart)),]
 colnames(annot.bed)[1] <- paste0('#', colnames(annot.bed)[1])
 
 ## Output annotation ##
@@ -51,8 +54,10 @@ if (array.type == 'IlluminaHumanMethylation450k') {
 	crossreactive <- do.call(rbind, crossreactive)
 	crossreactive <- crossreactive[,1]
 } else if (array.type == 'IlluminaHumanMethylationEPIC') {
-	crossreactive <- scan('http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S221359601630071X/1-s2.0-S221359601630071X-mmc2.txt/283447/html/S221359601630071X/d122a9289e5bc82609233a2cdeac8fa4/mmc2.txt', what='character')
-	ch_crossreactive <- scan('http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S221359601630071X/1-s2.0-S221359601630071X-mmc3.txt/283447/html/S221359601630071X/daff1031095143b45eeb59c65f1dd940/mmc3.txt', what='character')
+	download.file('http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S221359601630071X/1-s2.0-S221359601630071X-mmc2.txt/283447/html/S221359601630071X/d122a9289e5bc82609233a2cdeac8fa4/mmc2.txt', destfile=file.path(wd, 'crossreactive_cg.txt'), method='wget', extra='--user-agent="R"')
+	crossreactive <- scan(file.path(wd, 'crossreactive_cg.txt'), what='character')
+	download.file('http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S221359601630071X/1-s2.0-S221359601630071X-mmc3.txt/283447/html/S221359601630071X/daff1031095143b45eeb59c65f1dd940/mmc3.txt', destfile=file.path(wd, 'crossreactive_ch.txt'), method='wget', extra='--user-agent="R"')
+	ch_crossreactive <- scan(file.path(wd, 'crossreactive_ch.txt'), what='character')
 	crossreactive <- c(crossreactive, ch_crossreactive)
 }
 
@@ -79,7 +84,8 @@ if (removeEuropeanSNPs) {
 		polymorphic <- xlsxToR(file.path(wd, 'polymorphic.xlsx'), keep_sheets='Polymorphic CpGs & SNPs at SBE', header=T)
 		polymorphic[,grep('AF', colnames(polymorphic))] <- apply(polymorphic[,grep('AF', colnames(polymorphic))], 2, as.numeric)
 	} else if (array.type == 'IlluminaHumanMethylationEPIC') {
-		polymorphic <- read.delim('http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S221359601630071X/1-s2.0-S221359601630071X-mmc1.txt/283447/html/S221359601630071X/69a1cbea394507150394a9faaef9d876/mmc1.txt', header=T, stringsAsFactors=F)
+		download.file('http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S221359601630071X/1-s2.0-S221359601630071X-mmc1.txt/283447/html/S221359601630071X/69a1cbea394507150394a9faaef9d876/mmc1.txt', destfile=file.path(wd, 'polymorphic.txt'), method='wget', extra='--user-agent="R"')
+		polymorphic <- read.delim(file.path(wd, 'polymorphic.txt'), header=T, stringsAsFactors=F)
 	}
 	af <- 1/ncol(rgset)
 	european.snps <- polymorphic[polymorphic[,'EUR_AF'] > af,1]
@@ -108,7 +114,6 @@ close(gz)
 
 ### Remove background ###
 norm.meth <- NULL
-raw.meth <- preprocessRaw(rgset) 
 message("Correcting the data...")
 norm.meth <- preprocessENmix(rgset, bgParaEst='oob', dyeCorr=T, QCinfo=NULL, exQCsample=F, exQCcpg=F, exSample=NULL, exCpG=NULL, nCores=ncores)
 norm.meth <- preprocessSWAN(rgset, norm.meth)
@@ -129,13 +134,13 @@ message("Masking done.")
 genotype.betas <- getSnpBeta(rgset)
 colnames(genotype.betas) <- targets[colnames(genotype.betas), 'Sample_Name']
 
-## Output betas of genotyping probes ##
-write.table(genotype.betas, file.path(wd, 'genotyping_betas.txt'), sep="\t", quote=F, row.names=T)
-
 ### Sex determination ###
 ratio.meth <- mapToGenome(filtered.norm.meth, mergeManifest=T)
 gender <- getSex(ratio.meth)
 pData(filtered.norm.meth)$predictedSex <- factor(gender$predictedSex)
+if (usePredictedSex) {
+	interest.vars <- c(interest.vars, 'predictedSex')
+}
 
 ### Output preprocessed data ###
 message("Writing output...")
@@ -158,3 +163,6 @@ pdata <- pData(filtered.norm.meth)
 rownames(pdata) <- pdata$Sample_Name
 write.csv(pdata, file.path(wd, 'extended_sample_sheet.csv'), quote=F, row.names=F)
 #o#
+
+rm('array.annot', 'betas.bed', 'crossreactive', 'lowQ', 'lowQ.probes', 'mval.bed', 'norm.meth', 'ratio.meth', 'raw.betas.bed', 'rgset')
+gc()
