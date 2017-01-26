@@ -57,16 +57,11 @@ if ('functions.R' %in% pipeline_scripts) {
 }
 
 if (! file.exists(sample.annotation) | file.access(sample.annotation) == -1) {
-#if (! file.exists(sample.annotation) | ! file.access(sample.annotation)) {
 	stop(paste0("\n\tThe sample sheet could not be accessed.\n\t", sample.annotation))
 }
 
 if ( blacklist != '' & (! file.exists(blacklist) | file.access(blacklist) == -1)) {
 	stop(paste0("\n\tThe file with blacklisted probes could not be accessed.\n\t", blacklist))
-}
-
-if (!is.logical(batchCorrection)) {
-	stop("\n\t'batchCorrection' must be a valid R boolean: T, F, TRUE or FALSE.")
 }
 
 if (!is.logical(runCNV)) {
@@ -119,7 +114,6 @@ citations.txt <- file.path(wd, 'citations.txt')
 
 library(tools)
 source(file.path(pipeline_dir, 'methylation_preprocessing.R'))
-if (batchCorrection) source(file.path(pipeline_dir, 'batch_correction.R'))
 source(file.path(pipeline_dir, 'methylation_qc.R'))
 if (probeSelection) source(file.path(pipeline_dir, 'probe_selection.R'))
 if (runCNV) source(file.path(pipeline_dir, 'methylation_CNV.R'))

@@ -11,7 +11,6 @@ blacklist <- Sys.getenv("BLACKLIST") # file with additional probes to be discard
 wd <- Sys.getenv("OUTDIR")
 
 ### Steps ###
-batchCorrection <- as.logical(Sys.getenv("RUN_BATCH_CORRECTION"))
 runCNV <- as.logical(Sys.getenv("RUN_CNV"))
 probeSelection <- as.logical(Sys.getenv("RUN_PROBE_SELECTION"))
 diffMeth <- as.logical(Sys.getenv("RUN_DIFFERENTIAL_METHYLATION"))

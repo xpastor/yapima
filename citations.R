@@ -18,16 +18,6 @@ biblib <- c(biblib, citation('ENmix'))
 ### SWAN normalization ###
 biblib <- c(biblib, citation('minfi')[2])
 
-### Batch effect correction ###
-if (batchCorrection) {
-## ComBat ##
-	combat <- bibentry(bibtype='Article', author='W E Johnson, A Rabinovic, and C Li', title='Adjusting batch effects in microarray expression data using Empirical Bayes methods.', year='2007', journal='Biostatistics', volume='8', number='1', pages='118-127') 
-	biblib <- c(biblib, combat)
-
-## sva for ComBat implementation ##
-	biblib <- c(biblib, citation('sva'))
-}
-
 ### Boostrap clustering ###
 if (probeSelection) biblib <- c(biblib, citation('pvclust'))
 
@@ -45,7 +35,7 @@ if (diffMeth) {
 }
 
 ### M-value/Beta-value conversion ###
-#if (batchCorrection | diffMeth) {
+#if (diffMeth) {
 	m2beta <- bibentry(bibtype='Article', author='Pan Du, Xiao Zhang, Chiang-Ching Huang, Nadereh Jafari, Warren A Kibbe, Lifang Hou and Simon M Lin', title='Comparison of Beta-value and M-value methods for quantifying methylation levels by microarray analysis.', year='2010', journal='BMC Bioinformatics', volume='11', pages='587')
 	biblib <- c(biblib, m2beta)
 #}

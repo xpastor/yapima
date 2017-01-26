@@ -63,12 +63,6 @@ fi
 
 gawk '/# Output raw/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
 
-if isOn $RUN_BATCH_CORRECTION
-then
-	echo -e "\n#### Batch correction ####"
-	cat $PIPELINE_DIR/batch_correction.R
-fi
-
 if isOn $RUN_PROBE_SELECTION
 then
 	gawk '/# Probe selection/ || /# Output/,/#o#/' $PIPELINE_DIR/probe_selection.R

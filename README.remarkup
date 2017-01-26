@@ -80,29 +80,22 @@ The data is loaded into the R environment using the //minfi// (1) package from b
 
 Afterwards, //ENmix// background correction (4) is performed and SWAN normalization (5) is applied. Measures with low detection are replaced by 'NA'.
 
-=== Batch correction
-This step should be run if some batch effect is detected in the samples. Some typical examples of batch issues are samples hybridized in different array batches or effects related to the position of the samples in the array due to consistent habits during array preparation.
-
-The batch correction is done using the implementation of //ComBat// (6) from the //sva// package and it cannot correct all the effects at once, but needs to be applied one after the other. Therefore, it would be convenient to first correct for the strongest effect and leave the mildest at the end. Because the variables to be corrected are taken in the order they are given to **BATCH_VARS** it is convenient to put first the variable with the strongest effect and at the end the one with the mildest effect.
-
-It is important to notice that in case some batch variable is strongly related to a variable of interest, the results on the analyses of such variable cannot be trusted and the experimental design should be reviewed.
-
 === Probe selection
-In some cases it is of interest to try to define some classifier lacking of biological information. To achieve that the pipelines provide the most stable clustering among different probe sets based on bootstraping clustering using the //pvclust// package (7).
+In some cases it is of interest to try to define some classifier lacking of biological information. To achieve that the pipelines provide the most stable clustering among different probe sets based on bootstraping clustering using the //pvclust// package (6).
 
 This is currently the most challenging (and maybe controversial) part of the pipeline and quite probably needs to be discussed.
 
 This is by far the longest step and may take several hours, processors and a good amount of memory to accomplish it, so unless it is of real interest it may be more convenient to switch it off.
 
 === Copy Number Variation
-The CNV analysis is done using the //conumee// (8) package from bioconductor. This is one of the longest parts of the pipeline. In general, for 20 samples the basic execution of the pipeline (normalization, batch correction and differential methylation analysis) may take around 10 minutes, but the CNV analysis may need other 45 minutes, so when executing the pipeline for exploratory purposes it may be convenient to switch off this part.
+The CNV analysis is done using the //conumee// (7) package from bioconductor. This is one of the longest parts of the pipeline. In general, for 20 samples the basic execution of the pipeline (normalization, batch correction and differential methylation analysis) may take around 10 minutes, but the CNV analysis may need other 45 minutes, so when executing the pipeline for exploratory purposes it may be convenient to switch off this part.
 
 //conumee// requires a sample set without chromosomal aberrations. For the IlluminaHumanMethylation450k array //yapima// uses the samples provided in the //CopyNumber450kData// package. For the //IlluminaHumanMethylationEPIC// array there are not so many samples available yet, so it downloads 'GSM2309177', 'GSM2309178', 'GSM2309179' and 'GSM2309172' from GEO.
 
 This analysis may provide a good idea about chromosomal aberrations although it shouldn't replace an analysis at genomic level, and it proofs to be of value to detect sample swaps when compared to CNV analysis using sequencing data.
 
 === Differential Methylation Analysis
-The analysis of differentially methylated positions (DMP) is done using the //[limma](https://bioconductor.org/packages/release/bioc/html/limma.html)// (9) package from bioconductor and following the procedures detailed by the authors. It is limited to an unpaired analysis and reports tables with P-values and adjusted P-values (Benjamini & Hochberg (11)), and take as variables of interest all the extra columns of the SampleSheet except the provided in the **BATCH_VARS** variable.
+The analysis of differentially methylated positions (DMP) is done using the //[limma](https://bioconductor.org/packages/release/bioc/html/limma.html)// (8) package from bioconductor and following the procedures detailed by the authors. It is limited to an unpaired analysis and reports tables with P-values and adjusted P-values (Benjamini & Hochberg (9)), and take as variables of interest all the extra columns of the SampleSheet except the provided in the **BATCH_VARS** variable, although these are also included in the linear model to account for possible confounding factors.
 
 The detection of differentially methylated regions (DMR) is done using the //[DMRcate](https://www.bioconductor.org/packages/release/bioc/html/DMRcate.html)// (10) package from bioconductor. For two groups comparisons, the t statistics from the DMP analysis are used, and the beta log fold change is computed running the standard limma workflow on the beta values. For comparisons with more than two groups the squared F statistics from the DMP analysis are provided and the beta log fold change is set to 0. All the other parameters are left as default.
 
@@ -141,7 +134,7 @@ By default, the following QC files are also produced:
 * **qc/beta_distribution.pdf**: density plots of beta values for each sample, befor and after transformation
 * **qc/beta_distribution_heatmap.pdf**: density heatmaps of beta values, before and after transformation; these plots help better to identify the samples with abnormal beta values distribution
 * **qc/raw_batch_PCA_***: PCA plots of samples before transformation identifying the samples by groups of batch variables
-* **processed_batch_PCA_***: PCA plots of samples after transformation identifying the samples by groups of batch variables
+* **qc/processed_batch_PCA_***: PCA plots of samples after transformation identifying the samples by groups of batch variables
 * **qc/samples_correlation.pdf**: heatmaps showing sample correlations using beta values after transformation
 * **qc/genotypes.txt**: BED file with inferred genotypes of the samples using the beta values of genotyping probes
 
@@ -150,19 +143,11 @@ Additionally, if there are columns in the SampleSheet other than the basic ones 
 * **qc/raw_PCA_***: PCA plots of samples before transformation identifying the samples by variables of interest
 * **qc/processed_PCA_***: PCA plots of samples after transformation identifying the samples by variables of interest
 
-=== Batch correction
-When the batch correction is applied the following files are produced:
-
-* **batch_corrected.RData**: contains two matrices, one with corrected M-values and another with corrected beta-values
-* **batch_normalized_M.gz**: compressed file with a matrix with corrected M-values
-* **batch_normalized_betas.gz** compressed file with a matrix with corrected beta-values, calculated from corrected M-values
-
 === Copy Number Variation
 This is mostly a QC step that produces two files per sample:
 
 * **qc/CNV_report/$pid_CNV_report.pdf**: pdf file with one plot showing all the aberrations in the genome and one plot per chromosome, showing the aberrations present in each chromosome in more detail
 * **qc/CNV_report/$pid_CNV_report.txt**: tab delimited file with information on the regions of the genome with chromosomal aberrations
-
 
 === Probe Selection
 * **pvclust.RData**: stores an R list with all the resulting clusters
@@ -187,7 +172,6 @@ Depending on the type of analysis the requirements for the analysis may vary a l
 
 * **Preprocessing**: walltime=00:08:00,nodes=1:ppn=1,mem=4gb
 * **Preprocessing + CNV analysis**: walltime=00:45:00,nodes=1:ppn=1,mem=8gb
-* **Preprocessing + batch adjustment**: walltime=00:10:00,nodes=1:ppn=1,mem=4gb
 * **Preprocessing + probe selection**: walltime=03:00:00,nodes=1:ppn=6,mem=30g (user time=01:45:00, cpu time=10:00:00, mem=27gb)
 * **Preprocessing + probe selection (65 samples)**: walltime=24:00:00,nodes=1:ppn=6,mem=75g (user time=20:15:00, cpu time=120:00:00, mem=65gb)
 * **Preprocessing + differential methylation analysis**: walltime=00:10:00,nodes=1:ppn=1,mem=5gb (for 1 variable)
@@ -198,7 +182,6 @@ The most resources consuming processes are the CNV analysis and the probe select
 === Dependencies
 The current version of yapima requires R-3.3 (>=3.3.1 recommended) and Bioconductor 3.4. The following packages and their dependencies must be installed:
 * biomaRt
-* circlize
 * cluster
 * ComplexHeatmap
 * conumee
@@ -216,7 +199,6 @@ The current version of yapima requires R-3.3 (>=3.3.1 recommended) and Bioconduc
 * pbapply
 * plyr
 * pvclust
-* sva
 * tools
 * XML
 
@@ -231,18 +213,16 @@ The current version of yapima requires R-3.3 (>=3.3.1 recommended) and Bioconduc
 
 [(5)](http://doi.org/10.1186/gb-2012-13-6-r44) Maksimovic J, Gordon L and Oshlack A (2012). //SWAN: Subset quantile Within-Array Normalization for Illumina Infinium HumanMethylation450 BeadChips.// _Genome Biology_, *13*(6), pp. R44.
 
-[(6)](http://biostatistics.oxfordjournals.org/content/8/1/118.long) Johnson WE, Rabinovic A and Li C (2007). //Adjusting batch effects in microarray expression data using Empirical Bayes methods.// _Biostatistics_, *8*(1), pp. 118-127.
+[(6)](http://CRAN.R-project.org/package=pvclust) Suzuki R and Shimodaira H (2014). //pvclust: Hierarchical Clustering with P-Values via Multiscale Bootstrap Resampling//. R package version 1.3-2.
 
-[(7)](http://CRAN.R-project.org/package=pvclust) Suzuki R and Shimodaira H (2014). //pvclust: Hierarchical Clustering with P-Values via Multiscale Bootstrap Resampling//. R package version 1.3-2.
+[(7)](http://www.bioconductor.org/packages/release/bioc/html/conumee.html) Hovestadt V, Zapatka M (2015). //conumee: Enhanced copy-number variation analysis using Illumina 450k methylation arrays.// R package version 0.99.4.
 
-[(8)](http://www.bioconductor.org/packages/release/bioc/html/conumee.html) Hovestadt V, Zapatka M (2015). //conumee: Enhanced copy-number variation analysis using Illumina 450k methylation arrays.// R package version 0.99.4.
+[(8)](http://nar.oxfordjournals.org/content/43/7/e47.long) Ritchie ME, Phipson B, Wu D, Hu Y, Law CW, Shi W and Smyth GK (2015). //limma powers differential expression analyses for RNA-sequencing and microarray studies.// _Nucleic Acids Research_, *43*(7), pp. e47.
 
-[(9)](http://nar.oxfordjournals.org/content/43/7/e47.long) Ritchie ME, Phipson B, Wu D, Hu Y, Law CW, Shi W and Smyth GK (2015). //limma powers differential expression analyses for RNA-sequencing and microarray studies.// _Nucleic Acids Research_, *43*(7), pp. e47.
+[(9)](http://www.jstor.org/stable/2346101) Benjamini Y and Hochberg Y (1995). //Controlling the false discovery rate: a practical and powerful approach to multiple testing.// _Journal of the Royal Statistical Society Series B_, *57*, pp. 289-300.  
 
 [(10)](https://epigeneticsandchromatin.biomedcentral.com/articles/10.1186/1756-8935-8-6) Peters TJ, Buckley MJ, Statham AL, Pidsley R, Samaras K, Lord RV, Clark SJ and Molloy PL (2015). //De novo identification of differentially methylated regions in the human genome.// Epigenetics & Chromatin, 8:6
 
-[(11)](http://www.jstor.org/stable/2346101) Benjamini Y and Hochberg Y (1995). //Controlling the false discovery rate: a practical and powerful approach to multiple testing.// _Journal of the Royal Statistical Society Series B_, *57*, pp. 289-300.  
-
-[(12)](http://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-11-587) Du P, Zhang X, Huang C, Jafari N, Kibbe WA, Hou L and Lin SM (2010). //Comparison of Beta-value and M-value methods for quantifying methylation levels by microarray analysis.// _BMC Bioinformatics_, *11*, pp. 587.  
+[(11)](http://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-11-587) Du P, Zhang X, Huang C, Jafari N, Kibbe WA, Hou L and Lin SM (2010). //Comparison of Beta-value and M-value methods for quantifying methylation levels by microarray analysis.// _BMC Bioinformatics_, *11*, pp. 587.  
 ___
 This pipeline has been developed by Xavier Pastor <x.pastorhostench@dkfz-heidelberg.de> at DKFZ.

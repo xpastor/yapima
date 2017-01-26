@@ -1,11 +1,11 @@
 #!/usr/bin/bash
 
-NCORES=6
+NCORES=1
 PIPELINE_DIR=$HOME/pipelines/devel/yapima
 
 ### Cluster-related parameters ###
 EMAIL=x.pastorhostench@dkfz-heidelberg.de
-PBS_RESOURCES="walltime=10:00:00,nodes=1:ppn=$NCORES,mem=60g"
+PBS_RESOURCES="walltime=3:00:00,nodes=1:ppn=$NCORES,mem=10g"
 #PBS_RESOURCES="walltime=10:00:00,nodes=1:ppn=$NCORES,mem=121g -q highmem" # for jobs with more than 120 gb
 CLUSTER_EO=/ibios/co02/xavier/eo/yapima
 
@@ -14,7 +14,6 @@ RSCRIPT_BIN=/ibios/tbi_cluster/13.1/x86_64/R/R-3.3.1/bin/Rscript
 
 ### Steps ###
 # The variables must take an R boolean value (T, TRUE, F or FALSE) #
-RUN_BATCH_CORRECTION=F
 RUN_PROBE_SELECTION=F
 RUN_CNV=F
 RUN_DIFFERENTIAL_METHYLATION=F

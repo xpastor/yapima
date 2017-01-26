@@ -47,12 +47,6 @@ text <- paste(text,
 text <- paste(text,
 	'Measures with a detection P-value higher than 0.01, as estimated by \'minfi\' and tipically of low quality, were masked. Probes with low quality in at least 50% of the samples were also flagged.')
 
-### ComBat batch effect correction ###
-if (batchCorrection) {
-	text <- paste0(text, '\n',
-		'The M-values were corrected for possible batch effects for the following variables using the \'ComBat\' (Johnson, 2007) implementation in the \'sva\' package ', .cite_package('sva'), ' from bioconductor: ', paste(batch.vars, collapse=', '), '.')
-}
-
 ### Probe selection ###
 if (probeSelection) {
 	text <- paste0(text, '\n',
@@ -69,9 +63,6 @@ if (diffMeth) {
 		text <- paste0(text, '\n',
 			'The detection of differentially methylated regions (DMR) was done using the bioconductor \'DMRcate\' package ', .cite_package('DMRcate'), '. For two groups comparisons, the t statistics from the DMP analysis were used and the beta log fold change was computed running the standard \'limma\' workflow on the beta values. For comparisons with more than two groups the squared F statistics from the DMP analysis were provided and the beta log fold change was set to 0. All the other parameters were left as default.')
 	}
-}
-
-if (batchCorrection | diffMeth) {
 	text <- paste0(text, '\n\n',
 		'When necessary, the beta-values were derived from the M-values as described by Du et. al. (Du, 2010).')
 }
