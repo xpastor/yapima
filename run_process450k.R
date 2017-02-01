@@ -41,9 +41,6 @@ pipeline_scripts <- list.files(pipeline_dir)
 if (! 'methylation_preprocessing.R' %in% pipeline_scripts) {
 	stop(paste0("\n\tThe script 'methylation_preprocessing.R' is not present in ", pipeline_dir))
 }
-if (! 'batch_correction.R' %in% pipeline_scripts) {
-	stop(paste0("\n\tThe script 'batch_correction.R' is not present in ", pipeline_dir))
-}
 if (! 'methylation_qc.R' %in% pipeline_scripts) {
 	stop(paste0("\n\tThe script 'methylation_qc.R' is not present in ", pipeline_dir))
 }
