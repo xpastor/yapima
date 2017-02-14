@@ -77,12 +77,10 @@ if (!is.logical(removeEuropeanSNPs)) {
 	stop("\n\t'removeEuropeanSNPs' must be a valid R boolean: T, F, TRUE or FALSE.")
 }
 
-ncores <- as.integer(ncores)
 if (is.na(ncores)) {
 	stop("'ncores' must be integer.")
 }
 
-seed <- as.integer(seed)
 if (is.na(seed)) {
 	stop("'seed' must be integer.")
 }

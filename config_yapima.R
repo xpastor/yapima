@@ -22,5 +22,5 @@ usePredictedSex <- as.logical(Sys.getenv("USE_PREDICTED_SEX"))
 batch.vars <- Sys.getenv("BATCH_VARS") # comma separated list of batch variables present in sample.annotation
 #varianceProportion <- Sys.getenv("VARIANCE_PROPORTION") # proportion of variance that surrogate variables should explain
 
-seed <- Sys.getenv("SEED")
-ncores <- Sys.getenv("NCORES")
+seed <- as.integer(Sys.getenv("SEED"))
+ncores <- as.integer(Sys.getenv("NCORES"))

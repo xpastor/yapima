@@ -43,7 +43,7 @@ Tumor5,,,,,1234567890,R05C02
 Tumor6,,,,,1234567890,R06C02  
 ```
 
-Optionally, other columns of interest for the differential methylation analysis or the correction of batch effects can be added. In such case, if the value of a sample is unknown 'NA' must be provided.
+Optionally, other columns of interest for the differential methylation analysis or the correction of batch effects can be added. In such case, if the value of a sample is unknown 'NA' must be provided. The values of categorical variables can not be exclusively numerical (i.e.: absence/presence of a mutation should be referred as something like 'ref'/'mut', instead of 0/1), although numerical values may be used if other values are in string format. However, this numerical values will lose their numerical properties. Also, columns with numerical variables can include only numerical values or 'NA'.
 
 ```
 Sample_Name,Sample_Well,Sample_Plate,Sample_Group,Pool_ID,Sentrix_ID,Sentrix_Position,Group,Hospital  

@@ -3,6 +3,14 @@ library(minfi)
 library(ENmix)
 library(GenomicRanges)
 
+# Adjust number of usable cores
+if (Sys.getenv('PBS_NUM_PPN') != '') {
+	ncores <- min(ncores, as.integer(Sys.getenv('PBS_NUM_PPN')))
+} else {
+	ncores <- min(ncores, detectCores()-1)
+}
+ncores <- max(1, ncores)
+
 #### Reading in data ####
 ### Preparing targets data frame ###
 #header <- readLines(sample.annotation, n=1)
@@ -137,8 +145,8 @@ colnames(genotype.betas) <- targets[colnames(genotype.betas), 'Sample_Name']
 ### Sex determination ###
 ratio.meth <- mapToGenome(filtered.norm.meth, mergeManifest=T)
 gender <- getSex(ratio.meth)
-pData(filtered.norm.meth)$predictedSex <- factor(gender$predictedSex)
 if (usePredictedSex) {
+	pData(filtered.norm.meth)$predictedSex <- factor(gender$predictedSex)
 	interest.vars <- c(interest.vars, 'predictedSex')
 }
 
@@ -164,5 +172,5 @@ rownames(pdata) <- pdata$Sample_Name
 write.csv(pdata, file.path(wd, 'extended_sample_sheet.csv'), quote=F, row.names=F)
 #o#
 
-rm('array.annot', 'betas.bed', 'crossreactive', 'lowQ', 'lowQ.probes', 'mval.bed', 'norm.meth', 'ratio.meth', 'raw.betas.bed', 'rgset')
+rm('array.annot', 'betas.bed', 'crossreactive', 'lowQ', 'lowQ.probes', 'mval.bed', 'norm.meth', 'ratio.meth', 'raw.betas.bed')
 gc()

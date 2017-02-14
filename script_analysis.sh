@@ -17,7 +17,7 @@ echo -e "wd <- '${OUTDIR}_rep'"
 echo -e "pipeline_dir <- '$PIPELINE_DIR'"
 echo -e "seed <- $SEED"
 echo -e "ncores <- $NCORES"
-echo -e "usePredictedSex <- '$USE_PREDICTED_SEX'"
+echo -e "usePredictedSex <- $USE_PREDICTED_SEX"
 
 if [[ -n $BLACKLIST ]]
 then

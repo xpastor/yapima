@@ -12,8 +12,40 @@ library(GenomicRanges)
 library(cluster)
 library(parallel)
 library(ggplot2)
+library(ComplexHeatmap)
+
+dev.width <- .get_dev_width(raw.betas, name='Density')
 
 #### Data QC ####
+
+### Median intensities plot ###
+qc.raw <- getQC(preprocessRaw(rgset))
+row.names(qc.raw) <- row.names(pdata)[match(row.names(qc.raw), pdata$Basename)]
+qc.norm <- DataFrame(mMed=apply(log2(getMeth(filtered.norm.meth)), 2, median, na.rm=T), uMed=apply(log2(getUnmeth(filtered.norm.meth)), 2, median, na.rm=T))
+row.names(qc.norm) <- row.names(pdata)[match(row.names(qc.norm), pdata$Basename)]
+plotQC <- function(qc, badSampleCutoff = 10.5, main=NULL)
+{
+	meds <- rowMeans(as.matrix(qc))
+	bad <- meds < badSampleCutoff
+	plot(qc$mMed, qc$uMed, xlim=c(8,14), ylim=c(8,14), xaxt = "n", yaxt = "n", xlab = "Meth median intensity (log2)", ylab = "Unmeth median intensity (log2)", col = ifelse(bad, "red", "black"), main=main)
+	axis(side = 1, at = c(9, 11, 13))
+	axis(side = 2, at = c(9, 11, 13))
+	abline(badSampleCutoff * 2, -1, lty = 2)
+	if (sum(bad) > 0)
+		text(qc$mMed[bad], qc$uMed[bad] - 0.25, labels = row.names(qc)[bad], col = "red")
+	legend("topleft", legend = c("good", "bad, with sample index"), pch = 1, col = c("black", "red"), bty = "n")
+	invisible(NULL)
+}
+pdf(file.path(qcdir, 'median_intensities.pdf'))
+plotQC(qc.raw, main='Raw intensities')
+plotQC(qc.norm, main='Normalized intensities')
+dev.off()
+
+### Bisulfite conversion plots ###
+pdf(file.path(qcdir, 'bisulfite_conversion.pdf'), height=dev.width)
+controlStripPlot(rgset, controls='BISULFITE CONVERSION I', sampNames=pData(rgset)$Sample_Name)
+controlStripPlot(rgset, controls='BISULFITE CONVERSION II', sampNames=pData(rgset)$Sample_Name)
+dev.off()
 
 ### Beta distribution plot ###
 message('Plotting density plots of Beta values...')
@@ -34,17 +66,9 @@ message('Finished.')
 ### Beta density heatmap ###
 message('Plotting density heatmaps of Beta values...')
 heatmap.params <- list(cluster_rows=F, col=c('lightyellow', 'black'), name='Density')
-dev.width <- .get_dev_width(raw.betas, name='Density')
 pdf(file.path(qcdir, 'beta_distribution_heatmap.pdf'), width=dev.width)
-h <- apply(raw.betas, 2, function(x) hist(x, breaks=seq(0,1,0.001), plot=F)$counts)
-h <- h[nrow(h):1,]
-do.call(Heatmap2, c(list(mat=h, column_title='Raw beta distribution'), heatmap.params))
-#densityHeatmap(raw.betas, title='Raw beta distribution', range=c(0,1), column_names_gp=gpar(fontsize=7))
-
-h <- apply(processed.betas, 2, function(x) hist(x, breaks=seq(0,1,0.001), plot=F)$counts)
-h <- h[nrow(h):1,]
-do.call(Heatmap2, c(list(mat=h, column_title='Normalized beta distribution'), heatmap.params))
-#densityHeatmap(processed.betas, title='Normalized beta distribution', range=c(0,1), column_names_gp=gpar(fontsize=7))
+densityHeatmap(raw.betas, ylab='Beta value', title='Raw beta distribution', range=c(0,1), cluster_columns=T, show_column_dend=T, column_names_gp=gpar(fontsize=7))
+densityHeatmap(processed.betas, ylab='Beta value', title='Normalized beta distribution', range=c(0,1), cluster_columns=T, show_column_dend=T, column_names_gp=gpar(fontsize=7))
 dev.off()
 message('Finished.')
 gc()
@@ -104,7 +128,7 @@ message('Finished.')
 message('Plotting sample correlations...')
 sample.cor <- cor(processed.betas, use='na.or.complete')
 plot.vars <- interest.vars
-if (usePredictedSex) plot.vars <- c(plot.vars, 'predictedSex')
+if (usePredictedSex) plot.vars <- unique(c(plot.vars, 'predictedSex'))
 categorical <- colnames(pdata)[sapply(pdata, class) %in% c('character', 'factor')]
 plot.vars <- plot.vars[plot.vars %in% categorical]
 dev.width <- .get_dev_width(sample.cor, name='Correlation', annotation_names=plot.vars)
@@ -153,5 +177,5 @@ colnames(genotypes)[1] <- paste0('#', colnames(genotypes)[1])
 write.table(genotypes, file.path(qcdir, 'genotypes.bed'), sep="\t", row.names=F, quote=F)
 message('Finished.')
 
-rm('genotype.betas', 'genotypes', 'genotypes.df', 'h', 'pca', 'polymorphic', 'processed.betas.narm', 'raw.betas', 'raw.betas.narm', 'raw.pca', 'smpl.genotypes', 'snp.genotype', 'snp.idx', 'snp.meth', 'snp.unmeth', 'snps')
+rm('genotype.betas', 'genotypes', 'genotypes.df', 'h', 'pca', 'polymorphic', 'processed.betas.narm', 'raw.betas', 'raw.betas.narm', 'raw.pca', 'rgset', 'smpl.genotypes', 'snp.genotype', 'snp.idx', 'snp.meth', 'snp.unmeth', 'snps')
 gc()
