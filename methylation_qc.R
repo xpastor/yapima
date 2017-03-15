@@ -89,13 +89,18 @@ message('PCA plots of batch variables...')
 pdata2$ArrayRow <- gsub('C..', '', pdata2$Array)
 pdata2$ArrayColumn <- gsub('R..', '', pdata2$Array)
 
-plot.vars <- unique(c('Slide', 'ArrayRow', 'ArrayColumn', 'predictedSex', batch.vars))
+#plot.vars <- unique(c('Slide', 'ArrayRow', 'ArrayColumn', 'predictedSex', batch.vars))
+plot.vars <- unique(c('Slide', 'ArrayRow', 'ArrayColumn', batch.vars))
+if (usePredictedSex) {
+	plot.vars <- c(plot.vars, 'predictedSex')
+}
 n.comp <- min(ncol(pca$x), 6)
 n.grobs <- ceiling(n.comp/2)
 width.unit <- 13/20
 width <- n.grobs*2*4 + width.unit
 if (n.comp > 2) {
 	for (batch.var in plot.vars) {
+		message(batch.var)
 		groups <- pdata2[,batch.var]
 		names(groups) <- row.names(pdata2)
 		if (class(groups) %in% c('character', 'factor')) {
@@ -112,6 +117,7 @@ message('PCA plots of variables of interest...')
 if (! isEmpty(interest.vars) & n.comp > 2) {
 #filtered.betas.narm <- filtered.betas[! apply(is.na(filtered.betas), 1, any),]
 	for (interest.var in interest.vars) {
+	message(interest.var)
 		groups <- pdata2[,interest.var]
 		names(groups) <- row.names(pdata2)
 		if (class(groups) %in% c('character', 'factor')) {

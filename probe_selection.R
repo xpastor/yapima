@@ -32,7 +32,8 @@ scores <- score.clusters(clust.obj)
 #interest.vars <- variablesOfInterest(pdata, batch.vars)
 
 library(ComplexHeatmap)
-plot.vars <- c(interest.vars, 'predictedSex')
+plot.vars <- interest.vars
+if (usePredictedSex) plot.vars <- c(plot.vars, 'predictedSex')
 width.dev <- .get_dev_width(betas.sorted, annotation_names=plot.vars)
 height.dev <- .get_dev_width(betas.sorted, name='AAA')
 

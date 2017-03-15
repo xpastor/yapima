@@ -62,11 +62,10 @@ if (array.type == 'IlluminaHumanMethylation450k') {
 	crossreactive <- do.call(rbind, crossreactive)
 	crossreactive <- crossreactive[,1]
 } else if (array.type == 'IlluminaHumanMethylationEPIC') {
-	download.file('http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S221359601630071X/1-s2.0-S221359601630071X-mmc2.txt/283447/html/S221359601630071X/d122a9289e5bc82609233a2cdeac8fa4/mmc2.txt', destfile=file.path(wd, 'crossreactive_cg.txt'), method='wget', extra='--user-agent="R"')
-	crossreactive <- scan(file.path(wd, 'crossreactive_cg.txt'), what='character')
-	download.file('http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S221359601630071X/1-s2.0-S221359601630071X-mmc3.txt/283447/html/S221359601630071X/daff1031095143b45eeb59c65f1dd940/mmc3.txt', destfile=file.path(wd, 'crossreactive_ch.txt'), method='wget', extra='--user-agent="R"')
-	ch_crossreactive <- scan(file.path(wd, 'crossreactive_ch.txt'), what='character')
-	crossreactive <- c(crossreactive, ch_crossreactive)
+	#download.file('http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S221359601630071X/1-s2.0-S221359601630071X-mmc2.txt/283447/html/S221359601630071X/d122a9289e5bc82609233a2cdeac8fa4/mmc2.txt', destfile=file.path(wd, 'crossreactive_cg.txt'), method='wget', extra='--user-agent="R"')
+	crossreactive <- scan('https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4909830/bin/mmc2.txt', what='character')
+	#download.file('http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S221359601630071X/1-s2.0-S221359601630071X-mmc3.txt/283447/html/S221359601630071X/daff1031095143b45eeb59c65f1dd940/mmc3.txt', destfile=file.path(wd, 'crossreactive_ch.txt'), method='wget', extra='--user-agent="R"')
+	crossreactive <- c(crossreactive, scan('https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4909830/bin/mmc3.txt', what='character'))
 }
 
 crossreactive <- crossreactive[crossreactive %in% annot.bed$name]
@@ -77,10 +76,30 @@ annot.bed[crossreactive, 'score'] <- annot.bed[crossreactive, 'score'] + 2
 ## Flag blacklisted probes ##
 if (blacklist != '') {
 # Load blacklist
-	remove <- scan(blacklist, what='character')
-	remove <- remove[remove %in% annot.bed$name]
-	exclude <- c(exclude, remove)
-	annot.bed[remove, 'score'] <- annot.bed[remove, 'score'] + 4
+	remove <- read.delim(blacklist, sep='\t', stringsAsFactors=F, colClasses=c('character', 'character'), header=F)
+	colnames(remove) <- c('probeID', 'sample')
+	remove <- remove[remove$probeID %in% annot.bed$name,]
+	flag <- unique(remove[remove$sample=='',1])
+	annot.bed[flag, 'score'] <- annot.bed[flag, 'score'] + 4
+	remove <- remove[remove$sample!='',]
+	if (nrow(remove) > 0) {
+		remove <- remove[remove$sample %in% targets$Sample_Name,]
+		remove$value <- TRUE
+		library(reshape2)
+		remove <- dcast(probeID ~ sample, data=remove, fill=FALSE, value.var='value')
+		row.names(remove) <- remove$probeID
+		remove <- remove[,-1]
+		remove <- as.matrix(remove)
+		colnames(remove) <- rownames(targets)[match(colnames(remove), targets$Sample_Name)]
+		lowQ[row.names(remove), colnames(remove)] <- lowQ[row.names(remove), colnames(remove)] | remove
+	}
+	rm('flag', 'remove')
+#	remove <- scan(blacklist, what='character')
+#	remove <- remove[remove %in% annot.bed$name]
+#	exclude <- c(exclude, remove)
+#	exclude <- c(exclude, flag)
+#	annot.bed[remove, 'score'] <- annot.bed[remove, 'score'] + 4
+#	annot.bed[flag, 'score'] <- annot.bed[flag, 'score'] + 4
 #o#
 }
 
@@ -92,7 +111,8 @@ if (removeEuropeanSNPs) {
 		polymorphic <- xlsxToR(file.path(wd, 'polymorphic.xlsx'), keep_sheets='Polymorphic CpGs & SNPs at SBE', header=T)
 		polymorphic[,grep('AF', colnames(polymorphic))] <- apply(polymorphic[,grep('AF', colnames(polymorphic))], 2, as.numeric)
 	} else if (array.type == 'IlluminaHumanMethylationEPIC') {
-		download.file('http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S221359601630071X/1-s2.0-S221359601630071X-mmc1.txt/283447/html/S221359601630071X/69a1cbea394507150394a9faaef9d876/mmc1.txt', destfile=file.path(wd, 'polymorphic.txt'), method='wget', extra='--user-agent="R"')
+	download.file('https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4909830/bin/mmc1.txt', destfile=file.path(wd, 'polymorphic.txt'))
+	#download.file('http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S221359601630071X/1-s2.0-S221359601630071X-mmc1.txt/283447/html/S221359601630071X/69a1cbea394507150394a9faaef9d876/mmc1.txt', destfile=file.path(wd, 'polymorphic.txt'), method='wget', extra='--user-agent="R"')
 		polymorphic <- read.delim(file.path(wd, 'polymorphic.txt'), header=T, stringsAsFactors=F)
 	}
 	af <- 1/ncol(rgset)
@@ -169,7 +189,11 @@ message("Data ready in the output folder.")
 
 pdata <- pData(filtered.norm.meth)
 rownames(pdata) <- pdata$Sample_Name
-write.csv(pdata, file.path(wd, 'extended_sample_sheet.csv'), quote=F, row.names=F)
+pdata.out <- pdata
+if (!usePredictedSex) {
+	pdata.out$predictedSex <- factor(gender$predictedSex)
+}
+write.csv(pdata.out, file.path(wd, 'extended_sample_sheet.csv'), quote=F, row.names=F)
 #o#
 
 rm('array.annot', 'betas.bed', 'crossreactive', 'lowQ', 'lowQ.probes', 'mval.bed', 'norm.meth', 'ratio.meth', 'raw.betas.bed')

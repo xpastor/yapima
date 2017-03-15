@@ -30,7 +30,7 @@ if (array.type == 'IlluminaHumanMethylation450k') {
 #annotation(filtered.norm.meth)$array == 'IlluminaHumanMethylationEPIC'
 } else if (array.type == 'IlluminaHumanMethylationEPIC') {
 	library(GEOquery)
-	geos <- c('GSM2309177', 'GSM2309178', 'GSM2309179', 'GSM2309172')
+	geos <- c('GSM2309177', 'GSM2309178', 'GSM2309179', 'GSM2309172', 'GSM2309180', 'GSM2309181', 'GSM2309182', 'GSM2309183', 'GSM2309184')
 	geo.idatDir <- file.path(cnv.dir, 'idat')
 	dir.create(geo.idatDir, recursive=T)
 	sapply(geos, getGEOSuppFiles, makeDirectory=F, baseDir=geo.idatDir)
