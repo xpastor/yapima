@@ -62,7 +62,7 @@ Tumor6,,,,,1234567890,R06C02,Tumor,BBB
 ```
 
 === Optional inputs
-* **BLACKLIST**: stores the path to a file with a set of probes that should be discarded from the very beginning of the analysis for whatever reason. The probes should be listed per line and identified by the Illumina identifier that generally starts with //cg//
+* **BLACKLIST**: stores the path to a file with a set of probes that should be discarded from the very beginning of the analysis for whatever reason. The probes should be listed per line and identified by the Illumina identifier that generally starts with //cg//. Each line can have one or two columns, the second one being the sample where the value related to the probe should be masked. In summary, a probe not related to any sample will be flagged but the values will be left. In case a probe is related to a sample, the value for that probe in that sample will be replaced by 'NA'. A probe can be related to multiple samples by adding a line for each sample. The 'BLACKLIST' file can be mixed with both types of probes to be masked, global or sample specific.
 
 == Execution
 //yapima// is executed in a very similar way to other pipelines, using a bash configuration file as single parameter:
