@@ -136,6 +136,8 @@ By default, the following QC files are also produced:
 * **qc/raw_batch_PCA_***: PCA plots of samples before transformation identifying the samples by groups of batch variables
 * **qc/processed_batch_PCA_***: PCA plots of samples after transformation identifying the samples by groups of batch variables
 * **qc/samples_correlation.pdf**: heatmaps showing sample correlations using beta values after transformation
+* **qc/median_intensities.pdf**: scatter plot showing the median intensity for the methylated vs unmethylated intensities in each sample
+* **qc/bisulfite_conversion.pdf**: dotplots showing the success of the bisulfite conversion
 * **qc/genotypes.txt**: BED file with inferred genotypes of the samples using the beta values of genotyping probes
 
 Additionally, if there are columns in the SampleSheet other than the basic ones or identified as batch effects the following plots are produced:
@@ -165,7 +167,7 @@ Each column in the SampleSheet that does not correspond to a basic column or a b
 * **DMP/DMP_PCA_?.png**: PCA plot using the probes with an adjusted P-value smaller than 0.05
 * **DMP/DMP_cluster_?.pdf: hierarchical clustering of the samples using the probes with and adjusted P-value <= 0.05
 * **DMR/DMR_?.bed: BED file with the identified DMRs
-* **DMR/DMR_heatmap_?.pdf: heatmap of CpGs from the top DMRs that sum up to 500 CpGs. The top DMRs must have a minimum FDR below or equal to 0.01; from these a score is computed as follows: rank(minfdr) + 2*rank(-abs(meanbetafc)) + 2*rank(-no.cpgs). The DMRs with the minimum score are chosen.
+* **DMR/DMR_heatmap_?.pdf: heatmap of CpGs from the top DMRs that sum up to 500 CpGs, being the top DMRs those with a smaller Stouffer.
 
 == Computational requirements
 Depending on the type of analysis the requirements for the analysis may vary a lot. Here is just a short list of examples considering 20 samples each:

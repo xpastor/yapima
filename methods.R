@@ -34,6 +34,10 @@ text <- paste0(text,
 
 text <- paste(text, 'The crossreactive probes', flag.ref, 'were flagged.')
 
+ if (blacklist != '') {
+ 	text <- paste0(text,
+		'A list of blacklisted probes was also flagged (describe origin of blacklisted probes).')
+ }
 
 if (removeEuropeanSNPs) {
 	text <- paste0(text,
