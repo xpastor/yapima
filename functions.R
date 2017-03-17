@@ -38,16 +38,27 @@ gr2bed <- function(gr, name=NULL, score=NULL, additional=NULL)
 	xtitle <- paste0('PC', comp1, ' (', round(summary(pca)$importance[2,comp1]*100, digits=1), '% of variance)')
 	ytitle <- paste0('PC', comp2, ' (', round(summary(pca)$importance[2,comp2]*100, digits=1), '% of variance)')
 
-	theme_pca <- theme_bw() + theme(axis.text=element_blank(), axis.ticks=element_blank(), legend.position='none', panel.grid=element_blank(), panel.border=element_rect(colour='black'))
-	pca.plot <- ggplot(df) + geom_point(mapping=aes(x=xvals, y=yvals, colour=groups), size=4) + theme_pca + theme(plot.margin=unit(c(0,0,1,1), 'lines')) + xlab(xtitle) + ylab(ytitle)
+#	theme_pca <- theme_bw() + theme(axis.text=element_blank(), axis.ticks=element_blank(), legend.position='none', panel.grid=element_blank(), panel.border=element_rect(colour='black'))
+#	pca.plot <- ggplot(df) + geom_point(mapping=aes(x=xvals, y=yvals, colour=groups), size=4) + theme_pca + theme(plot.margin=unit(c(0,0,1,1), 'lines')) + xlab(xtitle) + ylab(ytitle)
+	theme_pca <- theme_bw() + theme(legend.position='none', panel.grid=element_blank(), panel.border=element_rect(colour='black'))
+	pca.plot <- ggplot(df) + geom_point(mapping=aes(x=xvals, y=yvals, colour=groups), size=4) + theme_pca + theme(axis.text=element_blank(), axis.ticks=element_blank(), plot.margin=unit(c(0,0,1,1), 'lines')) + xlab(xtitle) + ylab(ytitle)
 	if (legend) {
 		return(legend.plot <- pca.plot + theme(legend.position='right', legend.key=element_blank()) + labs(colour=''))
 	} else {
-		theme_density <- theme_pca + theme(panel.border=element_blank(), axis.title.x=element_blank())
-		xdensity <- ggplot(df) + geom_density(aes(x=xvals, colour=groups), na.rm=T, adjust=2) + geom_density(aes(x=xvals), na.rm=T, adjust=2, linetype='dotted') + theme_density + theme(plot.margin=unit(c(2,0,0,1), 'lines')) + ylab('')
-		ydensity <- ggplot(df) + geom_density(aes(x=yvals, colour=groups), na.rm=T, adjust=2) + geom_density(aes(x=yvals), na.rm=T, adjust=2, linetype='dotted') + theme_density + theme(plot.margin=unit(c(0,1,1,0), 'lines')) + coord_flip() + xlab('')
-
-		return(arrangeGrob(xdensity, rectGrob(gp=gpar(lty='blank')), pca.plot, ydensity, ncol=2, nrow=2, widths=c(3,1), heights=c(1,3)))
+#		theme_density <- theme_pca + theme(panel.border=element_blank(), axis.title.x=element_blank())
+#		xdensity <- ggplot(df) + geom_density(aes(x=xvals, colour=groups), na.rm=T, adjust=2) + geom_density(aes(x=xvals), na.rm=T, adjust=2, linetype='dotted') + theme_density + theme(plot.margin=unit(c(2,0,0,1), 'lines')) + ylab('')
+#		ydensity <- ggplot(df) + geom_density(aes(x=yvals, colour=groups), na.rm=T, adjust=2) + geom_density(aes(x=yvals), na.rm=T, adjust=2, linetype='dotted') + theme_density + theme(plot.margin=unit(c(0,1,1,0), 'lines')) + coord_flip() + xlab('')
+		theme_aux_plot <- theme_pca + theme(panel.border=element_blank(), axis.title.x=element_blank())
+		xplot <- ggplot(df)
+		yplot <- ggplot(df)
+		if (class(groups) %in% c('factor', 'character')) {
+			xplot <- xplot + geom_density(aes(x=xvals, colour=groups), na.rm=T, adjust=2) + geom_density(aes(x=xvals), na.rm=T, adjust=2, linetype='dotted') + theme_aux_plot + theme(axis.text=element_blank(), axis.ticks=element_blank(), plot.margin=unit(c(2,0,0,1), 'lines')) + ylab('')
+			yplot <- yplot + geom_density(aes(x=yvals, colour=groups), na.rm=T, adjust=2) + geom_density(aes(x=yvals), na.rm=T, adjust=2, linetype='dotted') + theme_aux_plot + theme(axis.text=element_blank(), axis.ticks=element_blank(), plot.margin=unit(c(0,1,1,0), 'lines')) + coord_flip() + xlab('')
+		} else {
+			xplot <- xplot + geom_point(aes(x=xvals, y=groups), na.rm=T) + geom_smooth(aes(x=xvals, y=groups), na.rm=T, se=FALSE, method='loess', span=1) + theme_aux_plot + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(), plot.margin=unit(c(2,0,0,0), 'lines')) + ylab('')
+			yplot <- yplot + geom_point(aes(x=yvals, y=groups), na.rm=T) + geom_smooth(aes(x=yvals, y=groups), na.rm=T, se=FALSE, method='loess', span=1) + theme_aux_plot + theme(axis.text.y=element_blank(), axis.ticks.y=element_blank(), plot.margin=unit(c(0,1,1,0), 'lines')) + coord_flip() + xlab('')
+		}
+		return(arrangeGrob(xplot, rectGrob(gp=gpar(lty='blank')), pca.plot, yplot, ncol=2, nrow=2, widths=c(3,1), heights=c(1,3)))
 	}
 }
 

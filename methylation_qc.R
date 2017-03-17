@@ -103,10 +103,8 @@ if (n.comp > 2) {
 		message(batch.var)
 		groups <- pdata2[,batch.var]
 		names(groups) <- row.names(pdata2)
-		if (class(groups) %in% c('character', 'factor')) {
-			ggsave(filename=file.path(qcdir, paste0('raw_batch_PCA_', batch.var, '.png')), plot=plot.pca(raw.pca, groups, batch.var), width=width)
-			ggsave(filename=file.path(qcdir, paste0('processed_batch_PCA_', batch.var, '.png')), plot=plot.pca(pca, groups, batch.var), width=width)
-		}
+		ggsave(filename=file.path(qcdir, paste0('raw_batch_PCA_', batch.var, '.png')), plot=plot.pca(raw.pca, groups, batch.var), width=width)
+		ggsave(filename=file.path(qcdir, paste0('processed_batch_PCA_', batch.var, '.png')), plot=plot.pca(pca, groups, batch.var), width=width)
 	}
 }
 message('Finished.')
@@ -117,13 +115,11 @@ message('PCA plots of variables of interest...')
 if (! isEmpty(interest.vars) & n.comp > 2) {
 #filtered.betas.narm <- filtered.betas[! apply(is.na(filtered.betas), 1, any),]
 	for (interest.var in interest.vars) {
-	message(interest.var)
+		message(interest.var)
 		groups <- pdata2[,interest.var]
 		names(groups) <- row.names(pdata2)
-		if (class(groups) %in% c('character', 'factor')) {
-			ggsave(filename=file.path(qcdir, paste0('raw_PCA_', interest.var, '.png')), plot=plot.pca(raw.pca, groups, interest.var), width=width)
-			ggsave(filename=file.path(qcdir, paste0('processed_PCA_', interest.var, '.png')), plot=plot.pca(pca, groups, interest.var), width=width)
-		}
+		ggsave(filename=file.path(qcdir, paste0('raw_PCA_', interest.var, '.png')), plot=plot.pca(raw.pca, groups, interest.var), width=width)
+		ggsave(filename=file.path(qcdir, paste0('processed_PCA_', interest.var, '.png')), plot=plot.pca(pca, groups, interest.var), width=width)
 	}
 }
 message('Finished.')

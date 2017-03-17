@@ -117,9 +117,10 @@ for (comparison in interest.vars) {
 		}
 		write.table(dmr.bed, file.path(dmr.dir, paste0('DMR_', coef.name, '.bed')), sep='\t', quote=F, row.names=F)
 	#o#
-		dmr.sig <- dmr.gr[dmr.gr$minfdr <= 0.01,]
-		dmr.score <- rank(dmr.sig$minfdr) + 2*rank(-abs(dmr.sig$meanbetafc)) + 2*rank(-dmr.sig$no.cpgs)
-		dmr.sig <- dmr.sig[order(dmr.score)]
+		dmr.sig <- dmr.gr[order(dmr.gr$Stouffer)]
+#		dmr.sig <- dmr.gr[dmr.gr$minfdr <= 0.01,]
+#		dmr.score <- rank(dmr.sig$minfdr) + 2*rank(-abs(dmr.sig$meanbetafc)) + 2*rank(-dmr.sig$no.cpgs)
+#		dmr.sig <- dmr.sig[order(dmr.score)]
 		L <- cumsum(dmr.sig$no.cpgs)
 		n.dmr <- sum(L <= 500)
 		dmr.sig <- head(dmr.sig, n.dmr)
