@@ -41,7 +41,8 @@ if (array.type == 'IlluminaHumanMethylation450k') {
 	RGcontrolSetEx <- read.metharray(geo.files, extended=T)
 	unlink(geo.idatDir, recursive=T, force=T)
 }
-controls.norm <- preprocessENmix(RGcontrolSetEx)
+#controls.norm <- preprocessENmix(RGcontrolSetEx)
+controls.norm <- preprocessNoob(RGcontrolSetEx, offset=15, dyeCorr=T, dyeMethod='single')
 controls.norm <- preprocessSWAN(RGcontrolSetEx, mSet=controls.norm)
 
 exclude <- unique(exclude)

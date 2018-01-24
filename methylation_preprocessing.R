@@ -1,6 +1,6 @@
 # Load libraries
-library(minfi)
-library(ENmix)
+#library(minfi)
+#library(ENmix)
 library(GenomicRanges)
 
 # Adjust number of usable cores
@@ -144,7 +144,8 @@ close(gz)
 ### Remove background ###
 norm.meth <- NULL
 message("Correcting the data...")
-norm.meth <- preprocessENmix(rgset, bgParaEst='oob', dyeCorr=T, QCinfo=NULL, exQCsample=F, exQCcpg=F, exSample=NULL, exCpG=NULL, nCores=ncores)
+#norm.meth <- preprocessENmix(rgset, bgParaEst='oob', dyeCorr=T, QCinfo=NULL, exQCsample=F, exQCcpg=F, exSample=NULL, exCpG=NULL, nCores=ncores)
+norm.meth <- preprocessNoob(rgset, offset=15, dyeCorr=T, dyeMethod='single')
 norm.meth <- preprocessSWAN(rgset, norm.meth)
 message("Data corrected.")
 
