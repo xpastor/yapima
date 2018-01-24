@@ -31,7 +31,7 @@ interest.vars <- interest.vars[interest.vars %in% not.unique]
 
 ### Reading methylation data ###
 message("Reading in methylation files...")
-rgset <- read.metharray.exp(idat_dir, targets, extended=T, recursive=T)
+rgset <- read.metharray.exp(idat_dir, targets, extended=T, recursive=T, force=TRUE)
 message("Data read.")
 
 ### Fetching array annotation ###
@@ -91,6 +91,7 @@ if (blacklist != '') {
 		remove <- remove[,-1]
 		remove <- as.matrix(remove)
 		colnames(remove) <- rownames(targets)[match(colnames(remove), targets$Sample_Name)]
+		remove <- remove[row.names(remove) %in% row.names(lowQ),]
 		lowQ[row.names(remove), colnames(remove)] <- lowQ[row.names(remove), colnames(remove)] | remove
 	}
 	rm('flag', 'remove')

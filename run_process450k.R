@@ -93,10 +93,15 @@ set.seed(seed)
 #o#
 
 # Extract variables of interest from sample sheet
-header <- readLines(sample.annotation, n=1)
-header <- unlist(strsplit(header, ','))
-illumina.vars <- c('Sample_Name', 'Sample_Well', 'Sample_Plate', 'Sample_Group', 'Pool_ID', 'Sentrix_ID', 'Sentrix_Position')
+library(minfi)
+targets <- read.metharray.sheet(dirname(sample.annotation), paste0('^', basename(sample.annotation), '$'), recursive=F)
+header <- colnames(targets)
+#header <- readLines(sample.annotation, n=1)
+#header <- unlist(strsplit(header, ','))
+illumina.vars <- c('Sample_Name', 'Sample_Well', 'Sample_Plate', 'Sentrix_ID', 'Sentrix_Position', 'Slide', 'Array', 'Basename')
+
 interest.vars <- header[! header %in% illumina.vars]
+if (length(interest.vars) != 0) interest.vars <- interest.vars[!apply(is.na(targets[,interest.vars,drop=F]), 2, all)]
 
 # Produce vector with batch variables
 batch.vars <- unlist(strsplit(batch.vars, ','))
