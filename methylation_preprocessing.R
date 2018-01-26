@@ -1,6 +1,6 @@
 # Load libraries
 #library(minfi)
-#library(ENmix)
+library(ENmix)
 library(GenomicRanges)
 
 # Adjust number of usable cores
@@ -15,14 +15,14 @@ ncores <- max(1, ncores)
 ### Preparing targets data frame ###
 #header <- readLines(sample.annotation, n=1)
 #header <- unlist(strsplit(header, ','))
-colClasses <- data.frame(t(rep('character', length(header))), stringsAsFactors=F)
-colnames(colClasses) <- header
+#colClasses <- data.frame(t(rep('character', length(header))), stringsAsFactors=F)
+#colnames(colClasses) <- header
 #interest.vars <- variablesOfInterest(colClasses, batch.vars)
-colClasses[,batch.vars] <- NA
-colClasses[,interest.vars] <- NA
-targets <- read.csv(sample.annotation, colClasses=colClasses, stringsAsFactors=F)
-colnames(targets)[colnames(targets)=='Sentrix_ID'] <- 'Slide'
-colnames(targets)[colnames(targets)=='Sentrix_Position'] <- 'Array'
+#colClasses[,batch.vars] <- NA
+#colClasses[,interest.vars] <- NA
+#targets <- read.csv(sample.annotation, colClasses=colClasses, stringsAsFactors=F)
+#colnames(targets)[colnames(targets)=='Sentrix_ID'] <- 'Slide'
+#colnames(targets)[colnames(targets)=='Sentrix_Position'] <- 'Array'
 targets$Basename <- paste(targets$Slide, targets$Array, sep='_')
 row.names(targets) <- targets$Basename
 
@@ -130,7 +130,7 @@ if (removeEuropeanSNPs) {
 #exclude <- exclude[exclude %in% array.annot$Name]
 
 ### Output raw tables ###
-raw.betas <- getBeta(rgset)
+raw.betas <- getBeta(preprocessRaw(rgset))
 colnames(raw.betas) <- targets[colnames(raw.betas), 'Sample_Name']
 raw.betas.bed <- data.frame(annot.bed[rownames(raw.betas),], raw.betas, stringsAsFactors=F, check.names=F)
 
@@ -144,43 +144,45 @@ close(gz)
 ### Remove background ###
 norm.meth <- NULL
 message("Correcting the data...")
-#norm.meth <- preprocessENmix(rgset, bgParaEst='oob', dyeCorr=T, QCinfo=NULL, exQCsample=F, exQCcpg=F, exSample=NULL, exCpG=NULL, nCores=ncores)
-norm.meth <- preprocessNoob(rgset, offset=15, dyeCorr=T, dyeMethod='single')
+norm.meth <- preprocessENmix(rgset, bgParaEst='oob', dyeCorr='RELIC', QCinfo=NULL, exQCsample=F, exQCcpg=F, exSample=NULL, exCpG=NULL, nCores=ncores)
+#norm.meth <- preprocessNoob(rgset, offset=15, dyeCorr=T, dyeMethod='single')
 norm.meth <- preprocessSWAN(rgset, norm.meth)
 message("Data corrected.")
 
 ### Mask probes
-message("Masking unreliable values...")
-filtered.norm.meth <- norm.meth
+#message("Masking unreliable values...")
+#filtered.norm.meth <- norm.meth
 #assayDataElement(filtered.norm.meth, 'Meth')[exclude, ] <- NA
 #assayDataElement(filtered.norm.meth, 'Unmeth')[exclude, ] <- NA
 
 ## Remove measures with low detection ###
-assayDataElement(filtered.norm.meth, 'Meth')[lowQ] <- NA
-assayDataElement(filtered.norm.meth, 'Unmeth')[lowQ] <- NA
-message("Masking done.")
+#assayDataElement(filtered.norm.meth, 'Meth')[lowQ] <- NA
+#assayDataElement(filtered.norm.meth, 'Unmeth')[lowQ] <- NA
+#message("Masking done.")
 
 ### Extract genotyping probes ###
 genotype.betas <- getSnpBeta(rgset)
 colnames(genotype.betas) <- targets[colnames(genotype.betas), 'Sample_Name']
 
 ### Sex determination ###
-ratio.meth <- mapToGenome(filtered.norm.meth, mergeManifest=T)
+ratio.meth <- mapToGenome(norm.meth, mergeManifest=T)
 gender <- getSex(ratio.meth)
 if (usePredictedSex) {
-	pData(filtered.norm.meth)$predictedSex <- factor(gender$predictedSex)
+	pData(norm.meth)$predictedSex <- factor(gender$predictedSex)
 	interest.vars <- c(interest.vars, 'predictedSex')
 }
 
 ### Output preprocessed data ###
 message("Writing output...")
-processed.betas <- getBeta(filtered.norm.meth)
+processed.betas <- getBeta(norm.meth)
+processed.betas[lowQ] <- NA
 colnames(processed.betas) <- targets[colnames(processed.betas), 'Sample_Name']
 betas.bed <- data.frame(annot.bed[rownames(processed.betas),], processed.betas, stringsAsFactors=F, check.names=F)
-processed.mval <- getM(filtered.norm.meth)
+processed.mval <- getM(norm.meth)
+processed.mval[lowQ] <- NA
 colnames(processed.mval) <- targets[colnames(processed.mval), 'Sample_Name']
 mval.bed <- data.frame(annot.bed[rownames(processed.mval),], processed.mval, stringsAsFactors=F, check.names=F)
-save(filtered.norm.meth, file=file.path(wd, 'filtered_normalized_meth.RData'))
+save(norm.meth, file=file.path(wd, 'normalized_meth.RData'))
 gz <- gzfile(file.path(wd, 'filtered_normalized_betas.bed.gz'), 'w', compression=9)
 write.table(betas.bed, gz, sep="\t", quote=F, row.names=F)
 close(gz)
@@ -189,7 +191,7 @@ write.table(mval.bed, gz, sep="\t", quote=F, row.names=F)
 close(gz)
 message("Data ready in the output folder.")
 
-pdata <- pData(filtered.norm.meth)
+pdata <- pData(norm.meth)
 rownames(pdata) <- pdata$Sample_Name
 pdata.out <- pdata
 if (!usePredictedSex) {
@@ -198,5 +200,5 @@ if (!usePredictedSex) {
 write.csv(pdata.out, file.path(wd, 'extended_sample_sheet.csv'), quote=F, row.names=F)
 #o#
 
-rm('array.annot', 'betas.bed', 'crossreactive', 'lowQ', 'lowQ.probes', 'mval.bed', 'norm.meth', 'ratio.meth', 'raw.betas.bed')
+rm('array.annot', 'betas.bed', 'crossreactive', 'lowQ', 'lowQ.probes', 'mval.bed', 'ratio.meth', 'raw.betas.bed')
 gc()
