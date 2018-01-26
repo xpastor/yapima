@@ -105,6 +105,8 @@ if (length(interest.vars) != 0) interest.vars <- interest.vars[!apply(is.na(targ
 
 # Produce vector with batch variables
 batch.vars <- unlist(strsplit(batch.vars, ','))
+batch.vars <- gsub('Sentrix_ID', 'Slide', batch.vars)
+batch.vars <- gsub('Sentrix_Position', 'Array', batch.vars)
 # Remove batch variables from list of variables for analysis
 interest.vars <- interest.vars[! interest.vars %in% batch.vars]
 #o#

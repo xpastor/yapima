@@ -28,7 +28,8 @@ library(ggplot2)
 # Limma analysis
 library(limma)
 
-design.vars <- c('Slide', batch.vars, interest.vars)
+#design.vars <- c('Slide', batch.vars, interest.vars)
+design.vars <- c(batch.vars, interest.vars)
 my.formula <- paste(design.vars, collapse='+')
 my.formula <- as.formula(paste('~', my.formula))
 design <- model.matrix(my.formula, data=pdata[,design.vars, drop=F])
@@ -36,6 +37,7 @@ n.e. <- nonEstimable(design)
 design <- design[, !colnames(design) %in% n.e.]
 #no.replicates <- colnames(design)[apply(design, 2, function(x) any(table(x) == 1))]
 categorical.vars <- interest.vars[sapply(pdata[, interest.vars], class) %in% c('character', 'factor')]
+categorical.vars <- categorical.vars[!is.na(categorical.vars)]
 no.replicates <- colnames(pdata[,categorical.vars, drop=F])[apply(pdata[,categorical.vars, drop=F], 2, function(x) any(table(x) == 1))]
 if (length(no.replicates) > 0) {
 	stop(paste0('The following variables contain groups without replicates: ', paste(no.replicates, collapse=', '), ". Replace them with 'NA' or reallocate them in other groups."))
@@ -59,7 +61,7 @@ gc()
 cate.array <- c(IlluminaHumanMethylation450k='450K', IlluminaHumanMethylationEPIC='EPIC')
 
 for (comparison in interest.vars) {
-	cat(comparison)
+	cat(paste0(comparison,"\n"))
 	var.coefs <- grep(paste0('^', comparison), colnames(design), value=T)
 	# DMP analysis
 	top <- topTable(fit, coef=var.coefs, number=Inf, sort.by='none')
