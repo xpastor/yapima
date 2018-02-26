@@ -22,7 +22,8 @@ betas.sorted <- betas.pass[order(betas.sd, decreasing=T),]
 
 ## bootstrap clustering ##
 library(pvclust)
-steps <- seq(1000, 12000, 1000)
+#steps <- seq(1000, 12000, 1000)
+steps <- c(1000, 2000, 5000, 10000)
 cl <- makeCluster(ncores, type='FORK')
 clust.obj <- lapply(steps, bootstrapClustering, betas.sorted, transpose=F, nboot=10000, ncores=ncores, cl=cl)
 stopCluster(cl)
