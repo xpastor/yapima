@@ -13,16 +13,6 @@ ncores <- max(1, ncores)
 
 #### Reading in data ####
 ### Preparing targets data frame ###
-#header <- readLines(sample.annotation, n=1)
-#header <- unlist(strsplit(header, ','))
-#colClasses <- data.frame(t(rep('character', length(header))), stringsAsFactors=F)
-#colnames(colClasses) <- header
-#interest.vars <- variablesOfInterest(colClasses, batch.vars)
-#colClasses[,batch.vars] <- NA
-#colClasses[,interest.vars] <- NA
-#targets <- read.csv(sample.annotation, colClasses=colClasses, stringsAsFactors=F)
-#colnames(targets)[colnames(targets)=='Sentrix_ID'] <- 'Slide'
-#colnames(targets)[colnames(targets)=='Sentrix_Position'] <- 'Array'
 targets$Basename <- paste(targets$Slide, targets$Array, sep='_')
 row.names(targets) <- targets$Basename
 
@@ -32,6 +22,7 @@ interest.vars <- interest.vars[interest.vars %in% not.unique]
 ### Reading methylation data ###
 message("Reading in methylation files...")
 rgset <- read.metharray.exp(idat_dir, targets, extended=T, recursive=T, force=TRUE)
+sampleNames(rgset) <- pData(rgset)$Sample_Name
 message("Data read.")
 
 ### Fetching array annotation ###
@@ -62,9 +53,7 @@ if (array.type == 'IlluminaHumanMethylation450k') {
 	crossreactive <- do.call(rbind, crossreactive)
 	crossreactive <- crossreactive[,1]
 } else if (array.type == 'IlluminaHumanMethylationEPIC') {
-	#download.file('http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S221359601630071X/1-s2.0-S221359601630071X-mmc2.txt/283447/html/S221359601630071X/d122a9289e5bc82609233a2cdeac8fa4/mmc2.txt', destfile=file.path(wd, 'crossreactive_cg.txt'), method='wget', extra='--user-agent="R"')
 	crossreactive <- scan('https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4909830/bin/mmc2.txt', what='character')
-	#download.file('http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S221359601630071X/1-s2.0-S221359601630071X-mmc3.txt/283447/html/S221359601630071X/daff1031095143b45eeb59c65f1dd940/mmc3.txt', destfile=file.path(wd, 'crossreactive_ch.txt'), method='wget', extra='--user-agent="R"')
 	crossreactive <- c(crossreactive, scan('https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4909830/bin/mmc3.txt', what='character'))
 }
 
@@ -94,14 +83,8 @@ if (blacklist != '') {
 		remove <- remove[row.names(remove) %in% row.names(lowQ),]
 		lowQ[row.names(remove), colnames(remove)] <- lowQ[row.names(remove), colnames(remove)] | remove
 	}
-	rm('flag', 'remove')
-#	remove <- scan(blacklist, what='character')
-#	remove <- remove[remove %in% annot.bed$name]
-#	exclude <- c(exclude, remove)
-#	exclude <- c(exclude, flag)
-#	annot.bed[remove, 'score'] <- annot.bed[remove, 'score'] + 4
-#	annot.bed[flag, 'score'] <- annot.bed[flag, 'score'] + 4
 #o#
+	rm('flag', 'remove')
 }
 
 ### Flag polymorphic probes ###
@@ -112,8 +95,7 @@ if (removeEuropeanSNPs) {
 		polymorphic <- xlsxToR(file.path(wd, 'polymorphic.xlsx'), keep_sheets='Polymorphic CpGs & SNPs at SBE', header=T)
 		polymorphic[,grep('AF', colnames(polymorphic))] <- apply(polymorphic[,grep('AF', colnames(polymorphic))], 2, as.numeric)
 	} else if (array.type == 'IlluminaHumanMethylationEPIC') {
-	download.file('https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4909830/bin/mmc1.txt', destfile=file.path(wd, 'polymorphic.txt'))
-	#download.file('http://www.sciencedirect.com/science/MiamiMultiMediaURL/1-s2.0-S221359601630071X/1-s2.0-S221359601630071X-mmc1.txt/283447/html/S221359601630071X/69a1cbea394507150394a9faaef9d876/mmc1.txt', destfile=file.path(wd, 'polymorphic.txt'), method='wget', extra='--user-agent="R"')
+		download.file('https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4909830/bin/mmc1.txt', destfile=file.path(wd, 'polymorphic.txt'))
 		polymorphic <- read.delim(file.path(wd, 'polymorphic.txt'), header=T, stringsAsFactors=F)
 	}
 	af <- 1/ncol(rgset)
@@ -125,13 +107,9 @@ if (removeEuropeanSNPs) {
 	exclude <- c(exclude, european.snps)
 }
 
-# Exclude probes
-#exclude <- unique(exclude[!is.na(exclude)])
-#exclude <- exclude[exclude %in% array.annot$Name]
-
 ### Output raw tables ###
 raw.betas <- getBeta(preprocessRaw(rgset))
-colnames(raw.betas) <- targets[colnames(raw.betas), 'Sample_Name']
+#colnames(raw.betas) <- targets[colnames(raw.betas), 'Sample_Name']
 raw.betas.bed <- data.frame(annot.bed[rownames(raw.betas),], raw.betas, stringsAsFactors=F, check.names=F)
 
 save(rgset, file=file.path(wd, 'rgset.RData'))
@@ -144,25 +122,21 @@ close(gz)
 ### Remove background ###
 norm.meth <- NULL
 message("Correcting the data...")
-norm.meth <- preprocessENmix(rgset, bgParaEst='oob', dyeCorr='RELIC', QCinfo=NULL, exQCsample=F, exQCcpg=F, exSample=NULL, exCpG=NULL, nCores=ncores)
+norm.meth <- preprocessENmix(rgset, bgParaEst='est', dyeCorr='RELIC', QCinfo=NULL, exQCsample=F, exQCcpg=F, exSample=NULL, exCpG=NULL, nCores=ncores)
 #norm.meth <- preprocessNoob(rgset, offset=15, dyeCorr=T, dyeMethod='single')
-norm.meth <- preprocessSWAN(rgset, norm.meth)
+#norm.meth <- preprocessSWAN(rgset, norm.meth)
+processed.betas <- rcp(norm.meth)
 message("Data corrected.")
 
 ### Mask probes
 #message("Masking unreliable values...")
-#filtered.norm.meth <- norm.meth
-#assayDataElement(filtered.norm.meth, 'Meth')[exclude, ] <- NA
-#assayDataElement(filtered.norm.meth, 'Unmeth')[exclude, ] <- NA
 
 ## Remove measures with low detection ###
-#assayDataElement(filtered.norm.meth, 'Meth')[lowQ] <- NA
-#assayDataElement(filtered.norm.meth, 'Unmeth')[lowQ] <- NA
 #message("Masking done.")
 
 ### Extract genotyping probes ###
 genotype.betas <- getSnpBeta(rgset)
-colnames(genotype.betas) <- targets[colnames(genotype.betas), 'Sample_Name']
+#colnames(genotype.betas) <- targets[colnames(genotype.betas), 'Sample_Name']
 
 ### Sex determination ###
 ratio.meth <- mapToGenome(norm.meth, mergeManifest=T)
@@ -174,25 +148,26 @@ if (usePredictedSex) {
 
 ### Output preprocessed data ###
 message("Writing output...")
-processed.betas <- getBeta(norm.meth)
+#processed.betas <- getBeta(norm.meth)
 processed.betas[lowQ] <- NA
-colnames(processed.betas) <- targets[colnames(processed.betas), 'Sample_Name']
+#colnames(processed.betas) <- targets[colnames(processed.betas), 'Sample_Name']
 betas.bed <- data.frame(annot.bed[rownames(processed.betas),], processed.betas, stringsAsFactors=F, check.names=F)
-processed.mval <- getM(norm.meth)
+#processed.mval <- getM(norm.meth)
+processed.mval <- logit2(processed.betas)
 processed.mval[lowQ] <- NA
-colnames(processed.mval) <- targets[colnames(processed.mval), 'Sample_Name']
+#colnames(processed.mval) <- targets[colnames(processed.mval), 'Sample_Name']
 mval.bed <- data.frame(annot.bed[rownames(processed.mval),], processed.mval, stringsAsFactors=F, check.names=F)
-save(norm.meth, file=file.path(wd, 'normalized_meth.RData'))
-gz <- gzfile(file.path(wd, 'filtered_normalized_betas.bed.gz'), 'w', compression=9)
+save(norm.meth, file=file.path(wd, 'bgCorr_meth.RData'))
+gz <- gzfile(file.path(wd, 'normalized_betas.bed.gz'), 'w', compression=9)
 write.table(betas.bed, gz, sep="\t", quote=F, row.names=F)
 close(gz)
-gz <- gzfile(file.path(wd, 'filtered_normalized_M.bed.gz'), 'w', compression=9)
+gz <- gzfile(file.path(wd, 'normalized_M.bed.gz'), 'w', compression=9)
 write.table(mval.bed, gz, sep="\t", quote=F, row.names=F)
 close(gz)
 message("Data ready in the output folder.")
 
 pdata <- pData(norm.meth)
-rownames(pdata) <- pdata$Sample_Name
+#rownames(pdata) <- pdata$Sample_Name
 pdata.out <- pdata
 if (!usePredictedSex) {
 	pdata.out$predictedSex <- factor(gender$predictedSex)

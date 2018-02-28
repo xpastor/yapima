@@ -38,7 +38,7 @@ plotQC <- function(qc, badSampleCutoff = 10.5, main=NULL)
 }
 pdf(file.path(qcdir, 'median_intensities.pdf'))
 plotQC(qc.raw, main='Raw intensities')
-plotQC(qc.norm, main='Normalized intensities')
+plotQC(qc.norm, main='Background corrected intensities')
 dev.off()
 
 ### Bisulfite conversion plots ###
