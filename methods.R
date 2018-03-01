@@ -45,7 +45,7 @@ if (removeEuropeanSNPs) {
 }
 
 text <- paste(text,
-	'The intensities were adjusted with the \'ENmix\' background correction available in the \'ENmix\' package, using the out-of-band probes to estimate the background and enabling dye bias correction and normalized applying the \'SWAN\' normalization mehtod (', .short_citation('minfi', 2), ').')
+	'The intensities were adjusted with the \'ENmix\' package (', .short_citation('ENmix', 1), ') using combined methylated and unmethylated intensities to estimate background distribution parameters separately for each color channel and each probe type, and enabling \'RELIC\' dye bias correction (' .short_citation('ENmix', 4), '). Methylation values were normalized applying the \'RCP\' normalization mehtod also available in \'ENmix\' (', .short_citation('ENmix', 2), ').')
 #norm.meth <- preprocessENmix(rgset, bpParaEst='oob', dyeCorr=T, QCinfo=NULL, exQCsample=F, exQCcpg=F, exSample=NULL, exCpG=NULL, nCores=ncores)
 
 text <- paste(text,

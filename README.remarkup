@@ -18,47 +18,43 @@ The SampleSheet will always be provided by the core facility, one for each array
 The basic SampleSheet is a comma delimited file that always must have the following columns:
 
 * Sample_Name
-* Sample_Well
-* Sample_Plate
-* Sample_Group
-* Pool_ID
 * Sentrix_ID: array barcode must correspond to its actual value for proper identification of the idat files
 * Sentrix_Position: array position (6x2 disposition of the 12 samples) must correspond to the actual position of the sample in the array in order to properly identify the idat files; it must follow the following pattern: R0[1-8]C0[12]
 
 It is mandatory that the columns //Sample_Name//, //Sentrix_ID// and //Sentrix_Position// contain proper values. For the other columns, if no values are provided they must be empty (i.e. no 'NA' values), so the final structure of the file must be something like this:
 
 ```
-Sample_Name,Sample_Well,Sample_Plate,Sample_Group,Pool_ID,Sentrix_ID,Sentrix_Position  
-Normal1,,,,,1234567890,R01C01  
-Normal2,,,,,1234567890,R02C01  
-Normal3,,,,,1234567890,R03C01  
-Normal4,,,,,1234567890,R04C01  
-Normal5,,,,,1234567890,R05C01  
-Normal6,,,,,1234567890,R06C01  
-Tumor1,,,,,1234567890,R01C02  
-Tumor2,,,,,1234567890,R02C02  
-Tumor3,,,,,1234567890,R03C02  
-Tumor4,,,,,1234567890,R04C02  
-Tumor5,,,,,1234567890,R05C02  
-Tumor6,,,,,1234567890,R06C02  
+Sample_Name,Sentrix_ID,Sentrix_Position  
+Normal1,1234567890,R01C01  
+Normal2,1234567890,R02C01  
+Normal3,1234567890,R03C01  
+Normal4,1234567890,R04C01  
+Normal5,1234567890,R05C01  
+Normal6,1234567890,R06C01  
+Tumor1,1234567890,R01C02  
+Tumor2,1234567890,R02C02  
+Tumor3,1234567890,R03C02  
+Tumor4,1234567890,R04C02  
+Tumor5,1234567890,R05C02  
+Tumor6,1234567890,R06C02  
 ```
 
 Optionally, other columns of interest for the differential methylation analysis or the correction of batch effects can be added. In such case, if the value of a sample is unknown 'NA' must be provided. The values of categorical variables can not be exclusively numerical (i.e.: absence/presence of a mutation should be referred as something like 'ref'/'mut', instead of 0/1), although numerical values may be used if other values are in string format. However, this numerical values will lose their numerical properties. Also, columns with numerical variables can include only numerical values or 'NA'.
 
 ```
-Sample_Name,Sample_Well,Sample_Plate,Sample_Group,Pool_ID,Sentrix_ID,Sentrix_Position,Group,Hospital  
-Normal1,,,,,1234567890,R01C01,Normal,AAA  
-Normal2,,,,,1234567890,R02C01,Normal,AAA  
-Normal3,,,,,1234567890,R03C01,Normal,BBB  
-Normal4,,,,,1234567890,R04C01,Normal,NA  
-Normal5,,,,,1234567890,R05C01,Normal,BBB  
-Normal6,,,,,1234567890,R06C01,Normal,BBB  
-Tumor1,,,,,1234567890,R01C02,Tumor,BBB  
-Tumor2,,,,,1234567890,R02C02,Tumor,BBB  
-Tumor3,,,,,1234567890,R03C02,Tumor,AAA  
-Tumor4,,,,,1234567890,R04C02,Tumor,NA  
-Tumor5,,,,,1234567890,R05C02,Tumor,AAA  
-Tumor6,,,,,1234567890,R06C02,Tumor,BBB  
+Sample_Name,Sentrix_ID,Sentrix_Position,Group,Hospital  
+Normal1,1234567890,R01C01,Normal,AAA  
+Normal2,1234567890,R02C01,Normal,AAA  
+Normal3,1234567890,R03C01,Normal,BBB  
+Normal4,1234567890,R04C01,Normal,NA  
+Normal5,1234567890,R05C01,Normal,BBB  
+Normal6,1234567890,R06C01,Normal,BBB  
+Tumor1,1234567890,R01C02,Tumor,BBB  
+Tumor2,1234567890,R02C02,Tumor,BBB  
+Tumor3,1234567890,R03C02,Tumor,AAA  
+Tumor4,1234567890,R04C02,Tumor,NA  
+Tumor5,1234567890,R05C02,Tumor,AAA  
+Tumor6,1234567890,R06C02,Tumor,BBB  
 ```
 
 === Optional inputs
@@ -78,26 +74,26 @@ The data is loaded into the R environment using the //minfi// (1) package from b
 * 2: crossreactive probes as described by Chen et al (2) for the IlluminaHumanMethylation450k array, and by McCartney et al (3) for the IlluminaHumanMethylationEPIC array
 * 1: if selected, probes with SNPs at the SBE position that could be present in at least one sample regarding to its allele frequency in european populations as estimated by Chen et al (2) for the IlluminaHumanMethylation450k array, and by McCartney et al (3) for the IlluminaHumanMethylationEPIC array
 
-Afterwards, //ENmix// background correction (4) is performed and SWAN normalization (5) is applied. Measures with low detection are replaced by 'NA'.
+Afterwards, //ENmix// 'est' background correction (4) and 'RELIC' dye bias correction (5) are performed, and RCP normalization (6) is applied. Measures with low detection are replaced by 'NA'.
 
 === Probe selection
-In some cases it is of interest to try to define some classifier lacking of biological information. To achieve that the pipelines provide the most stable clustering among different probe sets based on bootstraping clustering using the //pvclust// package (6).
+In some cases it is of interest to try to define some classifier lacking of biological information. To achieve that the pipelines provide the most stable clustering among different probe sets based on bootstraping clustering using the //pvclust// package (7).
 
 This is currently the most challenging (and maybe controversial) part of the pipeline and quite probably needs to be discussed.
 
 This is by far the longest step and may take several hours, processors and a good amount of memory to accomplish it, so unless it is of real interest it may be more convenient to switch it off.
 
 === Copy Number Variation
-The CNV analysis is done using the //conumee// (7) package from bioconductor. This is one of the longest parts of the pipeline. In general, for 20 samples the basic execution of the pipeline (normalization, batch correction and differential methylation analysis) may take around 10 minutes, but the CNV analysis may need other 45 minutes, so when executing the pipeline for exploratory purposes it may be convenient to switch off this part.
+The CNV analysis is done using the //conumee// (8) package from bioconductor. This is one of the longest parts of the pipeline. In general, for 20 samples the basic execution of the pipeline (normalization, batch correction and differential methylation analysis) may take around 10 minutes, but the CNV analysis may need other 45 minutes, so when executing the pipeline for exploratory purposes it may be convenient to switch off this part.
 
 //conumee// requires a sample set without chromosomal aberrations. For the IlluminaHumanMethylation450k array //yapima// uses the samples provided in the //CopyNumber450kData// package. For the //IlluminaHumanMethylationEPIC// array there are not so many samples available yet, so it downloads 'GSM2309177', 'GSM2309178', 'GSM2309179' and 'GSM2309172' from GEO.
 
 This analysis may provide a good idea about chromosomal aberrations although it shouldn't replace an analysis at genomic level, and it proofs to be of value to detect sample swaps when compared to CNV analysis using sequencing data.
 
 === Differential Methylation Analysis
-The analysis of differentially methylated positions (DMP) is done using the //[limma](https://bioconductor.org/packages/release/bioc/html/limma.html)// (8) package from bioconductor and following the procedures detailed by the authors. It is limited to an unpaired analysis and reports tables with P-values and adjusted P-values (Benjamini & Hochberg (9)), and take as variables of interest all the extra columns of the SampleSheet except the provided in the **BATCH_VARS** variable, although these are also included in the linear model to account for possible confounding factors.
+The analysis of differentially methylated positions (DMP) is done using the //[limma](https://bioconductor.org/packages/release/bioc/html/limma.html)// (9) package from bioconductor and following the procedures detailed by the authors. It is limited to an unpaired analysis and reports tables with P-values and adjusted P-values (Benjamini & Hochberg (10)), and take as variables of interest all the extra columns of the SampleSheet except the provided in the **BATCH_VARS** variable, although these are also included in the linear model to account for possible confounding factors.
 
-The detection of differentially methylated regions (DMR) is done using the //[DMRcate](https://www.bioconductor.org/packages/release/bioc/html/DMRcate.html)// (10) package from bioconductor. For two groups comparisons, the t statistics from the DMP analysis are used, and the beta log fold change is computed running the standard limma workflow on the beta values. For comparisons with more than two groups the squared F statistics from the DMP analysis are provided and the beta log fold change is set to 0. All the other parameters are left as default.
+The detection of differentially methylated regions (DMR) is done using the //[DMRcate](https://www.bioconductor.org/packages/release/bioc/html/DMRcate.html)// (11) package from bioconductor. For two groups comparisons, the t statistics from the DMP analysis are used, and the beta log fold change is computed running the standard limma workflow on the beta values. For comparisons with more than two groups the squared F statistics from the DMP analysis are provided and the beta log fold change is set to 0. All the other parameters are left as default.
 
 == Output
 === Basic output
@@ -182,7 +178,7 @@ Depending on the type of analysis the requirements for the analysis may vary a l
 The most resources consuming processes are the CNV analysis and the probe selection. In the first case it just means a considerable increase on the total time needed for the analysis but without much penalization on the computational requirements. Regarding the probe selection, the computational requirements scale up depending on the number of processors used for the analysis, since for each processor a copy of the contents in the memory is produced, multiplying the amount of memory needed for the analysis. Additionally, this is a extremely slow step, so taken all together, unless it's of real interest this option souldn't be switched on.
 
 === Dependencies
-The current version of yapima requires R-3.3 (>=3.3.1 recommended) and Bioconductor 3.4. The following packages and their dependencies must be installed:
+The current version of yapima requires R-3.4.2 and Bioconductor 3.6. The following packages and their dependencies must be installed:
 * biomaRt
 * cluster
 * ComplexHeatmap
@@ -211,20 +207,22 @@ The current version of yapima requires R-3.3 (>=3.3.1 recommended) and Bioconduc
 
 [(3)](http://www.sciencedirect.com/science/article/pii/S221359601630071X) McCartney DL, Walker RM, Morris SW, McIntosh AM, Porteous DJ and Evans KL (2016). //Identification of polymorphic and off-target probe binding sites on the Illumina Infinium MethylationEPIC BeadChip.// _Genomics Data_, *9*, pp. 22-4.
 
-[(4)](http://nar.oxfordjournals.org/content/44/3/e20.long) Xu Z, Niu L, Li L and Taylor J (2015). //ENmix: a novel background correction method for Illumina HumanMethylation450 BeadChip// _Nucleic Acids Research_, *44*(3):e20.
+[(4)](https://academic.oup.com/nar/article/44/3/e20/2503051) Xu Z, Niu L, Li L and Taylor J (2015). //ENmix: a novel background correction method for Illumina HumanMethylation450 BeadChip.// _Nucleic Acids Research_, *44*(3):e20.
 
-[(5)](http://doi.org/10.1186/gb-2012-13-6-r44) Maksimovic J, Gordon L and Oshlack A (2012). //SWAN: Subset quantile Within-Array Normalization for Illumina Infinium HumanMethylation450 BeadChips.// _Genome Biology_, *13*(6), pp. R44.
+[(5)](https://bmcgenomics.biomedcentral.com/articles/10.1186/s12864-016-3426-3) Xu Z, Langie S, De Boever P, Taylor J and Niu L (2017). //RELIC: a novel dye-bias correction method for Illumina Methylation BeadChip// _BMC Genomics_, *18*(4).
 
-[(6)](http://CRAN.R-project.org/package=pvclust) Suzuki R and Shimodaira H (2014). //pvclust: Hierarchical Clustering with P-Values via Multiscale Bootstrap Resampling//. R package version 1.3-2.
+[(6)](https://academic.oup.com/bioinformatics/article/32/17/2659/2450739) Niu L, Xu Z and Taylor J (2016). //RCP: a novel probe design bias correction method for Illumina Methylation BeadChip.// _Bioinformatics_, *32*(17).
 
-[(7)](http://www.bioconductor.org/packages/release/bioc/html/conumee.html) Hovestadt V, Zapatka M (2015). //conumee: Enhanced copy-number variation analysis using Illumina 450k methylation arrays.// R package version 0.99.4.
+[(7)](http://CRAN.R-project.org/package=pvclust) Suzuki R and Shimodaira H (2014). //pvclust: Hierarchical Clustering with P-Values via Multiscale Bootstrap Resampling.//. R package version 1.3-2.
 
-[(8)](http://nar.oxfordjournals.org/content/43/7/e47.long) Ritchie ME, Phipson B, Wu D, Hu Y, Law CW, Shi W and Smyth GK (2015). //limma powers differential expression analyses for RNA-sequencing and microarray studies.// _Nucleic Acids Research_, *43*(7), pp. e47.
+[(8)](http://www.bioconductor.org/packages/release/bioc/html/conumee.html) Hovestadt V, Zapatka M (2015). //conumee: Enhanced copy-number variation analysis using Illumina 450k methylation arrays.// R package version 0.99.4.
 
-[(9)](http://www.jstor.org/stable/2346101) Benjamini Y and Hochberg Y (1995). //Controlling the false discovery rate: a practical and powerful approach to multiple testing.// _Journal of the Royal Statistical Society Series B_, *57*, pp. 289-300.  
+[(9)](http://nar.oxfordjournals.org/content/43/7/e47.long) Ritchie ME, Phipson B, Wu D, Hu Y, Law CW, Shi W and Smyth GK (2015). //limma powers differential expression analyses for RNA-sequencing and microarray studies.// _Nucleic Acids Research_, *43*(7), pp. e47.
 
-[(10)](https://epigeneticsandchromatin.biomedcentral.com/articles/10.1186/1756-8935-8-6) Peters TJ, Buckley MJ, Statham AL, Pidsley R, Samaras K, Lord RV, Clark SJ and Molloy PL (2015). //De novo identification of differentially methylated regions in the human genome.// Epigenetics & Chromatin, 8:6
+[(10)](http://www.jstor.org/stable/2346101) Benjamini Y and Hochberg Y (1995). //Controlling the false discovery rate: a practical and powerful approach to multiple testing.// _Journal of the Royal Statistical Society Series B_, *57*, pp. 289-300.  
 
-[(11)](http://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-11-587) Du P, Zhang X, Huang C, Jafari N, Kibbe WA, Hou L and Lin SM (2010). //Comparison of Beta-value and M-value methods for quantifying methylation levels by microarray analysis.// _BMC Bioinformatics_, *11*, pp. 587.  
+[(11)](https://epigeneticsandchromatin.biomedcentral.com/articles/10.1186/1756-8935-8-6) Peters TJ, Buckley MJ, Statham AL, Pidsley R, Samaras K, Lord RV, Clark SJ and Molloy PL (2015). //De novo identification of differentially methylated regions in the human genome.// Epigenetics & Chromatin, 8:6
+
+[(12)](http://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-11-587) Du P, Zhang X, Huang C, Jafari N, Kibbe WA, Hou L and Lin SM (2010). //Comparison of Beta-value and M-value methods for quantifying methylation levels by microarray analysis.// _BMC Bioinformatics_, *11*, pp. 587.  
 ___
 This pipeline has been developed by Xavier Pastor <x.pastorhostench@dkfz-heidelberg.de> at DKFZ.

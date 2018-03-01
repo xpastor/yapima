@@ -13,10 +13,13 @@ if (array.type == 'IlluminaHumanMethylation450k') {
 }
 
 ### ENmix background correction ###
-biblib <- c(biblib, citation('ENmix'))
+biblib <- c(biblib, citation('ENmix'))[1]
 
-### SWAN normalization ###
-biblib <- c(biblib, citation('minfi')[2])
+### ENmix 'RELIC' dye bias correction ###
+biblib <- c(biblib, citation('ENmix'))[4]
+
+### ENmix 'RCP' normalization ###
+biblib <- c(biblib, citation('ENmix'))[2]
 
 ### Boostrap clustering ###
 if (probeSelection) biblib <- c(biblib, citation('pvclust'))
