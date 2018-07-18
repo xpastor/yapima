@@ -39,13 +39,14 @@ text <- paste(text, 'The crossreactive probes', flag.ref, 'were flagged.')
 		'A list of blacklisted probes was also flagged (describe origin of blacklisted probes).')
  }
 
-if (removeEuropeanSNPs) {
+if (removeSNPs) {
+	if (is.null(population) | population == '') population <- 'all'
 	text <- paste0(text,
-		' Probes with the single base extension (SBE) position overlaping SNPs with allele frequency higher than ', round(1/nrow(targets), digits=2),' in european populations ', flag.ref, ' were also flagged (n=', length(european.snps), ').')
+		' Probes with the single base extension (SBE) position overlaping SNPs with allele frequency higher than 0.005 in ', population,' populations ', flag.ref, ' were also flagged (n=', num_snps, ').')
 }
 
 text <- paste(text,
-	'The intensities were adjusted with the \'ENmix\' package (', .short_citation('ENmix', 1), ') using combined methylated and unmethylated intensities to estimate background distribution parameters separately for each color channel and each probe type, and enabling \'RELIC\' dye bias correction (' .short_citation('ENmix', 4), '). Methylation values were normalized applying the \'RCP\' normalization mehtod also available in \'ENmix\' (', .short_citation('ENmix', 2), ').')
+	'The intensities were adjusted with the \'ENmix\' package (', .short_citation('ENmix', 1), ') using combined methylated and unmethylated intensities to estimate background distribution parameters separately for each color channel and each probe type, and enabling \'RELIC\' dye bias correction (', .short_citation('ENmix', 4), '). Methylation values were normalized applying the \'RCP\' normalization mehtod also available in \'ENmix\' (', .short_citation('ENmix', 2), ').')
 #norm.meth <- preprocessENmix(rgset, bpParaEst='oob', dyeCorr=T, QCinfo=NULL, exQCsample=F, exQCcpg=F, exSample=NULL, exCpG=NULL, nCores=ncores)
 
 text <- paste(text,

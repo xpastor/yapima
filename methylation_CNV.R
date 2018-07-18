@@ -3,7 +3,7 @@
 ## qcdir
 ## exclude
 ## raw.betas
-## filtered.norm.meth
+## norm.meth
 ## processed.betas
 ## pdata
 ## genotype.betas
@@ -20,10 +20,10 @@ library(conumee)
 cnv.dir <- file.path(qcdir, 'CNV_report')
 dir.create(cnv.dir, recursive=T)
 #load(file.path(wd, 'filtered_normalized_meth.RData'))
-cnv.intensity <- getMeth(filtered.norm.meth) + getUnmeth(filtered.norm.meth)
+cnv.intensity <- getMeth(norm.meth) + getUnmeth(norm.meth)
 colnames(cnv.intensity) <- paste(targets[colnames(cnv.intensity), 'Sample_Name'], 'intensity', sep='.')
 #annotation(filtered.norm.meth)$array == 'IlluminaHumanMethylation450k'
-rm(filtered.norm.meth)
+#rm(norm.meth)
 if (array.type == 'IlluminaHumanMethylation450k') {
 	library(CopyNumber450kData)
 	data(RGcontrolSetEx)
@@ -41,9 +41,9 @@ if (array.type == 'IlluminaHumanMethylation450k') {
 	RGcontrolSetEx <- read.metharray(geo.files, extended=T)
 	unlink(geo.idatDir, recursive=T, force=T)
 }
-#controls.norm <- preprocessENmix(RGcontrolSetEx)
-controls.norm <- preprocessNoob(RGcontrolSetEx, offset=15, dyeCorr=T, dyeMethod='single')
-controls.norm <- preprocessSWAN(RGcontrolSetEx, mSet=controls.norm)
+controls.norm <- preprocessENmix(RGcontrolSetEx, bgParaEst='est', dyeCorr='RELIC', exQCsample=F, exQCcpg=F, ncores=ncores)
+#controls.norm <- preprocessENmix(RGcontrolSetEx, offset=15, dyeCorr=T, dyeMethod='single')
+#controls.norm <- preprocessSWAN(RGcontrolSetEx, mSet=controls.norm)
 
 exclude <- unique(exclude)
 exclude.gr <- array.annot.gr[exclude]

@@ -20,9 +20,9 @@ dev.width <- .get_dev_width(raw.betas, name='Density')
 
 ### Median intensities plot ###
 qc.raw <- getQC(preprocessRaw(rgset))
-row.names(qc.raw) <- row.names(pdata)[match(row.names(qc.raw), pdata$Basename)]
+#row.names(qc.raw) <- row.names(pdata)[match(row.names(qc.raw), pdata$Basename)]
 qc.norm <- DataFrame(mMed=apply(log2(getMeth(norm.meth)), 2, median, na.rm=T), uMed=apply(log2(getUnmeth(norm.meth)), 2, median, na.rm=T))
-row.names(qc.norm) <- row.names(pdata)[match(row.names(qc.norm), pdata$Basename)]
+#row.names(qc.norm) <- row.names(pdata)[match(row.names(qc.norm), pdata$Basename)]
 plotQC <- function(qc, badSampleCutoff = 10.5, main=NULL)
 {
 	meds <- rowMeans(as.matrix(qc))

@@ -72,7 +72,7 @@ The data is loaded into the R environment using the //minfi// (1) package from b
 * 8: probes with low quality in at least half of the samples in a cohort
 * 4: probes provided in **BLACKLIST**
 * 2: crossreactive probes as described by Chen et al (2) for the IlluminaHumanMethylation450k array, and by McCartney et al (3) for the IlluminaHumanMethylationEPIC array
-* 1: if selected, probes with SNPs at the SBE position that could be present in at least one sample regarding to its allele frequency in european populations as estimated by Chen et al (2) for the IlluminaHumanMethylation450k array, and by McCartney et al (3) for the IlluminaHumanMethylationEPIC array
+* 1: if selected, probes with SNPs at the CpG or SBE position that with an allele frequency of 0.005 in the selected population, as estimated by Chen et al (2) for the IlluminaHumanMethylation450k array, and by McCartney et al (3) for the IlluminaHumanMethylationEPIC array
 
 Afterwards, //ENmix// 'est' background correction (4) and 'RELIC' dye bias correction (5) are performed, and RCP normalization (6) is applied. Measures with low detection are replaced by 'NA'.
 

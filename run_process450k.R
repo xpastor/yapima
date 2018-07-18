@@ -73,10 +73,17 @@ if (!is.logical(diffMeth)) {
 	stop("\n\t'diffMeth' must be a valid R boolean: T, F, TRUE or FALSE.")
 }
 
-if (!is.logical(removeEuropeanSNPs)) {
-	stop("\n\t'removeEuropeanSNPs' must be a valid R boolean: T, F, TRUE or FALSE.")
+if (!is.logical(removeSNPs)) {
+	stop("\n\t'removeSNPs' must be a valid R boolean: T, F, TRUE or FALSE.")
 }
-
+if (removeSNPs) {
+	if (is.null(population)) population <- ''
+	populations <- c('', 'AFR', 'AMR', 'ASN', 'EAS', 'EUR', 'SAS')
+	if (!(population %in% populations)) {
+		stop(paste0(population, ' is not a valid population. Specify one of ', paste0(populations, collapse=', '), '.'))
+	}
+}
+	
 if (is.na(ncores)) {
 	stop("'ncores' must be integer.")
 }

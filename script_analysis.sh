@@ -51,14 +51,16 @@ fi
 
 gawk '/# Load libraries/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
 
+if isOn $REMOVE_SNPS
+then
+	gawk '/# Process SNPs/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
+fi
+
+gawk '/# Load crossreactive/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
+
 if [[ -n $BLACKLIST ]]
 then
 	gawk '/# Load blacklist/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R | sed 's/^\s*//g'
-fi
-
-if isOn $REMOVE_EUROPEAN_SNPS
-then
-	gawk '/# Process SNPs/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
 fi
 
 gawk '/# Output raw/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
