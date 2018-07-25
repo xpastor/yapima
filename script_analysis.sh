@@ -9,7 +9,7 @@ isOn () {
 	return $status
 }
 
-echo -e "#!/usr/bin/env $RSCRIPT_BIN\n"
+echo -e "#!/usr/bin/env Rscript\n"
 echo -e "# Variables initialization"
 echo -e "idat_dir <- '$IDAT_DIR'"
 echo -e "sample.annotation <- '$SAMPLE_ANNOTATION'"

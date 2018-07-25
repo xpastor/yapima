@@ -9,8 +9,8 @@ PBS_RESOURCES="walltime=3:00:00,nodes=1:ppn=$NCORES,mem=10g"
 #PBS_RESOURCES="walltime=10:00:00,nodes=1:ppn=$NCORES,mem=121g -q highmem" # for jobs with more than 120 gb
 CLUSTER_EO=/ibios/co02/xavier/eo/yapima
 
-### Binaries ###
-RSCRIPT_BIN=/ibios/tbi_cluster/13.1/x86_64/R/R-3.3.1/bin/Rscript
+### Modules ###
+R_MOD=R/3.5.0
 
 ### Steps ###
 # The variables must take an R boolean value (T, TRUE, F or FALSE) #

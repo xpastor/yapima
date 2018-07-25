@@ -17,39 +17,20 @@ library(GenomicRanges)
 ### CNV analysis ###
 message('Running CNV analysis...')
 library(conumee)
+library(CopyNeutralIMA)
 cnv.dir <- file.path(qcdir, 'CNV_report')
 dir.create(cnv.dir, recursive=T)
 #load(file.path(wd, 'filtered_normalized_meth.RData'))
 cnv.intensity <- getMeth(norm.meth) + getUnmeth(norm.meth)
 colnames(cnv.intensity) <- paste(targets[colnames(cnv.intensity), 'Sample_Name'], 'intensity', sep='.')
-#annotation(filtered.norm.meth)$array == 'IlluminaHumanMethylation450k'
-#rm(norm.meth)
-if (array.type == 'IlluminaHumanMethylation450k') {
-	library(CopyNumber450kData)
-	data(RGcontrolSetEx)
-#annotation(filtered.norm.meth)$array == 'IlluminaHumanMethylationEPIC'
-} else if (array.type == 'IlluminaHumanMethylationEPIC') {
-	library(GEOquery)
-	geos <- c('GSM2309177', 'GSM2309178', 'GSM2309179', 'GSM2309172', 'GSM2309180', 'GSM2309181', 'GSM2309182', 'GSM2309183', 'GSM2309184')
-	geo.idatDir <- file.path(cnv.dir, 'idat')
-	dir.create(geo.idatDir, recursive=T)
-	sapply(geos, getGEOSuppFiles, makeDirectory=F, baseDir=geo.idatDir)
-#	sapply(geos, getGEOidat, makeDirectory=F, baseDir=geo.idatDir)
-	geo.files <- list.files(geo.idatDir, full.names=T)
-	sapply(geo.files, gunzip)
-	geo.files <- list.files(geo.idatDir, pattern='_Red', full.names=T)
-	RGcontrolSetEx <- read.metharray(geo.files, extended=T)
-	unlink(geo.idatDir, recursive=T, force=T)
-}
-controls.norm <- preprocessENmix(RGcontrolSetEx, bgParaEst='est', dyeCorr='RELIC', exQCsample=F, exQCcpg=F, ncores=ncores)
-#controls.norm <- preprocessENmix(RGcontrolSetEx, offset=15, dyeCorr=T, dyeMethod='single')
-#controls.norm <- preprocessSWAN(RGcontrolSetEx, mSet=controls.norm)
+RGsetCtrl <- getCopyNeutralRGSet(array.type)
+MsetCtrl <- preprocessENmix(RGsetCtrl, bgParaEst='est', dyeCorr='RELIC', exQCsample=F, exQCcpg=F, nCores=ncores)
 
 exclude <- unique(exclude)
 exclude.gr <- array.annot.gr[exclude]
 
 cnv <- CNV.load(as.data.frame(cnv.intensity), names=sub('\\.intensity$', '', colnames(cnv.intensity)))
-cnv.controls <- CNV.load(controls.norm)
+cnv.controls <- CNV.load(MsetCtrl)
 conumee.array <- c(IlluminaHumanMethylation450k='450k', IlluminaHumanMethylationEPIC='EPIC')
 cnv.annot <- CNV.create_anno(exclude_regions=exclude.gr, chrXY=T, array_type=conumee.array[array.type])
 for (pid in names(cnv)) {

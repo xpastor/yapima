@@ -27,7 +27,7 @@ source $CONFIG_FILE
 if [[ "$vflag" == 1 ]]
 then
 	grep -v '###' $CONFIG_FILE   ### FIX ME
-	printf "%s\n" "`RSCRIPT_BIN | head -n1`"
+	printf "%s\n" "`Rscript | head -n1`"
 fi
 
 if [ ! -d $PIPELINE_DIR ]

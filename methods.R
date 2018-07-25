@@ -1,4 +1,4 @@
-text <- "The Illumina Infinium methylation array analysis was done using the \'yapima\' pipeline developed by Xavier Pastor (x.pastorhostench@dkfz-heidelberg.de) at DKFZ.\n\n"
+text <- "The Illumina Infinium methylation array analysis was done using the \'yapima\' pipeline developed by Xavier Pastor (xavier.pastor@compbio-dev) at DKFZ.\n\n"
 
 .short_citation <- function(package, idx=1)
 {

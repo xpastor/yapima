@@ -3,6 +3,8 @@
 source $CONFIG_FILE
 #set -x
 
+module load $R_MOD
+
 # Redefine the 0/1 switch to the R boolean values
 RUN_CNV=`echo $RUN_CNV | tr 01 FT`
 RUN_PROBE_SELECTION=`echo $RUN_PROBE_SELECTION | tr 01 FT`
@@ -13,7 +15,6 @@ USE_PREDICTED_SEX=`echo $USE_PREDICTED_SEX | tr 01 FT`
 # Export environment variables for R execution
 export NCORES
 export PIPELINE_DIR
-export RSCRIPT_BIN
 export RUN_CNV
 export RUN_PROBE_SELECTION
 export RUN_DIFFERENTIAL_METHYLATION
@@ -27,7 +28,7 @@ export USE_PREDICTED_SEX
 export BATCH_VARS
 export SEED
 
-$RSCRIPT_BIN $PIPELINE_DIR/run_process450k.R $PIPELINE_DIR/config_yapima.R
+Rscript $PIPELINE_DIR/run_process450k.R $PIPELINE_DIR/config_yapima.R
 
 if [[ $? == 0 ]]
 then

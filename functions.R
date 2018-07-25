@@ -49,11 +49,20 @@ gr2bed <- function(gr, name=NULL, score=NULL, additional=NULL)
 #		xdensity <- ggplot(df) + geom_density(aes(x=xvals, colour=groups), na.rm=T, adjust=2) + geom_density(aes(x=xvals), na.rm=T, adjust=2, linetype='dotted') + theme_density + theme(plot.margin=unit(c(2,0,0,1), 'lines')) + ylab('')
 #		ydensity <- ggplot(df) + geom_density(aes(x=yvals, colour=groups), na.rm=T, adjust=2) + geom_density(aes(x=yvals), na.rm=T, adjust=2, linetype='dotted') + theme_density + theme(plot.margin=unit(c(0,1,1,0), 'lines')) + coord_flip() + xlab('')
 		theme_aux_plot <- theme_pca + theme(panel.border=element_blank(), axis.title.x=element_blank())
-		xplot <- ggplot(df)
-		yplot <- ggplot(df)
+		groups_n <- table(groups)
+		groups_d <- names(groups_n)[groups_n >= 2]
+		df2 <- df[df$groups %in% groups_d,]
+		axis_plot <- ggplot(df2) + theme_aux_plot + theme(axis.text=element_blank(), axis.ticks=element_blank())
+#		yplot <- ggplot(df2)
 		if (class(groups) %in% c('factor', 'character')) {
-			xplot <- xplot + geom_density(aes(x=xvals, colour=groups), na.rm=T, adjust=2) + geom_density(aes(x=xvals), na.rm=T, adjust=2, linetype='dotted') + theme_aux_plot + theme(axis.text=element_blank(), axis.ticks=element_blank(), plot.margin=unit(c(2,0,0,1), 'lines')) + ylab('')
-			yplot <- yplot + geom_density(aes(x=yvals, colour=groups), na.rm=T, adjust=2) + geom_density(aes(x=yvals), na.rm=T, adjust=2, linetype='dotted') + theme_aux_plot + theme(axis.text=element_blank(), axis.ticks=element_blank(), plot.margin=unit(c(0,1,1,0), 'lines')) + coord_flip() + xlab('')
+			g <- ggplot_build(pca.plot)
+			g <- g$data[[1]]
+			g$group <- groups
+			g <- unique(g[,c('colour', 'group')])
+			color_map <- g$colour
+			names(color_map) <- g$group
+			xplot <- axis_plot + geom_density(aes(x=xvals, colour=groups), na.rm=T, adjust=2) + geom_density(aes(x=xvals), data=df, na.rm=T, adjust=2, linetype='dotted') + theme(plot.margin=unit(c(2,0,0,1), 'lines')) + ylab('')
+			yplot <- axis_plot + geom_density(aes(x=yvals, colour=groups), na.rm=T, adjust=2) + geom_density(aes(x=yvals), data=df, na.rm=T, adjust=2, linetype='dotted') + theme(plot.margin=unit(c(0,1,1,0), 'lines')) + coord_flip() + xlab('')
 		} else {
 			xplot <- xplot + geom_point(aes(x=xvals, y=groups), na.rm=T) + geom_smooth(aes(x=xvals, y=groups), na.rm=T, se=FALSE, method='loess', span=1) + theme_aux_plot + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(), plot.margin=unit(c(2,0,0,0), 'lines')) + ylab('')
 			yplot <- yplot + geom_point(aes(x=yvals, y=groups), na.rm=T) + geom_smooth(aes(x=yvals, y=groups), na.rm=T, se=FALSE, method='loess', span=1) + theme_aux_plot + theme(axis.text.y=element_blank(), axis.ticks.y=element_blank(), plot.margin=unit(c(0,1,1,0), 'lines')) + coord_flip() + xlab('')
@@ -113,9 +122,10 @@ score.cluster <- function(clust, num.edges=nrow(clust$cluster$edges))
 	pval <- clust$cluster$edges$au
 	pval <- pval[order(height, decreasing=T)]
 	pval <- head(pval, num.edges)
-	height <- sort(height, decreasing=T)
-	height <- head(height, num.edges)
-	return(sum(pval * height / max(height)))
+	#height <- sort(height, decreasing=T)
+	#height <- head(height, num.edges)
+	#return(sum(pval * height))
+	return(sum(pval))
 }
 
 score.clusters <- function(clustList, num.edges=NULL)
