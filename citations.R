@@ -21,9 +21,6 @@ biblib <- c(biblib, citation('ENmix'))[4]
 ### ENmix 'RCP' normalization ###
 biblib <- c(biblib, citation('ENmix'))[2]
 
-### Boostrap clustering ###
-if (probeSelection) biblib <- c(biblib, citation('pvclust'))
-
 ### Differential Methylation ###
 if (diffMeth) {
 ## limma for standard differential methylation analysis ##

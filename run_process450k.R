@@ -124,7 +124,6 @@ citations.txt <- file.path(wd, 'citations.txt')
 library(tools)
 source(file.path(pipeline_dir, 'methylation_preprocessing.R'))
 source(file.path(pipeline_dir, 'methylation_qc.R'))
-if (probeSelection) source(file.path(pipeline_dir, 'probe_selection.R'))
 if (runCNV) source(file.path(pipeline_dir, 'methylation_CNV.R'))
 if (diffMeth) {
 	if (isEmpty(interest.vars)) {

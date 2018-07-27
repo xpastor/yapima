@@ -25,11 +25,6 @@ then
 fi
 echo -e "batch.vars <- '$BATCH_VARS'"
 
-if isOn $RUN_PROBE_SELECTION
-then
-	gawk '/Clustering #/,/#o#/' $PIPELINE_DIR/functions.R
-fi
-
 if isOn $RUN_DIFFERENTIAL_METHYLATION
 then
 	gawk '/BED-like/,/#o#/' $PIPELINE_DIR/functions.R
@@ -64,11 +59,6 @@ then
 fi
 
 gawk '/# Output raw/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
-
-if isOn $RUN_PROBE_SELECTION
-then
-	gawk '/# Probe selection/ || /# Output/,/#o#/' $PIPELINE_DIR/probe_selection.R
-fi
 
 if isOn $RUN_DIFFERENTIAL_METHYLATION
 then

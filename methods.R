@@ -52,12 +52,6 @@ text <- paste(text,
 text <- paste(text,
 	'Measures with a detection P-value higher than 0.01, as estimated by \'minfi\' and tipically of low quality, were masked. Probes with low quality in at least 50% of the samples were also flagged.')
 
-### Probe selection ###
-if (probeSelection) {
-	text <- paste0(text, '\n',
- 		'To find the most stable unsupervised clustering of the samples, 12 sets of probes were analysed. Initially, the flagged probes were removed and from the remaining, the ones with the highest variation in their beta-values were chosen for the 12 sets, from 1000 to 12000 probes in steps of 1000 probes. The bootstrap clustering approach implemented by the \'pvclust\' package ', .cite_package('pvclust'), ' from bioconductor was applied, with 10000 iterations for each using the euclidean distance measure. Finally, to find the most stable set of probes a score was defined as the sum of the pvalue of the  top ', round((nrow(targets)-1)*0.25), ' edges multiplied by the height of the edge, and the set of probes with the highest score was chosen.')
-}
-
 ### Differential methylation analysis ###
 if (diffMeth) {
 	if (! isEmpty(interest.vars)) {

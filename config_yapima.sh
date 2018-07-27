@@ -14,7 +14,6 @@ R_MOD=R/3.5.0
 
 ### Steps ###
 # The variables must take an R boolean value (T, TRUE, F or FALSE) #
-RUN_PROBE_SELECTION=F
 RUN_CNV=F
 RUN_DIFFERENTIAL_METHYLATION=F
 

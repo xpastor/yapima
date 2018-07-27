@@ -102,38 +102,6 @@ plot.pca <- function(pca, groups, main=NULL) {
 	}
 }
 
-### Functions for bootstrap Clustering ###
-bootstrapClustering <- function(n, mat, transpose=F, nboot=100, ncores=1, cl=cl)
-{
-	library(pvclust)
-	print(n)
-	top.mat <- head(mat, n)
-	if (transpose) {top.mat <- t(top.mat)}
-	clust <- parPvclust(cl, top.mat, method.dist='euclidean', use.cor='na.or.complete', nboot=nboot)
-	return(list(n=n, cluster=clust))
-}
-
-score.cluster <- function(clust, num.edges=nrow(clust$cluster$edges))
-{
-	if (is.null(num.edges)) {
-		num.edges <- round(nrow(clust$cluster$edges)*0.25)
-	}
-	height <- clust$cluster$hclust$height
-	pval <- clust$cluster$edges$au
-	pval <- pval[order(height, decreasing=T)]
-	pval <- head(pval, num.edges)
-	#height <- sort(height, decreasing=T)
-	#height <- head(height, num.edges)
-	#return(sum(pval * height))
-	return(sum(pval))
-}
-
-score.clusters <- function(clustList, num.edges=NULL)
-{
-	sapply(clustList, score.cluster, num.edges)
-}
-#o#
-
 ### Function to produce Heatmaps with ComplexHeatmap ###
 Heatmap2 <- function(mat, ..., column_annotation=NULL, row_annotation=NULL, column_names_gp=gpar(fontsize=7), row_names_gp=column_names_gp, row_dend_side='right', row_names_side='left', heatmap_legend_param=list(color_bar='continuous', legend_height=unit(3, 'cm')))
 {

@@ -12,7 +12,6 @@ wd <- Sys.getenv("OUTDIR")
 
 ### Steps ###
 runCNV <- as.logical(Sys.getenv("RUN_CNV"))
-probeSelection <- as.logical(Sys.getenv("RUN_PROBE_SELECTION"))
 diffMeth <- as.logical(Sys.getenv("RUN_DIFFERENTIAL_METHYLATION"))
 
 ### Params ###
