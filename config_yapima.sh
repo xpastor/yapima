@@ -3,15 +3,6 @@
 NCORES=1
 PIPELINE_DIR=$HOME/pipelines/devel/yapima
 
-### Cluster-related parameters ###
-EMAIL=x.pastorhostench@dkfz-heidelberg.de
-PBS_RESOURCES="walltime=3:00:00,nodes=1:ppn=$NCORES,mem=10g"
-#PBS_RESOURCES="walltime=10:00:00,nodes=1:ppn=$NCORES,mem=121g -q highmem" # for jobs with more than 120 gb
-CLUSTER_EO=/ibios/co02/xavier/eo/yapima
-
-### Modules ###
-R_MOD=R/3.5.0
-
 ### Steps ###
 # The variables must take an R boolean value (T, TRUE, F or FALSE) #
 RUN_CNV=F

@@ -44,9 +44,6 @@ if (! 'methylation_preprocessing.R' %in% pipeline_scripts) {
 if (! 'methylation_qc.R' %in% pipeline_scripts) {
 	stop(paste0("\n\tThe script 'methylation_qc.R' is not present in ", pipeline_dir))
 }
-if (! 'probe_selection.R' %in% pipeline_scripts) {
-	stop(paste0("\n\tThe script 'probe_selection.R' is not present in ", pipeline_dir))
-}
 if ('functions.R' %in% pipeline_scripts) {
 	source(file.path(pipeline_dir, 'functions.R'))
 } else {
@@ -63,10 +60,6 @@ if ( blacklist != '' & (! file.exists(blacklist) | file.access(blacklist) == -1)
 
 if (!is.logical(runCNV)) {
 	stop("\n\t'runQC' must be a valid R boolean: T, F, TRUE or FALSE.")
-}
-
-if (!is.logical(probeSelection)) {
-	stop("\n\t'probeSelection' must be a valid R boolean: T, F, TRUE or FALSE.")
 }
 
 if (!is.logical(diffMeth)) {
@@ -132,14 +125,4 @@ if (diffMeth) {
 		source(file.path(pipeline_dir, 'differential_methylation.R'))
 	}
 }
-source(file.path(pipeline_dir, 'methods.R'))
-source(file.path(pipeline_dir, 'citations.R'))
-
-### sessionInfo() ###
-source('http://bioconductor.org/biocLite.R')
-session.tex <- file.path(wd, 'session.tex')
-write(paste0('\\documentclass{report}\n\\title{\'yapima\' sessionInfo}\n\n\\usepackage{hyperref}\n\n\\begin{document}\n\\section*{\\centerline{\'yapima\' sessionInfo}}\n\\center{\\today}\n\n\\begin{itemize}\\raggedright\n  \\item Bioconductor version ', biocVersion(), '\n\\end{itemize}'),file=session.tex)
-write(toLatex(sessionInfo()), file=session.tex, append=T)
-write('\n\\end{document}', file=session.tex, append=T)
-setwd(wd)
-texi2pdf(session.tex, clean=T)
+source(file.path(pipeline_dir, 'document_run.R'))
