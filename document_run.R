@@ -64,11 +64,11 @@ if (diffMeth) {
 }
 
 source('http://bioconductor.org/biocLite.R')
-library(git2r)
 repo <- repository(pipeline_dir)
 commit <- revparse_single(repo, "HEAD")
 repo_status <- do.call(c, status(repo))
 sha <- ifelse(any(grepl('\\.modified', names(repo_status))), '', commit@sha)
+if (sha_ini != sha) sha <- ''
 
 session <- c('```{r echo=F}',
 "message(paste0('Bioconductor version ', biocVersion()))",

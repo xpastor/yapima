@@ -1,5 +1,11 @@
 #!/usr/bin/env Rscript
 
+library(git2r)
+repo <- repository(pipeline_dir)
+commit <- revparse_single(repo, "HEAD")
+repo_status <- do.call(c, status(repo))
+sha_ini <- ifelse(any(grepl('\\.modified', names(repo_status))), '', commit@sha)
+
 params <- commandArgs(F)
 trail_params <- grep('--args', params)
 
