@@ -67,7 +67,7 @@ source('http://bioconductor.org/biocLite.R')
 repo <- repository(pipeline_dir)
 commit <- revparse_single(repo, "HEAD")
 repo_status <- do.call(c, status(repo))
-sha <- ifelse(any(grepl('\\.modified', names(repo_status))), '', commit@sha)
+sha <- ifelse(any(grepl('\\.modified', names(repo_status))), '', sha(commit))
 if (sha_ini != sha) sha <- ''
 
 session <- c('```{r echo=F}',
