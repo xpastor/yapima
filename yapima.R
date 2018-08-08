@@ -16,6 +16,7 @@ if (!file.exists(config)) {
 pipeline_dir <- gsub('--file=', '', grep('--file', params, value=T))
 pipeline_dir <- dirname(pipeline_dir)
 
+# Get commit at beginning of execution for comparison at end
 library(git2r)
 repo <- repository(pipeline_dir)
 commit <- revparse_single(repo, "HEAD")
