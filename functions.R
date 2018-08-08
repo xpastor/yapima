@@ -52,7 +52,7 @@ gr2bed <- function(gr, name=NULL, score=NULL, additional=NULL)
 		groups_n <- table(groups)
 		groups_d <- names(groups_n)[groups_n >= 2]
 		df2 <- df[df$groups %in% groups_d,]
-		axis_plot <- ggplot(df2) + theme_aux_plot + theme(axis.text=element_blank(), axis.ticks=element_blank())
+		axis_plot <- ggplot() + theme_aux_plot + theme(axis.text=element_blank(), axis.ticks=element_blank())
 #		yplot <- ggplot(df2)
 		if (class(groups) %in% c('factor', 'character')) {
 			g <- ggplot_build(pca.plot)
@@ -61,11 +61,11 @@ gr2bed <- function(gr, name=NULL, score=NULL, additional=NULL)
 			g <- unique(g[,c('colour', 'group')])
 			color_map <- g$colour
 			names(color_map) <- g$group
-			xplot <- axis_plot + geom_density(aes(x=xvals, colour=groups), na.rm=T, adjust=2) + geom_density(aes(x=xvals), data=df, na.rm=T, adjust=2, linetype='dotted') + theme(plot.margin=unit(c(2,0,0,1), 'lines')) + ylab('')
-			yplot <- axis_plot + geom_density(aes(x=yvals, colour=groups), na.rm=T, adjust=2) + geom_density(aes(x=yvals), data=df, na.rm=T, adjust=2, linetype='dotted') + theme(plot.margin=unit(c(0,1,1,0), 'lines')) + coord_flip() + xlab('')
+			xplot <- ggplot(df2) + theme_aux_plot + geom_density(aes(x=xvals, colour=groups), na.rm=T, adjust=2) + geom_density(aes(x=xvals), data=df, na.rm=T, adjust=2, linetype='dotted') + theme(axis.text=element_blank(), axis.ticks=element_blank(), plot.margin=unit(c(2,0,0,1), 'lines')) + ylab('')
+			yplot <- ggplot(df2) + theme_aux_plot + geom_density(aes(x=yvals, colour=groups), na.rm=T, adjust=2) + geom_density(aes(x=yvals), data=df, na.rm=T, adjust=2, linetype='dotted') + theme(axis.text=element_blank(), axis.ticks=element_blank(), plot.margin=unit(c(0,1,1,0), 'lines')) + coord_flip() + xlab('')
 		} else {
-			xplot <- xplot + geom_point(aes(x=xvals, y=groups), na.rm=T) + geom_smooth(aes(x=xvals, y=groups), na.rm=T, se=FALSE, method='loess', span=1) + theme_aux_plot + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(), plot.margin=unit(c(2,0,0,0), 'lines')) + ylab('')
-			yplot <- yplot + geom_point(aes(x=yvals, y=groups), na.rm=T) + geom_smooth(aes(x=yvals, y=groups), na.rm=T, se=FALSE, method='loess', span=1) + theme_aux_plot + theme(axis.text.y=element_blank(), axis.ticks.y=element_blank(), plot.margin=unit(c(0,1,1,0), 'lines')) + coord_flip() + xlab('')
+			xplot <- ggplot(df) + theme_aux_plot + geom_point(aes(x=xvals, y=groups), na.rm=T) + geom_smooth(aes(x=xvals, y=groups), na.rm=T, se=FALSE, method='loess', span=1) + theme(axis.text.x=element_blank(), axis.ticks.x=element_blank(), plot.margin=unit(c(2,0,0,0), 'lines')) + ylab('')
+			yplot <- ggplot(df) + theme_aux_plot + geom_point(aes(x=yvals, y=groups), na.rm=T) + geom_smooth(aes(x=yvals, y=groups), na.rm=T, se=FALSE, method='loess', span=1) + theme(axis.text.y=element_blank(), axis.ticks.y=element_blank(), plot.margin=unit(c(0,1,1,0), 'lines')) + coord_flip() + xlab('')
 		}
 		return(arrangeGrob(xplot, rectGrob(gp=gpar(lty='blank')), pca.plot, yplot, ncol=2, nrow=2, widths=c(3,1), heights=c(1,3)))
 	}

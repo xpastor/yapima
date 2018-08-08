@@ -1,7 +1,5 @@
 #!/usr/bin/env Rscript-3.2.0
 
-pipeline_dir <- Sys.getenv("PIPELINE_DIR")
-
 ### Input data ###
 idat_dir <- Sys.getenv("IDAT_DIR")
 sample.annotation <- Sys.getenv("SAMPLE_ANNOTATION") # Illumina's sample sheet with additional columns for sample annotation

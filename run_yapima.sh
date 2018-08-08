@@ -30,6 +30,7 @@ then
 	printf "%s\n" "`Rscript | head -n1`"
 fi
 
+PIPELINE_DIR=$(dirname $0)
 if [ ! -d $PIPELINE_DIR ]
 then
 	printf "Analysis pipeline directory not found. Exiting...\n" >&2
@@ -38,5 +39,6 @@ fi
 
 if [[ ! -d $CLUSTER_EO ]]; then mkdir $CLUSTER_EO; fi
 
-rscript=`qsub -o $CLUSTER_EO -j oe -M $EMAIL -N yapima -l $PBS_RESOURCES -v CONFIG_FILE=$CONFIG_FILE $PIPELINE_DIR/process450k.sh | cut -d '.' -f 1`
+#rscript=`qsub -o $CLUSTER_EO -j oe -M $EMAIL -N yapima -l $PBS_RESOURCES -v CONFIG_FILE=$CONFIG_FILE $PIPELINE_DIR/process450k.sh | cut -d '.' -f 1`
+rscript=`echo "module load R/3.5.0;module load pandoc/2.2.1;$PIPELINE_DIR/yapima.sh -c $CONFIG_FILE" | qsub -o $CLUSTER_EO -j oe -M $EMAIL -N yapima -l $PBS_RESOURCES | cut -d '.' -f 1`
 echo "yapima submitted, job ID $rscript"

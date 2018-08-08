@@ -58,7 +58,7 @@ R.utils::reassignInPackage('extractCoords', 'DMRcate', extractCoords)
 array.annot.gr <- sort(array.annot.gr)
 annot.dm <- annot.dm[rownames(annot.bed),]
 gc()
-cate.array <- c(IlluminaHumanMethylation450k='450K', IlluminaHumanMethylationEPIC='EPIC')
+cate.array <- c(IlluminaHumanMethylation450k='450K', IlluminaHumanMethylationEPIC='EPIC')[array.type]
 
 for (comparison in interest.vars) {
 	cat(paste0(comparison,"\n"))
@@ -95,10 +95,26 @@ for (comparison in interest.vars) {
 		Heatmap2(matrix(nrow=0, ncol=ncol(processed.mval), dimnames=list(NULL, colnames(processed.mval))), column_annotation=pdata[,comparison,drop=F], cluster_columns=hc, column_dend_height=unit(5, 'cm'))
 		dev.off()
 
-	#	rm('scaled.mval', 'sig', 'sig.meth')
-		gc()
+		# GO analysis
+		library(missMethyl)
+		go <- gometh(sig, rownames(top), collection='GO', array.type=cate.array, prior.prob=T)
+		terms <- unique(go$Ont)
+		for (term in terms) {
+			go.df <- go[go$Ont==term,]
+			go.df <- go.df[order(go.df$FDR),]
+			go.df$GO_id <- rownames(go.df)
+			filename <- file.path(dmp.dir, paste0('GO_', term, '_', comparison, '.txt'))
+			write.table(go.df, filename, sep="\t", row.names=F, quote=F)
+		}
+		# KEGG analysis
+		go <- gometh(sig, rownames(top), collection='KEGG', array.type=cate.array, prior.prob=T)
+		go$KEGG_id <- rownames(go)
+		write.table(go, file.path(dmp.dir, paste0('KEGG_', comparison, '.txt')), sep="\t", quote=F, row.names=F)
+		# GSEA analysis
+#		library(org.Hs.eg.db)
+#		gsa <- gsa.meth(sig, rownames(top), collection=collection, array.type=cate.array, prior.prob=T)
 
-	# DMR analysis
+		# DMR analysis
 #		chr <- as.character(seqnames(array.annot.gr))
 #		pos <- end(array.annot.gr)
 		top <- top[!is.na(top$adj.P.Val),]
@@ -118,7 +134,6 @@ for (comparison in interest.vars) {
 			coef.name <- comparison
 		}
 		write.table(dmr.bed, file.path(dmr.dir, paste0('DMR_', coef.name, '.bed')), sep='\t', quote=F, row.names=F)
-	#o#
 		dmr.sig <- dmr.gr[order(dmr.gr$Stouffer)]
 #		dmr.sig <- dmr.gr[dmr.gr$minfdr <= 0.01,]
 #		dmr.score <- rank(dmr.sig$minfdr) + 2*rank(-abs(dmr.sig$meanbetafc)) + 2*rank(-dmr.sig$no.cpgs)
@@ -130,6 +145,7 @@ for (comparison in interest.vars) {
 		cpg.dmr <- array.annot.gr[queryHits(overlap),]
 #		cpg.dmr$differentialDMR <- as.character(dmr.sig[subjectHits(overlap)])
 		cpg.dmr <- cpg.dmr[annot.bed[names(cpg.dmr),'score']==0]
+	#o#
 		
 		pdf(file.path(dmr.dir, paste0('DMR_heatmap_', comparison, '.pdf')), height=10, width=hc.width)
 		Heatmap2(processed.betas[names(cpg.dmr),], column_annotation=pdata[,comparison,drop=F], row_annotation=data.frame(Chromosome=as.character(seqnames(cpg.dmr)), row.names=names(cpg.dmr), stringsAsFactors=F), cluster_rows=F, show_row_names=F, name='Beta', row_dend_side='left')

@@ -1,17 +1,20 @@
 #!/usr/bin/env Rscript
 
-params <- commandArgs(T)
+params <- commandArgs(F)
+trail_params <- grep('--args', params)
 
-if (length(params) == 0) {
+if (length(params) == trail_params) {
 	stop("Error:\n\tYou need to specify a configuration file.")
-} else if (length(params) > 1) {
+} else if (length(params) > trail_params + 1) {
 	message("Warning:\n\tYou specified too many parameters, only one is allowed. The first one will be taken as the configuration file.")
 }
 
-config <- params[1]
+config <- params[trail_params + 1]
 if (!file.exists(config)) {
 	stop(paste0("\n\tThe config file cannot be accessed:\n\t", config))
 }
+pipeline_dir <- gsub('--file=', '', grep('--file', params, value=T))
+pipeline_dir <- dirname(pipeline_dir)
 
 source(config)
 

@@ -45,27 +45,21 @@ lowQ <- detectionP(rgset) > 0.01
 lowQ.probes <- rowSums(lowQ)/ncol(lowQ) >= 0.5
 annot.bed$score[lowQ.probes] <- annot.bed$score[lowQ.probes] + 8
 
-source('https://gist.githubusercontent.com/schaunwheeler/5825002/raw/a7e1844d2abcb6c51f7d2479d5d9f64a473cb50f/xlsxToR.r')
 #o#
 
 ## Flag polymorphic probes ##
 if (removeSNPs) {
-	if (array.type == 'IlluminaHumanMethylation450k') {
-		if (population %in% c('EAS', 'SAS')) {
-			warning(paste0('Population \'', population, 'is only valid for EPIC arrays.'))
-		}
-		download.file('http://www.sickkids.ca/MS-Office-Files/Research/Weksberg%20Lab/48640-polymorphic-CpGs-Illumina450k.xlsx', destfile=file.path(wd, 'polymorphic.xlsx'))
-		polymorphic <- xlsxToR(file.path(wd, 'polymorphic.xlsx'), keep_sheets='Polymorphic CpGs & SNPs at SBE', header=T)
-		polymorphic[,grep('AF', colnames(polymorphic))] <- apply(polymorphic[,grep('AF', colnames(polymorphic))], 2, as.numeric)
-	} else if (array.type == 'IlluminaHumanMethylationEPIC') {
-		if (population == 'ASN') {
-			stop(paste0('Population \'', population, 'is only valid for 450k arrays.'))
-		}
-		download.file('https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4909830/bin/mmc1.txt', destfile=file.path(wd, 'polymorphic.txt'))
-		polymorphic <- read.delim(file.path(wd, 'polymorphic.txt'), header=T, stringsAsFactors=F)
+	load(file.path(pipeline_dir, 'polymorphic.rda'))
+	# Process SNPs
+	polymorphic <- polymorphic[[array.type]]$CpG_SBE
+	available <- grep('AF$', colnames(polymorphic), value=T)
+	available <- gsub('_?AF$', '', available)
+	if (! population %in% available) {
+		available <- gsub('(.*)', '\'\\1\'', available)
+		available <- paste(available, collapse=', ')
+		stop(paste0('\'',population, '\' population is not available for \'', array.type,'\'. Available populations are: ', available, '.'))
 	}
 	af <- 0.005
-#	polymorphic <- polymorphic[[array.type]]$CpG_SBE
 	polymorphic <- polymorphic$PROBE[!is.na(polymorphic[polymorphic[,paste(c(population, 'AF'), collapse="_")] > af,1])]
 	polymorphic <- polymorphic[polymorphic %in% annot.bed$name]
 	num_snps <- length(polymorphic)
@@ -75,18 +69,11 @@ if (removeSNPs) {
 }
 
 ## Load crossreactive probes ##
-crossreactive <- NULL
-if (array.type == 'IlluminaHumanMethylation450k') {
-#	source(file.path(pipeline_dir, 'xlsxToR.R'))
-	download.file('http://www.sickkids.ca/MS-Office-Files/Research/Weksberg%20Lab/48639-non-specific-probes-Illumina450k.xlsx', destfile=file.path(wd, 'crossreactive.xlsx'))
-	crossreactive <- xlsxToR(file.path(wd, 'crossreactive.xlsx'), keep_sheets=c('nonspecific cg probes', 'nonspecific ch probes'), header=T)
-	crossreactive <- do.call(rbind, crossreactive)
-	crossreactive <- crossreactive[,1]
-} else if (array.type == 'IlluminaHumanMethylationEPIC') {
-	crossreactive <- scan('https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4909830/bin/mmc2.txt', what='character')
-	crossreactive <- c(crossreactive, scan('https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4909830/bin/mmc3.txt', what='character'))
-}
-
+load(file.path(pipeline_dir, 'crossreactive.rda'))
+#load('https://github.com/xpastor/yapima/crossreactive.rda')
+# Process crossreactive
+crossreactive <- crossreactive[[array.type]]
+crossreactive <- do.call(c, crossreactive)
 crossreactive <- crossreactive[crossreactive %in% annot.bed$name]
 exclude <- unique(c(exclude, crossreactive))
 annot.bed[crossreactive, 'score'] <- annot.bed[crossreactive, 'score'] + 2

@@ -9,12 +9,14 @@ isOn () {
 	return $status
 }
 
+PIPELINE_DIR=$(dirname $0)
+
 echo -e "#!/usr/bin/env Rscript\n"
 echo -e "# Variables initialization"
 echo -e "idat_dir <- '$IDAT_DIR'"
 echo -e "sample.annotation <- '$SAMPLE_ANNOTATION'"
 echo -e "wd <- '${OUTDIR}_rep'"
-echo -e "pipeline_dir <- '$PIPELINE_DIR'"
+#echo -e "pipeline_dir <- '$PIPELINE_DIR'"
 echo -e "seed <- $SEED"
 echo -e "ncores <- $NCORES"
 echo -e "usePredictedSex <- $USE_PREDICTED_SEX"
@@ -31,27 +33,25 @@ then
 	cat $PIPELINE_DIR/extractCoords.R
 fi
 
-#if isOn $RUN_DIFFERENTIAL_METHYLATION
-#then
-#	gawk '/variables #/,/#o#/' $PIPELINE_DIR/functions.R
-#fi
-
-gawk '/# Create output/,/#o#/' $PIPELINE_DIR/run_process450k.R
-gawk '/# Define/,/#o#/' $PIPELINE_DIR/run_process450k.R
-gawk '/# Extract/,/#o#/' $PIPELINE_DIR/run_process450k.R
+gawk '/# Create output/,/#o#/' $PIPELINE_DIR/yapima.R
+gawk '/# Define/,/#o#/' $PIPELINE_DIR/yapima.R
+gawk '/# Extract/,/#o#/' $PIPELINE_DIR/yapima.R
 if [[ -n $BATCH_VARS ]]
 then
-	gawk '/# Produce/,/#o#/' $PIPELINE_DIR/run_process450k.R
+	gawk '/# Produce/,/#o#/' $PIPELINE_DIR/yapima.R
 fi
 
 gawk '/# Load libraries/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
 
 if isOn $REMOVE_SNPS
 then
+	echo -e "load(file.path('$OUTDIR', 'polymorphic.rda'))"
+	echo -e "population <- '$POPULATION'"
 	gawk '/# Process SNPs/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
 fi
 
-gawk '/# Load crossreactive/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
+echo -e "load(file.path('$OUTDIR', 'crossreactive.rda'))"
+gawk '/# Process crossreactive/,/#o#/' $PIPELINE_DIR/methylation_preprocessing.R
 
 if [[ -n $BLACKLIST ]]
 then
@@ -64,6 +64,6 @@ if isOn $RUN_DIFFERENTIAL_METHYLATION
 then
 	gawk '/# Differential methylation/,/#o#/' $PIPELINE_DIR/differential_methylation.R
 	gawk '/# Limma/,/#o#/' $PIPELINE_DIR/differential_methylation.R
-	gawk '/# DMR/, /#o#/' $PIPELINE_DIR/differential_methylation.R
-	echo -e "\n\t}\n}"
+	gawk '/# GO analysis/,/#o#/' $PIPELINE_DIR/differential_methylation.R
+	echo -e "\n\t}\n}" 
 fi
