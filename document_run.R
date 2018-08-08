@@ -57,6 +57,8 @@ if (diffMeth) {
 		text <- c(text,
 			'The analysis of differentially methylated positions (DMP) was done on the M-values of the reliable probes (i.e. flag=0) using the biconductor *limma* package [@limma] and multiple testing correction was applied [@fdr] (protocol described in ', limmaURL, ').')
 		text <- c(text,
+			'The analysis on GO and KEGG was done using the *missMethyl* package [@missMethyl]. Probes with an adjusted p-value lower than 0.05 where taken as the significant subset, and all the probes of the array as the whole list, with the *prior.prob* parameter as *TRUE* to account for biases in the number of probes per gene.')
+		text <- c(text,
 			'The detection of differentially methylated regions (DMR) was done using the bioconductor *DMRcate* package [@dmr]. For two groups comparisons, the t statistics from the DMP analysis were used and the beta log fold change was computed running the standard *limma* workflow on the beta values. For comparisons with more than two groups the squared F statistics from the DMP analysis were provided and the beta log fold change was set to 0. All the other parameters were left as default.')
 		text <- c(text, '\n',
 			'When necessary, the beta-values were derived from the M-values as described by [@mval].')

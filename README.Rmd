@@ -123,7 +123,9 @@ This analysis may provide a good idea about chromosomal aberrations although it 
 ### Differential Methylation Analysis
 The analysis of differentially methylated positions (DMP) is done using the *[limma](https://bioconductor.org/packages/release/bioc/html/limma.html)* [@limma] package from bioconductor and following the procedures detailed by the authors. It can perform only paired and unpaired analysis and reports tables with P-values and adjusted P-values (Benjamini & Hochberg [@fdr]), and takes as variables of interest all the extra columns of the SampleSheet except the provided in the **BATCH_VARS** variable, although these are also included in the linear model to account for possible confounding factors.
 
-The detection of differentially methylated regions (DMR) is done using the *[DMRcate](https://www.bioconductor.org/packages/release/bioc/html/DMRcate.html)* [@dmr] package from bioconductor. For two groups comparisons, the t statistics from the DMP analysis are used, and the beta log fold change is computed running the standard limma workflow on the beta values. For comparisons with more than two groups the squared F statistics from the DMP analysis are provided and the beta log fold change is set to 0. All the other parameters are left as default.
+The analysis on GO and KEGG is done with the package *[missMethyl](https://bioconductor.org/packages/missMethyl)* [@missMethyl], which takes into account the bias due to the number of probes per gene. The probes with an adjusted p-value below 0.05 are taken as the significant subset.
+
+The detection of differentially methylated regions (DMR) is done using the *[DMRcate](https://www.bioconductor.org/packages/release/bioc/html/DMRcate.html)* [@dmr] package from Bioconductor. For two groups comparisons, the t statistics from the DMP analysis are used, and the beta log fold change is computed running the standard limma workflow on the beta values. For comparisons with more than two groups the squared F statistics from the DMP analysis are provided and the beta log fold change is set to 0. All the other parameters are left as default.
 
 ## Output
 ### Basic output
@@ -171,6 +173,11 @@ Each column in the SampleSheet that does not correspond to a basic column or a b
 * **DMP/DMP_?.bed.gz**: compressed BED file with some statistical parameters (*limma*) like the log fold change ('logFC'), average methylation ('AveExpr'), the P-value ('P.value') and the adjusted P-value('adj.P.Value'), together with array annotation
 * **DMP/DMP_PCA_?.png**: PCA plot using the probes with an adjusted P-value smaller than 0.05
 * **DMP/DMP_cluster_?.pdf**: hierarchical clustering of the samples using the probes with and adjusted P-value <= 0.05
+* **DMP/GO_BP_?.txt**: tab delimited file with the name of the category ('Term') in the *Biological Process* ontology, the total number of probes in the category ('N') and the number of significant probes in it ('DE'), the significance of the enrichment ('P.DE') and the significance after multiple testing correction ('FDR')
+* **DMP/GO_CC_?.txt**: same as before but for *Cellular Component*
+* **DMP/GO_MF_?.txt**: same as before but for *Molecular Function*
+* **DMP/KEGG_?.txt**: same as before but for KEGG pathways
+
 * **DMR/DMR_?.bed**: BED file with the identified DMRs
 * **DMR/DMR_heatmap_?.pdf**: heatmap of CpGs from the top DMRs that sum up to 500 CpGs, being the top DMRs those with a smaller Stouffer.
 

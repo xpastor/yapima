@@ -198,10 +198,17 @@ columns of the SampleSheet except the provided in the **BATCH\_VARS**
 variable, although these are also included in the linear model to
 account for possible confounding factors.
 
+The analysis on GO and KEGG is done with the package
+*[missMethyl](https://bioconductor.org/packages/missMethyl)*
+(<span class="citeproc-not-found" data-reference-id="missMethyl">**???**</span>),
+which takes into account the bias due to the number of probes per gene.
+The probes with an adjusted p-value below 0.05 are taken as the
+significant subset.
+
 The detection of differentially methylated regions (DMR) is done using
 the
 *[DMRcate](https://www.bioconductor.org/packages/release/bioc/html/DMRcate.html)*
-(Peters et al. [2015](#ref-dmr)) package from bioconductor. For two
+(Peters et al. [2015](#ref-dmr)) package from Bioconductor. For two
 groups comparisons, the t statistics from the DMP analysis are used, and
 the beta log fold change is computed running the standard limma workflow
 on the beta values. For comparisons with more than two groups the
@@ -298,11 +305,27 @@ analysis, and for each of them the following files are produced:
     parameters (*limma*) like the log fold change (‘logFC’), average
     methylation (‘AveExpr’), the P-value (‘P.value’) and the adjusted
     P-value(‘adj.P.Value’), together with array annotation
+
   - **DMP/DMP\_PCA\_?.png**: PCA plot using the probes with an adjusted
     P-value smaller than 0.05
+
   - **DMP/DMP\_cluster\_?.pdf**: hierarchical clustering of the samples
     using the probes with and adjusted P-value \<= 0.05
+
+  - **DMP/GO\_BP\_?.txt**: tab delimited file with the name of the
+    category (‘Term’) in the *Biological Process* ontology, the total
+    number of probes in the category (‘N’) and the number of significant
+    probes in it (‘DE’), the significance of the enrichment (‘P.DE’) and
+    the significance after multiple testing correction (‘FDR’)
+
+  - **DMP/GO\_CC\_?.txt**: same as before but for *Cellular Component*
+
+  - **DMP/GO\_MF\_?.txt**: same as before but for *Molecular Function*
+
+  - **DMP/KEGG\_?.txt**: same as before but for KEGG pathways
+
   - **DMR/DMR\_?.bed**: BED file with the identified DMRs
+
   - **DMR/DMR\_heatmap\_?.pdf**: heatmap of CpGs from the top DMRs that
     sum up to 500 CpGs, being the top DMRs those with a smaller
     Stouffer.
