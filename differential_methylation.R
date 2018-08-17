@@ -97,19 +97,23 @@ for (comparison in interest.vars) {
 
 		# GO analysis
 		library(missMethyl)
-		go <- gometh(sig, rownames(top), collection='GO', array.type=cate.array, prior.prob=T)
-		terms <- unique(go$Ont)
-		for (term in terms) {
-			go.df <- go[go$Ont==term,]
-			go.df <- go.df[order(go.df$FDR),]
-			go.df$GO_id <- rownames(go.df)
-			filename <- file.path(dmp.dir, paste0('GO_', term, '_', comparison, '.txt'))
-			write.table(go.df, filename, sep="\t", row.names=F, quote=F)
+		go <- tryCatch(gometh(sig, rownames(top), collection='GO', array.type=cate.array, prior.prob=T), error = function(e) FALSE)
+		if (!is.logical(go)) {
+			terms <- unique(go$Ont)
+			for (term in terms) {
+				go.df <- go[go$Ont==term,]
+				go.df <- go.df[order(go.df$FDR),]
+				go.df$GO_id <- rownames(go.df)
+				filename <- file.path(dmp.dir, paste0('GO_', term, '_', comparison, '.txt'))
+				write.table(go.df, filename, sep="\t", row.names=F, quote=F)
+			}
 		}
 		# KEGG analysis
-		go <- gometh(sig, rownames(top), collection='KEGG', array.type=cate.array, prior.prob=T)
-		go$KEGG_id <- rownames(go)
-		write.table(go, file.path(dmp.dir, paste0('KEGG_', comparison, '.txt')), sep="\t", quote=F, row.names=F)
+		go <- tryCatch(gometh(sig, rownames(top), collection='KEGG', array.type=cate.array, prior.prob=T), error = function(e) FALSE)
+		if (!is.logical(go)) {
+			go$KEGG_id <- rownames(go)
+			write.table(go, file.path(dmp.dir, paste0('KEGG_', comparison, '.txt')), sep="\t", quote=F, row.names=F)
+		}
 		# GSEA analysis
 #		library(org.Hs.eg.db)
 #		gsa <- gsa.meth(sig, rownames(top), collection=collection, array.type=cate.array, prior.prob=T)
