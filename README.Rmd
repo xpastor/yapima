@@ -206,4 +206,4 @@ The current version of yapima requires R-3.5.0 and Bioconductor 3.8. The followi
 Additionally, pandoc v2.2.1 or higher is necessary in order to produce the documentation of the execution.
 
 ## References
-* This pipeline has been developed by [Xavier Pastor](xavier.pastor@compbio-dev.com) at DKFZ, Heidelberg, Germany.
+* This pipeline has been developed by [Xavier Pastor](mailto:xavier.pastor@compbio-dev.com) at DKFZ, Heidelberg, Germany.

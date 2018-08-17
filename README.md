@@ -374,7 +374,8 @@ the documentation of the execution.
 ## References
 
   - This pipeline has been developed by [Xavier
-    Pastor](xavier.pastor@compbio-dev.com) at DKFZ, Heidelberg, Germany.
+    Pastor](mailto:xavier.pastor@compbio-dev.com) at DKFZ, Heidelberg,
+    Germany.
 
 <div id="refs" class="references">
 
