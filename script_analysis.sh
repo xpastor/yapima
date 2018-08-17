@@ -30,7 +30,6 @@ echo -e "batch.vars <- '$BATCH_VARS'"
 if isOn $RUN_DIFFERENTIAL_METHYLATION
 then
 	gawk '/BED-like/,/#o#/' $PIPELINE_DIR/functions.R
-	cat $PIPELINE_DIR/extractCoords.R
 fi
 
 gawk '/# Create output/,/#o#/' $PIPELINE_DIR/yapima.R

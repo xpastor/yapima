@@ -1,8 +1,8 @@
 eForge.sh
 raw_qc.R
 tissue_decomposition.R
-xlsxToR.R
-xlsxToR.r
 yapima_pbs.sh
 references.R
 tfbs_enrichment.R
+README.remarkup
+yapima_pbs.sh

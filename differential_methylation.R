@@ -4,7 +4,6 @@
 ## processed.mval
 ## array.annot
 
-source(file.path(pipeline_dir, 'extractCoords.R'))
 #### Differential methylation analysis ####
 message('Starting differential methylation analysis...')
 
@@ -53,7 +52,6 @@ betafit <- eBayes(betafit)
 
 ## Prepare data for DMR analysis
 library(DMRcate)
-R.utils::reassignInPackage('extractCoords', 'DMRcate', extractCoords)
 
 array.annot.gr <- sort(array.annot.gr)
 annot.dm <- annot.dm[rownames(annot.bed),]
