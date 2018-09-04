@@ -5,7 +5,7 @@ variablesOfInterest <- function(pdata, batch.vars=NULL)
 {
 	illumina.vars <- c('Sample_Name', 'Sample_Well', 'Sample_Plate', 'Sample_Group', 'Pool_ID', 'Basename', 'filenames', 'Sentrix_ID', 'Sentrix_Position')
 	batch.vars <- c(batch.vars, 'Slide', 'Array')
-	not.relevant <- c('predictedSex')
+	not.relevant <- c('predictedSex', 'ArrayColumn', 'ArrayRow')
 	interest.vars  <- colnames(pdata)[!colnames(pdata) %in% c(illumina.vars, batch.vars, not.relevant)]
 	return(interest.vars)
 }

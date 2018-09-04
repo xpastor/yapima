@@ -122,7 +122,8 @@ Tumor6,1234567890,R06C02,Tumor,BBB
     define if the predicted sex has to be used as confounder
   - **BATCH\_VARS**: comma separated list of columns, without spaces,
     from the sample sheet that will be used as confounders or batch
-    effects
+    effects. 'ArrayColumn' and 'ArrayRow', although initially not
+    included in the sample sheet, can also be used as batch variables.
   - **SEED**: an integer to allow the repetition of results in random
     processes
 

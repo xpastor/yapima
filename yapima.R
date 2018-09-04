@@ -108,7 +108,7 @@ targets <- read.metharray.sheet(dirname(sample.annotation), paste0('^', basename
 header <- colnames(targets)
 #header <- readLines(sample.annotation, n=1)
 #header <- unlist(strsplit(header, ','))
-illumina.vars <- c('Sample_Name', 'Sample_Well', 'Sample_Plate', 'Sentrix_ID', 'Sentrix_Position', 'Slide', 'Array', 'Basename')
+illumina.vars <- c('Sample_Name', 'Sample_Well', 'Sample_Plate', 'Sentrix_ID', 'Sentrix_Position', 'Slide', 'Array', 'Basename', 'ArrayColumn', 'ArrayRow')
 
 interest.vars <- header[! header %in% illumina.vars]
 if (length(interest.vars) != 0) interest.vars <- interest.vars[!apply(is.na(targets[,interest.vars,drop=F]), 2, all)]

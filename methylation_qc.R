@@ -76,7 +76,6 @@ gc()
 ### PCA analysis ###
 #pdata2 <- pdata[,colSums(! is.na(pdata)) != 0]
 pdata2 <- pdata
-pdata2$Slide <- as.character(pdata2$Slide)
 raw.betas.narm <- raw.betas[! apply(is.na(raw.betas), 1, any),]
 processed.betas.narm <- processed.betas[! apply(is.na(processed.betas), 1, any),]
 raw.pca <- prcomp(t(raw.betas.narm))
@@ -86,8 +85,6 @@ gc()
 
 ## Batch variables ##
 message('PCA plots of batch variables...')
-pdata2$ArrayRow <- gsub('C..', '', pdata2$Array)
-pdata2$ArrayColumn <- gsub('R..', '', pdata2$Array)
 
 #plot.vars <- unique(c('Slide', 'ArrayRow', 'ArrayColumn', 'predictedSex', batch.vars))
 plot.vars <- unique(c('Slide', 'ArrayRow', 'ArrayColumn', batch.vars))

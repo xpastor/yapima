@@ -164,6 +164,9 @@ close(gz)
 message("Data ready in the output folder.")
 
 pdata <- pData(norm.meth)
+pdata$Slide <- as.character(pdata$Slide)
+pdata$ArrayRow <- gsub('C..', '', pdata$Array)
+pdata$ArrayColumn <- gsub('R..', '', pdata$Array)
 #rownames(pdata) <- pdata$Sample_Name
 pdata.out <- pdata
 if (!usePredictedSex) {
