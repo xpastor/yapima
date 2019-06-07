@@ -1,3 +1,30 @@
+yapima
+================
+true
+2019-06-07
+
+  - [yapima](#yapima)
+      - [Description](#description)
+      - [Installation](#installation)
+          - [Set up the tools using
+            *conda*](#set-up-the-tools-using-conda)
+          - [Update of
+            *IlluminaHumanMethylationEPICmanifest*](#update-of-illuminahumanmethylationepicmanifest)
+      - [Execution](#execution)
+          - [Definition of variables](#definition-of-variables)
+      - [Analysis steps](#analysis-steps)
+          - [Preprocessing](#preprocessing)
+          - [Copy Number Variation](#copy-number-variation)
+          - [Differential Methylation
+            Analysis](#differential-methylation-analysis)
+      - [Output](#output)
+          - [Basic output](#basic-output)
+          - [Copy Number Variation](#copy-number-variation-1)
+          - [Differential Methylation
+            Analysis](#differential-methylation-analysis-1)
+          - [Dependencies](#dependencies)
+      - [References](#references)
+
 # yapima
 
 ## Description
@@ -11,9 +38,90 @@ For the sake of simplicity in the usage and comprehension of the
 pipeline most of the options are hardcoded, and the interaction with it
 almost reduced to input/output definition and processes switches.
 
-## Definition of variables
+## Installation
 
-### Requirements
+To install yapima just clone this repository with the following command"
+
+    git clone https://github.com/xpastor/yapima.git
+
+The file `environment.yml` contains the packages and software
+dependencies to run *yapima*. *yapima* has been tested with the given
+versions of the packages and its performance with newer versions is not
+guaranteed (but I guarantee that it does not work with older ones).
+
+### Set up the tools using *conda*
+
+You can use *conda* to manage the software requirements and set un an
+environment. Instructions on how to install and use *conda* can be found
+here: <https://conda.io/projects/conda/en/latest/user-guide/index.html>
+
+Once you have *conda* set up you can create an environment for *yapima*
+running the following command:
+
+    conda env create -f environment.yml
+
+Be aware that if you already have a R version installed in your system,
+this has priority over the one in your *conda* environment and it will
+not have access to the recently created R library by *conda*. In order
+to run the R instance from your *conda* environment you need to copy the
+provided *env\_vars.sh* files into a specific location of your *conda*
+environment. To do so, first you need to activate *yapima* environment:
+
+    conda activate yapima
+
+Then run the following commands:
+
+    cp env_vars_activate.sh ${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh
+    cp env_vars_deactivate.sh ${CONDA_PREFIX}/etc/conda/deactivate.d/env_vars.sh
+
+*yapima* can be run either directly using R or through a bash script
+(see explanations below, in the *Execution* section). If you want to run
+*yapima* directly in R, you need to activate the environment as
+explained above. On the other hand, if you want to run the bash wrapper
+you need to add the following line to `yapima.sh` right below the
+shebang (`#!/bin/bash`):
+
+    . activate yapima
+
+Now you are all set up, and remember to activate the environment
+everytime you run *yapima*.
+
+Be aware that conda may not provide the last version of some
+bioconductor packages. In such case, after activating the conda
+environment start R and install/update the packages manually.
+
+### Update of *IlluminaHumanMethylationEPICmanifest*
+
+Depending on the version of R and array the execution may file due to
+incompatibility caused by differences in dimensions between the manifest
+provided by bioconductor and the methylation array. In such case install
+the manifest provided here.
+
+## Execution
+
+*yapima* requires a configuration file with the specifications of the
+files and steps required for the analysis.
+
+The most basic call to run *yapima* is:
+
+    Rscript /path/to/yapima.R /path/to/config_yapima.R
+
+There is also a wrapper bash script that additionally places annotation
+files used in the analysis, the sample sheet and a simplified script to
+reproduce the results (without plots) in the results folder. In order to
+run the analysis using the bash wrapper, execute the following:
+
+    sh /path/to/yapima/yapima.sh -c /path/to/config_yapima.sh
+
+*config\_yapima.R* and *config\_yapima.sh* can be used as templates for
+the respective calls. However, be aware that the bash wrapper needs
+*config\_yapima.R* as it is here delivered in order to load the values
+of the bash variables into the R environment, so if you want to run R
+yourself you should modify a copy of the file and not the file itself.
+
+### Definition of variables
+
+#### Requirements
 
 *yapima* uses tools that rely on the standard Illumina structures to
 import the data, and although it limits the flexibility of the tool,
@@ -28,7 +136,7 @@ facilities. There are three requirements regarding input data.
     relevant annotation for the arrays and the samples
   - **OUTDIR**: directory to store all the files generated by *yapima*
 
-#### A few rules for the SampleSheet
+##### A few rules for the SampleSheet
 
 The explanations here are to understand the final structure of the
 Sample Sheet, and the only manipulation of the file should be the
@@ -94,8 +202,10 @@ Tumor5,1234567890,R05C02,Tumor,AAA
 Tumor6,1234567890,R06C02,Tumor,BBB  
 ```
 
-### Optional variables
+#### Optional variables
 
+  - **CONDA\_ENV**: name of the conda environment to be activated to
+    execute yapima.
   - **BLACKLIST**: stores the path to a file with a set of probes that
     should be discarded from the very beginning of the analysis for
     whatever reason. The probes should be listed per line and identified
@@ -126,13 +236,6 @@ Tumor6,1234567890,R06C02,Tumor,BBB
   - **SEED**: an integer to allow the repetition of results in random
     processes
 
-## Execution
-
-*yapima* is executed using a bash configuration file that needs to be
-sourced:
-
-    sh /path/to/yapima/yapima.sh -c /path/to/config_yapima.sh
-
 ## Analysis steps
 
 Since the pipeline is implemented in R and the config file is just a
@@ -162,13 +265,13 @@ value for probes that pass all the filters:
     or for the IlluminaHumanMethylationEPIC array (McCartney et al.
     [2016](#ref-epic))
 
-Afterwards, *ENmix* ‘est’ background correction (Xu et al.
-[2016](#ref-ENmix)) and ‘RELIC’ dye bias correction (Xu et al.
-[2017](#ref-RELIC)) are performed, and RCP normalization (Niu, Xu, and
-Jack [2016](#ref-RCP)) is applied, all them from the
-*[ENmix](https://bioconductor.org/packages/ENmix)* (Xu et al.
-[2016](#ref-ENmix)) Bioconductor package. Measures with low detection
-are replaced by ‘NA’.
+Afterwards, *Noob* background correction (Triche et al.
+[2013](#ref-noob)) is performed, with an offset of 15 and dye bias
+correction without a reference sample. Afterwards, SWAN normalization
+(Maksimovic, Gordon, and Oshlack [2012](#ref-SWAN)) is applied, all them
+from the *[minfi](https://bioconductor.org/packages/minfi)* (Aryee et
+al. [2014](#ref-minfi)) Bioconductor package. Measures with low
+detection are replaced by ‘NA’.
 
 ### Copy Number Variation
 
@@ -182,7 +285,7 @@ convenient to switch off this part.
 *conumee* requires a sample set without chromosomal aberrations that are
 provided by
 *[CopyNeutralIMA](https://bioconductor.org/packages/CopyNeutralIMA)*
-(Przybilla and Pastor [2018](#ref-cnima)).
+(Przybilla and Pastor [2018](#ref-CopyNeutralIMA)).
 
 This analysis may provide a good idea about chromosomal aberrations
 although it should not replace an analysis at genomic level, and it
@@ -204,13 +307,13 @@ confounding factors.
 
 The analysis on GO and KEGG is done with the package
 *[missMethyl](https://bioconductor.org/packages/missMethyl)* (Phipson,
-Maksimovic, and Oshlack [2015](#ref-missMethyl)), which takes into
+Maksimovic, and Oshlack [2015](#ref-missMethyl2)), which takes into
 account the bias due to the number of probes per gene. The probes with
 an adjusted p-value below 0.05 are taken as the significant subset.
 
 The detection of differentially methylated regions (DMR) is done using
 the *[DMRcate](https://www.bioconductor.org/packages/DMRcate)* (Peters
-et al. [2015](#ref-dmr)) package from Bioconductor. For two groups
+et al. [2015](#ref-DMRcate)) package from Bioconductor. For two groups
 comparisons, the t statistics from the DMP analysis are used, and the
 beta log fold change is computed running the standard limma workflow on
 the beta values. For comparisons with more than two groups the squared F
@@ -343,7 +446,7 @@ analysis, and for each of them the following files are produced:
 
 ### Dependencies
 
-The current version of yapima requires R-3.5.0 and Bioconductor 3.8. The
+The current version of yapima requires R-3.5.1 and Bioconductor 3.8. The
 following packages and their dependencies must be installed:
 
   - biomaRt
@@ -353,7 +456,6 @@ following packages and their dependencies must be installed:
   - conumee
   - CopyNeutralIMA
   - DMRcate
-  - ENmix
   - fpc
   - GenomicRanges
   - ggplot2
@@ -364,9 +466,6 @@ following packages and their dependencies must be installed:
   - limma
   - minfi
   - missMethyl
-  - parallel
-  - rmarkup
-  - tools
 
 Additionally, pandoc v2.2.1 or higher is necessary in order to produce
 the documentation of the execution.
@@ -374,8 +473,7 @@ the documentation of the execution.
 ## References
 
   - This pipeline has been developed by [Xavier
-    Pastor](mailto:xavier.pastor@compbio-dev.com) at DKFZ, Heidelberg,
-    Germany.
+    Pastor](mailto:xpastor79@gmail.com) at DKFZ, Heidelberg, Germany.
 
 <div id="refs" class="references">
 
@@ -417,6 +515,15 @@ Germany. <http://bioconductor.org/packages/conumee/>.
 
 </div>
 
+<div id="ref-SWAN">
+
+Maksimovic, Jovana, Lavinia Gordon, and Alicia Oshlack. 2012. “SWAN:
+Subset quantile Within-Array Normalization for Illumina Infinium
+HumanMethylation450 BeadChips.” *Genome Biology* 13 (6): R44.
+<https://doi.org/10.1186/gb-2012-13-6-r44>.
+
+</div>
+
 <div id="ref-epic">
 
 McCartney, Daniel L., Rosie M. Walker, Stewart W. Morris, Andrew M.
@@ -426,15 +533,7 @@ Infinium Methylationepic Beadchip.” *Genomics Data* 9: 22–24.
 
 </div>
 
-<div id="ref-RCP">
-
-Niu, Liang, Zongli Xu, and A. Taylor Jack. 2016. “RCP: A Novel Probe
-Design Bias Correction Method for Illumina Methylation Beadchip.”
-*Bioinformatics*.
-
-</div>
-
-<div id="ref-dmr">
+<div id="ref-DMRcate">
 
 Peters, Timothy J, Michael J Buckley, Aaron L Statham, Ruth Pidsley,
 Katherine Samaras, Reginald V Lord, Susan J Clark, and Peter L Molloy.
@@ -444,7 +543,7 @@ the Human Genome.” *Epigenetics & Chromatin* 8: 6.
 
 </div>
 
-<div id="ref-missMethyl">
+<div id="ref-missMethyl2">
 
 Phipson, Belinda, Jovana Maksimovic, and Alicia Oshlack. 2015.
 “MissMethyl: An R Package for Analysing Methylation Data from
@@ -452,7 +551,7 @@ Illuminas Humanmethylation450 Platform.” *Bioinformatics*, btv560.
 
 </div>
 
-<div id="ref-cnima">
+<div id="ref-CopyNeutralIMA">
 
 Przybilla, Moritz, and Xavier Pastor. 2018. *CopyNeutralIMA: Genomic
 Copy Neutral samples for Illumina Methylation arrays*.
@@ -469,19 +568,12 @@ Research* 43 (7): e47.
 
 </div>
 
-<div id="ref-RELIC">
+<div id="ref-noob">
 
-Xu, Zongli, A. Taylor Jack, A.S. Langie Sabine, De Boever Patrick, and
-Liang Niu. 2017. “RELIC: A Novel Dye-Bias Correction Method for Illumina
-Methylation Beadchip.” *BMC Genomics*.
-
-</div>
-
-<div id="ref-ENmix">
-
-Xu, Zongli, Liang Niu, Leping Li, and A. Taylor Jack. 2016. “ENmix: A
-Novel Background Correction Method for Illumina Humanmethylation450
-Beadchip.” *Nucleic Acids Research*.
+Triche, Timothy J., Daniel J. Weisenberger, David Van Den Berg, Peter W.
+Laird, and Kimberly D. Siegmund. 2013. “Low-Level Processing of Illumina
+Infinium DNA Methylation BeadArrays.” *Nucleic Acids Research* 41 (7):
+e90. <https://doi.org/10.1093/nar/gkt090>.
 
 </div>
 

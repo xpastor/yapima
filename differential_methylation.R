@@ -79,8 +79,8 @@ for (comparison in interest.vars) {
 	sig <- row.names(top)[top[,adjP] <= 0.05 & !is.na(top[,adjP])]
 	if (!isEmpty(sig)) {
 #o#
-		sig.meth <- processed.mval[sig,] 
-		sig.meth <- sig.meth[! apply(is.na(sig.meth), 1, any),]
+		sig.meth <- processed.mval[sig,,drop=F] 
+		sig.meth <- sig.meth[! apply(is.na(sig.meth), 1, any),,drop=F]
 		pca <- prcomp(t(sig.meth))
 		groups <- pdata[,comparison]
 		names(groups) <- row.names(pdata)
