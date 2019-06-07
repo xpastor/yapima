@@ -25,7 +25,12 @@ set -a
 source $CONFIG_FILE
 set +a
 
-PIPELINE_DIR=$(dirname $0)
+if [[ ! -z $CONDA_PREFIX && ! -z $CONDA_ENV ]]
+then
+  . activate $CONDA_ENV
+fi
+
+PIPELINE_DIR=$(dirname `readlink -f $0`)
 
 # Redefine the 0/1 switch to the R boolean values
 RUN_CNV=`echo $RUN_CNV | tr 01 FT`

@@ -47,7 +47,7 @@ text <- paste(text,
 	'Measures with a detection P-value higher than 0.01, as estimated by *minfi* and tipically of low quality, were masked. Probes with low quality in at least 50% of the samples were also flagged.')
 
 text <- c(text, '\n## Processing',
-	'The intensities were adjusted with the *ENmix* package [@ENmix] using combined methylated and unmethylated intensities to estimate background distribution parameters separately for each color channel and each probe type, and enabling *RELIC* dye bias correction [@RELIC]. Methylation values were normalized applying the *RCP* normalization mehtod also available in *ENmix* [@RCP].')
+	'The intensities were adjusted with the *minfi* package [@minfi]. The background signal was corrected using *Noob* [@noob], with an offset of 15 and dye bias correction without a reference sample, and normalized with SWAN [@SWAN].')
 
 if (diffMeth) {
 	if (! isEmpty(interest.vars)) {
@@ -57,15 +57,14 @@ if (diffMeth) {
 		text <- c(text,
 			'The analysis of differentially methylated positions (DMP) was done on the M-values of the reliable probes (i.e. flag=0) using the biconductor *limma* package [@limma] and multiple testing correction was applied [@fdr] (protocol described in ', limmaURL, ').')
 		text <- c(text,
-			'The analysis on GO and KEGG was done using the *missMethyl* package [@missMethyl]. Probes with an adjusted p-value lower than 0.05 where taken as the significant subset, and all the probes of the array as the whole list, with the *prior.prob* parameter as *TRUE* to account for biases in the number of probes per gene.')
+			'The analysis on GO and KEGG was done using the *missMethyl* package [@missMethyl2]. Probes with an adjusted p-value lower than 0.05 where taken as the significant subset, and all the probes of the array as the whole list, with the *prior.prob* parameter as *TRUE* to account for biases in the number of probes per gene.')
 		text <- c(text,
-			'The detection of differentially methylated regions (DMR) was done using the bioconductor *DMRcate* package [@dmr]. For two groups comparisons, the t statistics from the DMP analysis were used and the beta log fold change was computed running the standard *limma* workflow on the beta values. For comparisons with more than two groups the squared F statistics from the DMP analysis were provided and the beta log fold change was set to 0. All the other parameters were left as default.')
+			'The detection of differentially methylated regions (DMR) was done using the bioconductor *DMRcate* package [@DMRcate]. For two groups comparisons, the t statistics from the DMP analysis were used and the beta log fold change was computed running the standard *limma* workflow on the beta values. For comparisons with more than two groups the squared F statistics from the DMP analysis were provided and the beta log fold change was set to 0. All the other parameters were left as default.')
 		text <- c(text, '\n',
 			'When necessary, the beta-values were derived from the M-values as described by [@mval].')
 	}
 }
 
-source('http://bioconductor.org/biocLite.R')
 repo <- repository(pipeline_dir)
 commit <- revparse_single(repo, "HEAD")
 repo_status <- do.call(c, status(repo))
@@ -73,7 +72,7 @@ sha <- ifelse(any(grepl('\\.modified', names(repo_status))), '', sha(commit))
 if (sha_ini != sha) sha <- ''
 
 session <- c('```{r echo=F}',
-"message(paste0('Bioconductor version ', biocVersion()))",
+"message(paste0('Bioconductor version ', BiocManager::version()))",
 'sessionInfo()',
 "message(paste('commit: ', sha))",
 '```')

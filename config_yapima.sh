@@ -2,6 +2,7 @@
 
 NCORES=1
 PIPELINE_DIR=$HOME/pipelines/devel/yapima
+CONDA_ENV=yapima
 
 ### Steps ###
 # The variables must take an R boolean value (T, TRUE, F or FALSE) #

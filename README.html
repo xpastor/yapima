@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style type="text/css">
+@font-face {
+font-family: octicons-link;
+src: url(data:font/woff;charset=utf-8;base64,d09GRgABAAAAAAZwABAAAAAACFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABEU0lHAAAGaAAAAAgAAAAIAAAAAUdTVUIAAAZcAAAACgAAAAoAAQAAT1MvMgAAAyQAAABJAAAAYFYEU3RjbWFwAAADcAAAAEUAAACAAJThvmN2dCAAAATkAAAABAAAAAQAAAAAZnBnbQAAA7gAAACyAAABCUM+8IhnYXNwAAAGTAAAABAAAAAQABoAI2dseWYAAAFsAAABPAAAAZwcEq9taGVhZAAAAsgAAAA0AAAANgh4a91oaGVhAAADCAAAABoAAAAkCA8DRGhtdHgAAAL8AAAADAAAAAwGAACfbG9jYQAAAsAAAAAIAAAACABiATBtYXhwAAACqAAAABgAAAAgAA8ASm5hbWUAAAToAAABQgAAAlXu73sOcG9zdAAABiwAAAAeAAAAME3QpOBwcmVwAAAEbAAAAHYAAAB/aFGpk3jaTY6xa8JAGMW/O62BDi0tJLYQincXEypYIiGJjSgHniQ6umTsUEyLm5BV6NDBP8Tpts6F0v+k/0an2i+itHDw3v2+9+DBKTzsJNnWJNTgHEy4BgG3EMI9DCEDOGEXzDADU5hBKMIgNPZqoD3SilVaXZCER3/I7AtxEJLtzzuZfI+VVkprxTlXShWKb3TBecG11rwoNlmmn1P2WYcJczl32etSpKnziC7lQyWe1smVPy/Lt7Kc+0vWY/gAgIIEqAN9we0pwKXreiMasxvabDQMM4riO+qxM2ogwDGOZTXxwxDiycQIcoYFBLj5K3EIaSctAq2kTYiw+ymhce7vwM9jSqO8JyVd5RH9gyTt2+J/yUmYlIR0s04n6+7Vm1ozezUeLEaUjhaDSuXHwVRgvLJn1tQ7xiuVv/ocTRF42mNgZGBgYGbwZOBiAAFGJBIMAAizAFoAAABiAGIAznjaY2BkYGAA4in8zwXi+W2+MjCzMIDApSwvXzC97Z4Ig8N/BxYGZgcgl52BCSQKAA3jCV8CAABfAAAAAAQAAEB42mNgZGBg4f3vACQZQABIMjKgAmYAKEgBXgAAeNpjYGY6wTiBgZWBg2kmUxoDA4MPhGZMYzBi1AHygVLYQUCaawqDA4PChxhmh/8ODDEsvAwHgMKMIDnGL0x7gJQCAwMAJd4MFwAAAHjaY2BgYGaA4DAGRgYQkAHyGMF8NgYrIM3JIAGVYYDT+AEjAwuDFpBmA9KMDEwMCh9i/v8H8sH0/4dQc1iAmAkALaUKLgAAAHjaTY9LDsIgEIbtgqHUPpDi3gPoBVyRTmTddOmqTXThEXqrob2gQ1FjwpDvfwCBdmdXC5AVKFu3e5MfNFJ29KTQT48Ob9/lqYwOGZxeUelN2U2R6+cArgtCJpauW7UQBqnFkUsjAY/kOU1cP+DAgvxwn1chZDwUbd6CFimGXwzwF6tPbFIcjEl+vvmM/byA48e6tWrKArm4ZJlCbdsrxksL1AwWn/yBSJKpYbq8AXaaTb8AAHja28jAwOC00ZrBeQNDQOWO//sdBBgYGRiYWYAEELEwMTE4uzo5Zzo5b2BxdnFOcALxNjA6b2ByTswC8jYwg0VlNuoCTWAMqNzMzsoK1rEhNqByEyerg5PMJlYuVueETKcd/89uBpnpvIEVomeHLoMsAAe1Id4AAAAAAAB42oWQT07CQBTGv0JBhagk7HQzKxca2sJCE1hDt4QF+9JOS0nbaaYDCQfwCJ7Au3AHj+LO13FMmm6cl7785vven0kBjHCBhfpYuNa5Ph1c0e2Xu3jEvWG7UdPDLZ4N92nOm+EBXuAbHmIMSRMs+4aUEd4Nd3CHD8NdvOLTsA2GL8M9PODbcL+hD7C1xoaHeLJSEao0FEW14ckxC+TU8TxvsY6X0eLPmRhry2WVioLpkrbp84LLQPGI7c6sOiUzpWIWS5GzlSgUzzLBSikOPFTOXqly7rqx0Z1Q5BAIoZBSFihQYQOOBEdkCOgXTOHA07HAGjGWiIjaPZNW13/+lm6S9FT7rLHFJ6fQbkATOG1j2OFMucKJJsxIVfQORl+9Jyda6Sl1dUYhSCm1dyClfoeDve4qMYdLEbfqHf3O/AdDumsjAAB42mNgYoAAZQYjBmyAGYQZmdhL8zLdDEydARfoAqIAAAABAAMABwAKABMAB///AA8AAQAAAAAAAAAAAAAAAAABAAAAAA==) format('woff');
+}
+body {
+-webkit-text-size-adjust: 100%;
+text-size-adjust: 100%;
+color: #333;
+font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+font-size: 16px;
+line-height: 1.6;
+word-wrap: break-word;
+}
+a {
+background-color: transparent;
+}
+a:active,
+a:hover {
+outline: 0;
+}
+strong {
+font-weight: bold;
+}
+h1 {
+font-size: 2em;
+margin: 0.67em 0;
+}
+img {
+border: 0;
+}
+hr {
+box-sizing: content-box;
+height: 0;
+}
+pre {
+overflow: auto;
+}
+code,
+kbd,
+pre {
+font-family: monospace, monospace;
+font-size: 1em;
+}
+input {
+color: inherit;
+font: inherit;
+margin: 0;
+}
+html input[disabled] {
+cursor: default;
+}
+input {
+line-height: normal;
+}
+input[type="checkbox"] {
+box-sizing: border-box;
+padding: 0;
+}
+table {
+border-collapse: collapse;
+border-spacing: 0;
+}
+td,
+th {
+padding: 0;
+}
+* {
+box-sizing: border-box;
+}
+input {
+font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+a {
+color: #4078c0;
+text-decoration: none;
+}
+a:hover,
+a:active {
+text-decoration: underline;
+}
+hr {
+height: 0;
+margin: 15px 0;
+overflow: hidden;
+background: transparent;
+border: 0;
+border-bottom: 1px solid #ddd;
+}
+hr:before {
+display: table;
+content: "";
+}
+hr:after {
+display: table;
+clear: both;
+content: "";
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+margin-top: 15px;
+margin-bottom: 15px;
+line-height: 1.1;
+}
+h1 {
+font-size: 30px;
+}
+h2 {
+font-size: 21px;
+}
+h3 {
+font-size: 16px;
+}
+h4 {
+font-size: 14px;
+}
+h5 {
+font-size: 12px;
+}
+h6 {
+font-size: 11px;
+}
+blockquote {
+margin: 0;
+}
+ul,
+ol {
+padding: 0;
+margin-top: 0;
+margin-bottom: 0;
+}
+ol ol,
+ul ol {
+list-style-type: lower-roman;
+}
+ul ul ol,
+ul ol ol,
+ol ul ol,
+ol ol ol {
+list-style-type: lower-alpha;
+}
+dd {
+margin-left: 0;
+}
+code {
+font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+font-size: 12px;
+}
+pre {
+margin-top: 0;
+margin-bottom: 0;
+font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+.select::-ms-expand {
+opacity: 0;
+}
+.octicon {
+font: normal normal normal 16px/1 octicons-link;
+display: inline-block;
+text-decoration: none;
+text-rendering: auto;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+-webkit-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+.octicon-link:before {
+content: '\f05c';
+}
+.markdown-body:before {
+display: table;
+content: "";
+}
+.markdown-body:after {
+display: table;
+clear: both;
+content: "";
+}
+.markdown-body>*:first-child {
+margin-top: 0 !important;
+}
+.markdown-body>*:last-child {
+margin-bottom: 0 !important;
+}
+a:not([href]) {
+color: inherit;
+text-decoration: none;
+}
+.anchor {
+display: inline-block;
+padding-right: 2px;
+margin-left: -18px;
+}
+.anchor:focus {
+outline: none;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+margin-top: 1em;
+margin-bottom: 16px;
+font-weight: bold;
+line-height: 1.4;
+}
+h1 .octicon-link,
+h2 .octicon-link,
+h3 .octicon-link,
+h4 .octicon-link,
+h5 .octicon-link,
+h6 .octicon-link {
+color: #000;
+vertical-align: middle;
+visibility: hidden;
+}
+h1:hover .anchor,
+h2:hover .anchor,
+h3:hover .anchor,
+h4:hover .anchor,
+h5:hover .anchor,
+h6:hover .anchor {
+text-decoration: none;
+}
+h1:hover .anchor .octicon-link,
+h2:hover .anchor .octicon-link,
+h3:hover .anchor .octicon-link,
+h4:hover .anchor .octicon-link,
+h5:hover .anchor .octicon-link,
+h6:hover .anchor .octicon-link {
+visibility: visible;
+}
+h1 {
+padding-bottom: 0.3em;
+font-size: 2.25em;
+line-height: 1.2;
+border-bottom: 1px solid #eee;
+}
+h1 .anchor {
+line-height: 1;
+}
+h2 {
+padding-bottom: 0.3em;
+font-size: 1.75em;
+line-height: 1.225;
+border-bottom: 1px solid #eee;
+}
+h2 .anchor {
+line-height: 1;
+}
+h3 {
+font-size: 1.5em;
+line-height: 1.43;
+}
+h3 .anchor {
+line-height: 1.2;
+}
+h4 {
+font-size: 1.25em;
+}
+h4 .anchor {
+line-height: 1.2;
+}
+h5 {
+font-size: 1em;
+}
+h5 .anchor {
+line-height: 1.1;
+}
+h6 {
+font-size: 1em;
+color: #777;
+}
+h6 .anchor {
+line-height: 1.1;
+}
+p,
+blockquote,
+ul,
+ol,
+dl,
+table,
+pre {
+margin-top: 0;
+margin-bottom: 16px;
+}
+hr {
+height: 4px;
+padding: 0;
+margin: 16px 0;
+background-color: #e7e7e7;
+border: 0 none;
+}
+ul,
+ol {
+padding-left: 2em;
+}
+ul ul,
+ul ol,
+ol ol,
+ol ul {
+margin-top: 0;
+margin-bottom: 0;
+}
+li>p {
+margin-top: 16px;
+}
+dl {
+padding: 0;
+}
+dl dt {
+padding: 0;
+margin-top: 16px;
+font-size: 1em;
+font-style: italic;
+font-weight: bold;
+}
+dl dd {
+padding: 0 16px;
+margin-bottom: 16px;
+}
+blockquote {
+padding: 0 15px;
+color: #777;
+border-left: 4px solid #ddd;
+}
+blockquote>:first-child {
+margin-top: 0;
+}
+blockquote>:last-child {
+margin-bottom: 0;
+}
+table {
+display: block;
+width: 100%;
+overflow: auto;
+word-break: normal;
+word-break: keep-all;
+}
+table th {
+font-weight: bold;
+}
+table th,
+table td {
+padding: 6px 13px;
+border: 1px solid #ddd;
+}
+table tr {
+background-color: #fff;
+border-top: 1px solid #ccc;
+}
+table tr:nth-child(2n) {
+background-color: #f8f8f8;
+}
+img {
+max-width: 100%;
+box-sizing: content-box;
+background-color: #fff;
+}
+code {
+padding: 0;
+padding-top: 0.2em;
+padding-bottom: 0.2em;
+margin: 0;
+font-size: 85%;
+background-color: rgba(0,0,0,0.04);
+border-radius: 3px;
+}
+code:before,
+code:after {
+letter-spacing: -0.2em;
+content: "\00a0";
+}
+pre>code {
+padding: 0;
+margin: 0;
+font-size: 100%;
+word-break: normal;
+white-space: pre;
+background: transparent;
+border: 0;
+}
+.highlight {
+margin-bottom: 16px;
+}
+.highlight pre,
+pre {
+padding: 16px;
+overflow: auto;
+font-size: 85%;
+line-height: 1.45;
+background-color: #f7f7f7;
+border-radius: 3px;
+}
+.highlight pre {
+margin-bottom: 0;
+word-break: normal;
+}
+pre {
+word-wrap: normal;
+}
+pre code {
+display: inline;
+max-width: initial;
+padding: 0;
+margin: 0;
+overflow: initial;
+line-height: inherit;
+word-wrap: normal;
+background-color: transparent;
+border: 0;
+}
+pre code:before,
+pre code:after {
+content: normal;
+}
+kbd {
+display: inline-block;
+padding: 3px 5px;
+font-size: 11px;
+line-height: 10px;
+color: #555;
+vertical-align: middle;
+background-color: #fcfcfc;
+border: solid 1px #ccc;
+border-bottom-color: #bbb;
+border-radius: 3px;
+box-shadow: inset 0 -1px 0 #bbb;
+}
+.pl-c {
+color: #969896;
+}
+.pl-c1,
+.pl-s .pl-v {
+color: #0086b3;
+}
+.pl-e,
+.pl-en {
+color: #795da3;
+}
+.pl-s .pl-s1,
+.pl-smi {
+color: #333;
+}
+.pl-ent {
+color: #63a35c;
+}
+.pl-k {
+color: #a71d5d;
+}
+.pl-pds,
+.pl-s,
+.pl-s .pl-pse .pl-s1,
+.pl-sr,
+.pl-sr .pl-cce,
+.pl-sr .pl-sra,
+.pl-sr .pl-sre {
+color: #183691;
+}
+.pl-v {
+color: #ed6a43;
+}
+.pl-id {
+color: #b52a1d;
+}
+.pl-ii {
+background-color: #b52a1d;
+color: #f8f8f8;
+}
+.pl-sr .pl-cce {
+color: #63a35c;
+font-weight: bold;
+}
+.pl-ml {
+color: #693a17;
+}
+.pl-mh,
+.pl-mh .pl-en,
+.pl-ms {
+color: #1d3e81;
+font-weight: bold;
+}
+.pl-mq {
+color: #008080;
+}
+.pl-mi {
+color: #333;
+font-style: italic;
+}
+.pl-mb {
+color: #333;
+font-weight: bold;
+}
+.pl-md {
+background-color: #ffecec;
+color: #bd2c00;
+}
+.pl-mi1 {
+background-color: #eaffea;
+color: #55a532;
+}
+.pl-mdr {
+color: #795da3;
+font-weight: bold;
+}
+.pl-mo {
+color: #1d3e81;
+}
+kbd {
+display: inline-block;
+padding: 3px 5px;
+font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+line-height: 10px;
+color: #555;
+vertical-align: middle;
+background-color: #fcfcfc;
+border: solid 1px #ccc;
+border-bottom-color: #bbb;
+border-radius: 3px;
+box-shadow: inset 0 -1px 0 #bbb;
+}
+.task-list-item {
+list-style-type: none;
+}
+.task-list-item+.task-list-item {
+margin-top: 3px;
+}
+.task-list-item input {
+margin: 0 0.35em 0.25em -1.6em;
+vertical-align: middle;
+}
+:checked+.radio-label {
+z-index: 1;
+position: relative;
+border-color: #4078c0;
+}
+.sourceLine {
+display: inline-block;
+}
+code .kw { color: #000000; }
+code .dt { color: #ed6a43; }
+code .dv { color: #009999; }
+code .bn { color: #009999; }
+code .fl { color: #009999; }
+code .ch { color: #009999; }
+code .st { color: #183691; }
+code .co { color: #969896; }
+code .ot { color: #0086b3; }
+code .al { color: #a61717; }
+code .fu { color: #63a35c; }
+code .er { color: #a61717; background-color: #e3d2d2; }
+code .wa { color: #000000; }
+code .cn { color: #008080; }
+code .sc { color: #008080; }
+code .vs { color: #183691; }
+code .ss { color: #183691; }
+code .im { color: #000000; }
+code .va {color: #008080; }
+code .cf { color: #000000; }
+code .op { color: #000000; }
+code .bu { color: #000000; }
+code .ex { color: #000000; }
+code .pp { color: #999999; }
+code .at { color: #008080; }
+code .do { color: #969896; }
+code .an { color: #008080; }
+code .cv { color: #008080; }
+code .in { color: #008080; }
+</style>
+<style>
+body {
+  box-sizing: border-box;
+  min-width: 200px;
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 45px;
+  padding-top: 0px;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1 id="yapima">yapima</h1>
+<p>true 2019-06-07</p>
+<ul>
+<li><a href="#yapima">yapima</a>
+<ul>
+<li><a href="#description">Description</a></li>
+<li><a href="#installation">Installation</a>
+<ul>
+<li><a href="#set-up-the-tools-using-conda">Set up the tools using <em>conda</em></a></li>
+<li><a href="#update-of-illuminahumanmethylationepicmanifest">Update of <em>IlluminaHumanMethylationEPICmanifest</em></a></li>
+</ul></li>
+<li><a href="#execution">Execution</a>
+<ul>
+<li><a href="#definition-of-variables">Definition of variables</a></li>
+</ul></li>
+<li><a href="#analysis-steps">Analysis steps</a>
+<ul>
+<li><a href="#preprocessing">Preprocessing</a></li>
+<li><a href="#copy-number-variation">Copy Number Variation</a></li>
+<li><a href="#differential-methylation-analysis">Differential Methylation Analysis</a></li>
+</ul></li>
+<li><a href="#output">Output</a>
+<ul>
+<li><a href="#basic-output">Basic output</a></li>
+<li><a href="#copy-number-variation-1">Copy Number Variation</a></li>
+<li><a href="#differential-methylation-analysis-1">Differential Methylation Analysis</a></li>
+<li><a href="#dependencies">Dependencies</a></li>
+</ul></li>
+<li><a href="#references">References</a></li>
+</ul></li>
+</ul>
+<h1 id="yapima-1">yapima</h1>
+<h2 id="description">Description</h2>
+<p><em>yapima</em> is a pipeline developed to simplify and standardize the preprocessing of the Illumina InfiniumHumanMethylation arrays in order to easily produce tables with beta-values and/or M-values that can be later used for further analysis.</p>
+<p>For the sake of simplicity in the usage and comprehension of the pipeline most of the options are hardcoded, and the interaction with it almost reduced to input/output definition and processes switches.</p>
+<h2 id="installation">Installation</h2>
+<p>To install yapima just clone this repository with the following command&quot;</p>
+<pre><code>git clone https://github.com/xpastor/yapima.git
+</code></pre>
+<p>The file <code>environment.yml</code> contains the packages and software dependencies to run <em>yapima</em>. <em>yapima</em> has been tested with the given versions of the packages and its performance with newer versions is not guaranteed (but I guarantee that it does not work with older ones).</p>
+<h3 id="set-up-the-tools-using-conda">Set up the tools using <em>conda</em></h3>
+<p>You can use <em>conda</em> to manage the software requirements and set un an environment. Instructions on how to install and use <em>conda</em> can be found here: <a href="https://conda.io/projects/conda/en/latest/user-guide/index.html">https://conda.io/projects/conda/en/latest/user-guide/index.html</a></p>
+<p>Once you have <em>conda</em> set up you can create an environment for <em>yapima</em> running the following command:</p>
+<pre><code>conda env create -f environment.yml
+</code></pre>
+<p>Be aware that if you already have a R version installed in your system, this has priority over the one in your <em>conda</em> environment and it will not have access to the recently created R library by <em>conda</em>. In order to run the R instance from your <em>conda</em> environment you need to copy the provided <em>env_vars.sh</em> files into a specific location of your <em>conda</em> environment. To do so, first you need to activate <em>yapima</em> environment:</p>
+<pre><code>conda activate yapima
+</code></pre>
+<p>Then run the following commands:</p>
+<pre><code>cp env_vars_activate.sh ${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh
+cp env_vars_deactivate.sh ${CONDA_PREFIX}/etc/conda/deactivate.d/env_vars.sh
+</code></pre>
+<p><em>yapima</em> can be run either directly using R or through a bash script (see explanations below, in the <em>Execution</em> section). If you want to run <em>yapima</em> directly in R, you need to activate the environment as explained above. On the other hand, if you want to run the bash wrapper you need to add the following line to <code>yapima.sh</code> right below the shebang (<code>#!/bin/bash</code>):</p>
+<pre><code>. activate yapima
+</code></pre>
+<p>Now you are all set up, and remember to activate the environment everytime you run <em>yapima</em>.</p>
+<p>Be aware that conda may not provide the last version of some bioconductor packages. In such case, after activating the conda environment start R and install/update the packages manually.</p>
+<h3 id="update-of-illuminahumanmethylationepicmanifest">Update of <em>IlluminaHumanMethylationEPICmanifest</em></h3>
+<p>Depending on the version of R and array the execution may file due to incompatibility caused by differences in dimensions between the manifest provided by bioconductor and the methylation array. In such case install the manifest provided here.</p>
+<h2 id="execution">Execution</h2>
+<p><em>yapima</em> requires a configuration file with the specifications of the files and steps required for the analysis.</p>
+<p>The most basic call to run <em>yapima</em> is:</p>
+<pre><code>Rscript /path/to/yapima.R /path/to/config_yapima.R
+</code></pre>
+<p>There is also a wrapper bash script that additionally places annotation files used in the analysis, the sample sheet and a simplified script to reproduce the results (without plots) in the results folder. In order to run the analysis using the bash wrapper, execute the following:</p>
+<pre><code>sh /path/to/yapima/yapima.sh -c /path/to/config_yapima.sh
+</code></pre>
+<p><em>config_yapima.R</em> and <em>config_yapima.sh</em> can be used as templates for the respective calls. However, be aware that the bash wrapper needs <em>config_yapima.R</em> as it is here delivered in order to load the values of the bash variables into the R environment, so if you want to run R yourself you should modify a copy of the file and not the file itself.</p>
+<h3 id="definition-of-variables">Definition of variables</h3>
+<h4 id="requirements">Requirements</h4>
+<p><em>yapima</em> uses tools that rely on the standard Illumina structures to import the data, and although it limits the flexibility of the tool, allows the user to provide the data without much need of manipulation since all the required files are usually provided by the core facilities. There are three requirements regarding input data.</p>
+<ul>
+<li><strong>IDAT_DIR</strong>: the path to the directory with all the idat files. All the idat files have to be located in the same directory, without any subdirectory structure</li>
+<li><strong>SAMPLE_ANNOTATION</strong>: path to a SampleSheet file, with all the relevant annotation for the arrays and the samples</li>
+<li><strong>OUTDIR</strong>: directory to store all the files generated by <em>yapima</em></li>
+</ul>
+<h5 id="a-few-rules-for-the-samplesheet">A few rules for the SampleSheet</h5>
+<p>The explanations here are to understand the final structure of the Sample Sheet, and the only manipulation of the file should be the addition of sample information columns to the standard Illumina sample sheet.</p>
+<p>The basic SampleSheet is a comma delimited file that always must have the following columns:</p>
+<ul>
+<li>Sample_Name: a unique identifier per sample (avoid purely numerical identifiers)</li>
+<li>Sentrix_ID: array barcode must correspond to its actual value for proper identification of the idat files</li>
+<li>Sentrix_Position: array position (6x2 disposition of the 12 samples) must correspond to the actual position of the sample in the array in order to properly identify the idat files; it must follow the following pattern: R0[1-8]C0[12]</li>
+</ul>
+<p>It is mandatory that the columns <em>Sample_Name</em>, <em>Sentrix_ID</em> and <em>Sentrix_Position</em> contain proper values. For the other columns, if no values are provided they must be empty (i.e. no ‘NA’ values), so the final structure of the file must be something like this:</p>
+<pre><code>Sample_Name,Sentrix_ID,Sentrix_Position  
+Normal1,1234567890,R01C01  
+Normal2,1234567890,R02C01  
+Normal3,1234567890,R03C01  
+Normal4,1234567890,R04C01  
+Normal5,1234567890,R05C01  
+Normal6,1234567890,R06C01  
+Tumor1,1234567890,R01C02  
+Tumor2,1234567890,R02C02  
+Tumor3,1234567890,R03C02  
+Tumor4,1234567890,R04C02  
+Tumor5,1234567890,R05C02  
+Tumor6,1234567890,R06C02  
+</code></pre>
+<p>Optionally, other columns of interest for the differential methylation analysis or the correction of batch effects can be added. In such case, if the value of a sample is unknown ‘NA’ must be provided. The values of categorical variables can not be exclusively numerical (i.e.: absence/presence of a mutation should be referred as something like ‘ref’/‘mut’, instead of 0/1), although numerical values may be used if other values are in string format. However, this numerical values will lose their numerical properties. Also, columns with numerical variables can include only numerical values or ‘NA’.</p>
+<pre><code>Sample_Name,Sentrix_ID,Sentrix_Position,Group,Hospital  
+Normal1,1234567890,R01C01,Normal,AAA  
+Normal2,1234567890,R02C01,Normal,AAA  
+Normal3,1234567890,R03C01,Normal,BBB  
+Normal4,1234567890,R04C01,Normal,NA  
+Normal5,1234567890,R05C01,Normal,BBB  
+Normal6,1234567890,R06C01,Normal,BBB  
+Tumor1,1234567890,R01C02,Tumor,BBB  
+Tumor2,1234567890,R02C02,Tumor,BBB  
+Tumor3,1234567890,R03C02,Tumor,AAA  
+Tumor4,1234567890,R04C02,Tumor,NA  
+Tumor5,1234567890,R05C02,Tumor,AAA  
+Tumor6,1234567890,R06C02,Tumor,BBB  
+</code></pre>
+<h4 id="optional-variables">Optional variables</h4>
+<ul>
+<li><strong>CONDA_ENV</strong>: name of the conda environment to be activated to execute yapima.</li>
+<li><strong>BLACKLIST</strong>: stores the path to a file with a set of probes that should be discarded from the very beginning of the analysis for whatever reason. The probes should be listed per line and identified by the Illumina identifier that generally starts with <em>cg</em>. Each line can have one or two columns, the second one being the sample where the value related to the probe should be masked. In summary, a probe not related to any sample will be flagged but the values will be left. In case a probe is related to a sample, the value for that probe in that sample will be replaced by ‘NA’. A probe can be related to multiple samples by adding a line for each sample. The ‘BLACKLIST’ file can be mixed with both types of probes to be masked, global or sample specific.</li>
+<li><strong>RUN_CNV</strong>: valid values are T/TRUE or F/FALSE and toggles the execution of CNV analysis</li>
+<li><strong>RUN_DIFFERENTIAL_METHYLATION</strong>: valid values are T/TRUE or F/FALSE and toggles the execution of differential analysis</li>
+<li><strong>REMOVE_SNPS</strong>: possible values are T/TRUE or F/FALSE and flags the polymorphic probes of a given population. By default ‘TRUE’</li>
+<li><strong>POPULATION</strong>: population from which the allelic frequency is used to flag polymorphic probes. By default ‘EUR’. Possible values are ’‘, ’EUR’, ‘AMR’, ‘AFR’, ‘ASN’ for 450k arrays and ’‘, ’EUR’, ‘AMR’, ‘AFR’, ‘EAS’, ‘SAS’ for EPIC arrays</li>
+<li><strong>USE_PREDICTED_SEX</strong>: possible values are T/TRUE of F/FALSE, to define if the predicted sex has to be used as confounder</li>
+<li><strong>BATCH_VARS</strong>: comma separated list of columns, without spaces, from the sample sheet that will be used as confounders or batch effects</li>
+<li><strong>SEED</strong>: an integer to allow the repetition of results in random processes</li>
+</ul>
+<h2 id="analysis-steps">Analysis steps</h2>
+<p>Since the pipeline is implemented in R and the config file is just a bash front-end for the pipeline, the values passed to the variables that control the processess switching need valid R logical values or expressions that can be evaluated in R context, not in bash. However, to make it easier, it’s also possible to switch off/on the processes with 0/1.</p>
+<h3 id="preprocessing">Preprocessing</h3>
+<p>The data is loaded into the R environment using the <em>minfi</em> (Aryee et al. <a href="#ref-minfi">2014</a>) package from bioconductor. Initially, probes are flagged using the following values and summed accordingly, being 0 the value for probes that pass all the filters:</p>
+<ul>
+<li>8: probes with low quality in at least half of the samples in a cohort</li>
+<li>4: probes provided in <strong>BLACKLIST</strong></li>
+<li>2: crossreactive probes for the IlluminaHumanMethylation450k array (Chen et al. <a href="#ref-450k">2013</a>), or for the IlluminaHumanMethylationEPIC array (McCartney et al. <a href="#ref-epic">2016</a>)</li>
+<li>1: if selected, probes with SNPs at the CpG or SBE position with an allelic frequency of 0.005 in the selected population for the IlluminaHumanMethylation450k array (Chen et al. <a href="#ref-450k">2013</a>) or for the IlluminaHumanMethylationEPIC array (McCartney et al. <a href="#ref-epic">2016</a>)</li>
+</ul>
+<p>Afterwards, <em>Noob</em> background correction (Triche et al. <a href="#ref-noob">2013</a>) is performed, with an offset of 15 and dye bias correction without a reference sample. Afterwards, SWAN normalization (Maksimovic, Gordon, and Oshlack <a href="#ref-SWAN">2012</a>) is applied, all them from the <em><a href="https://bioconductor.org/packages/minfi">minfi</a></em> (Aryee et al. <a href="#ref-minfi">2014</a>) Bioconductor package. Measures with low detection are replaced by ‘NA’.</p>
+<h3 id="copy-number-variation">Copy Number Variation</h3>
+<p>The CNV analysis is done using the <em><a href="https://bioconductor.org/packages/conumee">conumee</a></em> (Hovestadt and Zapatka, <a href="#ref-conumee">n.d.</a>) package from bioconductor. Each sample may take around two minutes of processing, so when executing the pipeline for exploratory purposes or in large cohorts it may e convenient to switch off this part.</p>
+<p><em>conumee</em> requires a sample set without chromosomal aberrations that are provided by <em><a href="https://bioconductor.org/packages/CopyNeutralIMA">CopyNeutralIMA</a></em> (Przybilla and Pastor <a href="#ref-CopyNeutralIMA">2018</a>).</p>
+<p>This analysis may provide a good idea about chromosomal aberrations although it should not replace an analysis at genomic level, and it proofs to be as valid to detect sample swaps as CNV analysis using sequencing data.</p>
+<h3 id="differential-methylation-analysis">Differential Methylation Analysis</h3>
+<p>The analysis of differentially methylated positions (DMP) is done using the <em><a href="https://bioconductor.org/packages/limma">limma</a></em> (Ritchie et al. <a href="#ref-limma">2015</a>) package from Bioconductor and following the procedures detailed by the authors. It can perform only paired and unpaired analysis and reports tables with P-values and adjusted P-values (Benjamini and Hochberg <a href="#ref-fdr">1995</a>), and takes as variables of interest all sample information columns provided by the user in the SampleSheet except the ones in the <strong>BATCH_VARS</strong> variable, although these are also included in the linear model to account for possible confounding factors.</p>
+<p>The analysis on GO and KEGG is done with the package <em><a href="https://bioconductor.org/packages/missMethyl">missMethyl</a></em> (Phipson, Maksimovic, and Oshlack <a href="#ref-missMethyl2">2015</a>), which takes into account the bias due to the number of probes per gene. The probes with an adjusted p-value below 0.05 are taken as the significant subset.</p>
+<p>The detection of differentially methylated regions (DMR) is done using the <em><a href="https://www.bioconductor.org/packages/DMRcate">DMRcate</a></em> (Peters et al. <a href="#ref-DMRcate">2015</a>) package from Bioconductor. For two groups comparisons, the t statistics from the DMP analysis are used, and the beta log fold change is computed running the standard limma workflow on the beta values. For comparisons with more than two groups the squared F statistics from the DMP analysis are provided and the beta log fold change is set to 0. All the other parameters are left as default.</p>
+<h2 id="output">Output</h2>
+<h3 id="basic-output">Basic output</h3>
+<p>When the pipeline is run without switching on any of the steps the following files are produced:</p>
+<ul>
+<li><strong>annotation.txt</strong>: tab delimited file with annotation for each probe in InfiniumHumanMethylation450k arrays</li>
+<li><strong>rgset.RData</strong>: a <em>RGSetChannel</em> object with all the imported arrays and annotation</li>
+<li><strong>raw_betas.bed.gz</strong>: compressed BED file with beta values before any transformation</li>
+<li><strong>bgCorr_meth.RData</strong>: an object of class <em>MethylSet</em> produced after transforming data with <em>ENmix</em> background correction and <em>RCP</em> normalization</li>
+<li><strong>normalized_betas.bed.gz</strong>: a compressed BED file with transformed beta-values, ready for analysis</li>
+<li><strong>normalized_M.bed.gz</strong>: compressed BED file with transformed M-values, suited for statistical analysis</li>
+<li><strong>extended_sample_sheet.csv</strong>: SampleSheet with an additional column for the predicted gender of the samples</li>
+<li><strong>genotyping_betas.txt</strong>: matrix of beta values of 65 genotyping probes present in the array</li>
+</ul>
+<h4 id="reproducible-research">Reproducible research</h4>
+<p>The pipeline also produces two files in order to be able to reproduce the analysis:</p>
+<ul>
+<li><strong>methods_session_references.docx</strong>: contains a description of the analysis as a paragraph that could be added to the <em>Methods</em> section of a paper; the session info with all the packages and versions used to reproduce the environment used for the analysis and the commit id for the version of the pipeline executed; the references to be mentioned in case the analysis is included in a paper</li>
+<li><strong>script.R</strong>: R script that reproduces a transparent analysis to repeat the results produced by the pipeline, with all the conditions evaluated by the pipeline already removed</li>
+</ul>
+<h4 id="qc">QC</h4>
+<p>By default, the following QC files are also produced:</p>
+<ul>
+<li><strong>qc/median_intensities.pdf</strong>: scatterplots with the median intensity of methylation signal against median intensity of unmethylation signal. Samples with a combined intensity below 21 are shown as bad quality. It is advisable to remove such probes from analysis and rerun <em>yapima</em>.</li>
+<li><strong>qc/bisulfite_conversion.pdf</strong>: dotplots showing the success of the bisulfite conversion. Bad quality samples may show differing patterns from the majority of the samples</li>
+<li><strong>qc/beta_distribution.pdf</strong>: density plots of beta values for each sample, before and after transformation</li>
+<li><strong>qc/beta_distribution_heatmap.pdf</strong>: density heatmaps of beta values, before and after transformation; these plots help better to identify the samples with abnormal beta values distribution</li>
+<li><strong>qc/raw_batch_PCA_</strong>*: PCA plots of samples before transformation identifying the samples by groups of batch/confounding variables</li>
+<li><strong>qc/processed_batch_PCA_</strong>*: PCA plots of samples after transformation identifying the samples by groups of batch/confounding variables</li>
+<li><strong>qc/samples_correlation.pdf</strong>: heatmaps showing sample correlations using beta values after transformation</li>
+<li><strong>qc/genotypes.bed</strong>: BED file with inferred genotypes of the samples using the beta values of genotyping probes</li>
+</ul>
+<p>Additionally, if there are columns in the SampleSheet other than the basic ones or identified as batch effects the following plots are produced:</p>
+<ul>
+<li><strong>qc/raw_PCA_</strong>*: PCA plots of samples before transformation identifying the samples by variables of interest</li>
+<li><strong>qc/processed_PCA_</strong>*: PCA plots of samples after transformation identifying the samples by variables of interest</li>
+</ul>
+<h3 id="copy-number-variation-1">Copy Number Variation</h3>
+<p>This is mostly a QC step that produces two files per sample:</p>
+<ul>
+<li>**qc/CNV_report/?_CNV_report.pdf**: for each sample a pdf file with one plot showing all the aberrations in the genome and one plot per chromosome, showing the aberrations present in each chromosome in more detail</li>
+<li>**qc/CNV_report/?_CNV_report.txt**: for each sample a tab delimited file with information on the regions of the genome with chromosomal aberrations</li>
+</ul>
+<h3 id="differential-methylation-analysis-1">Differential Methylation Analysis</h3>
+<p>Each column in the SampleSheet that does not correspond to a basic column or a batch variables is used to define a differential methylation analysis, and for each of them the following files are produced:</p>
+<ul>
+<li><p><strong>DMP/DMP_?.bed.gz</strong>: compressed BED file with some statistical parameters (<em>limma</em>) like the log fold change (‘logFC’), average methylation (‘AveExpr’), the P-value (‘P.value’) and the adjusted P-value(‘adj.P.Value’), together with array annotation</p></li>
+<li><p><strong>DMP/DMP_PCA_?.png</strong>: PCA plot using the probes with an adjusted P-value smaller than 0.05</p></li>
+<li><p><strong>DMP/DMP_cluster_?.pdf</strong>: hierarchical clustering of the samples using the probes with and adjusted P-value &lt;= 0.05</p></li>
+<li><p><strong>DMP/GO_BP_?.txt</strong>: tab delimited file with the name of the category (‘Term’) in the <em>Biological Process</em> ontology, the total number of probes in the category (‘N’) and the number of significant probes in it (‘DE’), the significance of the enrichment (‘P.DE’) and the significance after multiple testing correction (‘FDR’)</p></li>
+<li><p><strong>DMP/GO_CC_?.txt</strong>: same as before but for <em>Cellular Component</em></p></li>
+<li><p><strong>DMP/GO_MF_?.txt</strong>: same as before but for <em>Molecular Function</em></p></li>
+<li><p><strong>DMP/KEGG_?.txt</strong>: same as before but for KEGG pathways</p></li>
+<li><p><strong>DMR/DMR_?.bed</strong>: BED file with the identified DMRs</p></li>
+<li><p><strong>DMR/DMR_heatmap_?.pdf</strong>: heatmap of CpGs from the top DMRs that sum up to 500 CpGs, being the top DMRs those with a smaller Stouffer.</p></li>
+</ul>
+<h3 id="dependencies">Dependencies</h3>
+<p>The current version of yapima requires R-3.5.1 and Bioconductor 3.8. The following packages and their dependencies must be installed:</p>
+<ul>
+<li>biomaRt</li>
+<li>circlize</li>
+<li>cluster</li>
+<li>ComplexHeatmap</li>
+<li>conumee</li>
+<li>CopyNeutralIMA</li>
+<li>DMRcate</li>
+<li>fpc</li>
+<li>GenomicRanges</li>
+<li>ggplot2</li>
+<li>git2r</li>
+<li>grid</li>
+<li>gridExtra</li>
+<li>knitr</li>
+<li>limma</li>
+<li>minfi</li>
+<li>missMethyl</li>
+</ul>
+<p>Additionally, pandoc v2.2.1 or higher is necessary in order to produce the documentation of the execution.</p>
+<h2 id="references">References</h2>
+<ul>
+<li>This pipeline has been developed by <a href="mailto:xpastor79@gmail.com">Xavier Pastor</a> at DKFZ, Heidelberg, Germany.</li>
+</ul>
+<div id="refs" class="references">
+
+<div id="ref-minfi">
+
+<p>Aryee, Martin J., Andrew E. Jaffe, Hector Corrada-Bravo, Christine Ladd-Acosta, Andrew P. Feinberg, Kasper D. Hansen, and Rafael A. Irizarry. 2014. “Minfi: A flexible and comprehensive Bioconductor package for the analysis of Infinium DNA Methylation microarrays.” <em>Bioinformatics</em> 30 (10): 1363–9. <a href="https://doi.org/10.1093/bioinformatics/btu049">https://doi.org/10.1093/bioinformatics/btu049</a>.</p>
+</div>
+
+<div id="ref-fdr">
+
+<p>Benjamini, Y, and Y Hochberg. 1995. “Controlling the False Discovery Rate: A Practical and Powerful Approach to Multiple Testing.” <em>Journal of the Royal Statistical Society Series B</em> 57: 289–300.</p>
+</div>
+
+<div id="ref-450k">
+
+<p>Chen, Yi-an, Mathieu Lemire, Sanaa Choufani, Darci T. Butcher, Daria Grafodatskayak, Brent W. Zanke, Steven Gallinger, Thomas J. Hudson, and Rosanna Weksberg. 2013. “Discovery of Cross-Reactive Probes and Polymorphic Cpgs in the Illumina Infinium Human Methylation450 Microarray.” <em>Epigenetics</em> 8 (2): 203–9.</p>
+</div>
+
+<div id="ref-conumee">
+
+<p>Hovestadt, Volker, and Marc Zapatka. n.d. <em>Conumee: Enhanced Copy-Number Variation Analysis Using Illumina Dna Methylation Arrays</em>. Division of Molecular Genetics, German Cancer Research Center (DKFZ), Heidelberg, Germany. <a href="http://bioconductor.org/packages/conumee/">http://bioconductor.org/packages/conumee/</a>.</p>
+</div>
+
+<div id="ref-SWAN">
+
+<p>Maksimovic, Jovana, Lavinia Gordon, and Alicia Oshlack. 2012. “SWAN: Subset quantile Within-Array Normalization for Illumina Infinium HumanMethylation450 BeadChips.” <em>Genome Biology</em> 13 (6): R44. <a href="https://doi.org/10.1186/gb-2012-13-6-r44">https://doi.org/10.1186/gb-2012-13-6-r44</a>.</p>
+</div>
+
+<div id="ref-epic">
+
+<p>McCartney, Daniel L., Rosie M. Walker, Stewart W. Morris, Andrew M. McIntosh, David J. Porteous, and Kathryn L. Evans. 2016. “Identification of Polymorphic and Off-Target Probe Binding Sites on the Illumina Infinium Methylationepic Beadchip.” <em>Genomics Data</em> 9: 22–24.</p>
+</div>
+
+<div id="ref-DMRcate">
+
+<p>Peters, Timothy J, Michael J Buckley, Aaron L Statham, Ruth Pidsley, Katherine Samaras, Reginald V Lord, Susan J Clark, and Peter L Molloy. 2015. “De Novo Identification of Differentially Methylated Regions in the Human Genome.” <em>Epigenetics &amp; Chromatin</em> 8: 6. <a href="http://www.epigeneticsandchromatin.com/content/8/1/6">http://www.epigeneticsandchromatin.com/content/8/1/6</a>.</p>
+</div>
+
+<div id="ref-missMethyl2">
+
+<p>Phipson, Belinda, Jovana Maksimovic, and Alicia Oshlack. 2015. “MissMethyl: An R Package for Analysing Methylation Data from Illuminas Humanmethylation450 Platform.” <em>Bioinformatics</em>, btv560.</p>
+</div>
+
+<div id="ref-CopyNeutralIMA">
+
+<p>Przybilla, Moritz, and Xavier Pastor. 2018. <em>CopyNeutralIMA: Genomic Copy Neutral samples for Illumina Methylation arrays</em>. <a href="https://bioconductor.org/packages/CopyNeutralIMA">https://bioconductor.org/packages/CopyNeutralIMA</a>.</p>
+</div>
+
+<div id="ref-limma">
+
+<p>Ritchie, Matthew E, Belinda Phipson, Di Wu, Yifang Hu, Charity W Law, Wei Shi, and Gordon K Smyth. 2015. “limma Powers Differential Expression Analyses for RNA-Sequencing and Microarray Studies.” <em>Nucleic Acids Research</em> 43 (7): e47.</p>
+</div>
+
+<div id="ref-noob">
+
+<p>Triche, Timothy J., Daniel J. Weisenberger, David Van Den Berg, Peter W. Laird, and Kimberly D. Siegmund. 2013. “Low-Level Processing of Illumina Infinium DNA Methylation BeadArrays.” <em>Nucleic Acids Research</em> 41 (7): e90. <a href="https://doi.org/10.1093/nar/gkt090">https://doi.org/10.1093/nar/gkt090</a>.</p>
+</div>
+
+</div>
+
+</body>
+</html>

@@ -5,15 +5,18 @@ author:
     affiliation:
     - Heidelberg Center for Personalized Oncology (DKFZ-HIPO), Heidelberg, Germany
     - Division of Theoretical Bioinformatics, German Cancer Research Center (DKFZ), Heidelberg, Germany
-    email: xavier.pastor@compbio-dev.com
+    - Institute of Computational Biology, Helmholtz Zentrum Muenchen, Munich, Germany
+    email: xavier.pastor@helmholtz-muenchen.de
+output:
+  github_document:
+    toc: TRUE
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
 
 date: "`r Sys.Date()`"
 link-citations: true
 bibliography: REFERENCES.bib
-vignette: >
-  %\VignetteIndexEntry{CopyNeutralIMA}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, echo = FALSE}
@@ -26,15 +29,72 @@ knitr::opts_chunk$set(collapse=TRUE, comment='#>')
 
 For the sake of simplicity in the usage and comprehension of the pipeline most of the options are hardcoded, and the interaction with it almost reduced to input/output definition and processes switches.
 
-## Definition of variables
-### Requirements
+## Installation
+To install yapima just clone this repository with the following command"
+```
+git clone https://github.com/xpastor/yapima.git
+```
+
+The file `environment.yml` contains the packages and software dependencies to run *yapima*. *yapima* has been tested with the given versions of the packages and its performance with newer versions is not guaranteed (but I guarantee that it does not work with older ones).
+
+### Set up the tools using *conda*
+
+You can use *conda* to manage the software requirements and set un an environment. Instructions on how to install and use *conda* can be found here: 
+<https://conda.io/projects/conda/en/latest/user-guide/index.html>
+
+Once you have *conda* set up you can create an environment for *yapima* running the following command:
+```
+conda env create -f environment.yml
+```
+
+Be aware that if you already have a R version installed in your system, this has priority over the one in your *conda* environment and it will not have access to the recently created R library by *conda*. In order to run the R instance from your *conda* environment you need to copy the provided *env_vars.sh* files into a specific location of your *conda* environment. To do so, first you need to activate *yapima* environment:
+```
+conda activate yapima
+```
+Then run the following commands:
+```
+cp env_vars_activate.sh ${CONDA_PREFIX}/etc/conda/activate.d/env_vars.sh
+cp env_vars_deactivate.sh ${CONDA_PREFIX}/etc/conda/deactivate.d/env_vars.sh
+```
+
+*yapima* can be run either directly using R or through a bash script (see explanations below, in the *Execution* section). If you want to run *yapima* directly in R, you need to activate the environment as explained above. On the other hand, if you want to run the bash wrapper you need to add the following line to `yapima.sh` right below the shebang (`#!/bin/bash`):
+```
+. activate yapima
+```
+
+Now you are all set up, and remember to activate the environment everytime you run *yapima*.
+
+Be aware that conda may not provide the last version of some bioconductor packages. In such case, after activating the conda environment start R and install/update the packages manually.
+
+### Update of *IlluminaHumanMethylationEPICmanifest*
+
+Depending on the version of R and array the execution may file due to incompatibility caused by differences in dimensions between the manifest provided by bioconductor and the methylation array. In such case install the manifest provided here.
+
+## Execution
+
+*yapima* requires a configuration file with the specifications of the files and steps required for the analysis.  
+
+The most basic call to run *yapima* is:
+```
+Rscript /path/to/yapima.R /path/to/config_yapima.R
+```
+
+There is also a wrapper bash script that additionally places annotation files used in the analysis, the sample sheet and a simplified script to reproduce the results (without plots) in the results folder. In order to run the analysis using the bash wrapper, execute the following:
+```
+sh /path/to/yapima/yapima.sh -c /path/to/config_yapima.sh
+```
+
+*config_yapima.R* and *config_yapima.sh* can be used as templates for the respective calls. However, be aware that the bash wrapper needs *config_yapima.R* as it is here delivered in order to load the values of the bash variables into the R environment, so if you want to run R yourself you should modify a copy of the file and not the file itself.
+
+### Definition of variables
+#### Requirements
 *yapima* uses tools that rely on the standard Illumina structures to import the data, and although it limits the flexibility of the tool, allows the user to provide the data without much need of manipulation since all the required files are usually provided by the core facilities. There are three requirements regarding input data.
 
 * **IDAT_DIR**: the path to the directory with all the idat files. All the idat files have to be located in the same directory, without any subdirectory structure
 * **SAMPLE_ANNOTATION**: path to a SampleSheet file, with all the relevant annotation for the arrays and the samples
 * **OUTDIR**: directory to store all the files generated by *yapima*
 
-#### A few rules for the SampleSheet
+##### A few rules for the SampleSheet
 The explanations here are to understand the final structure of the Sample Sheet, and the only manipulation of the file should be the addition of sample information columns to the standard Illumina sample sheet.
 
 The basic SampleSheet is a comma delimited file that always must have the following columns:
@@ -79,7 +139,8 @@ Tumor5,1234567890,R05C02,Tumor,AAA
 Tumor6,1234567890,R06C02,Tumor,BBB  
 ```
 
-### Optional variables
+#### Optional variables
+* **CONDA_ENV**: name of the conda environment to be activated to execute yapima.
 * **BLACKLIST**: stores the path to a file with a set of probes that should be discarded from the very beginning of the analysis for whatever reason. The probes should be listed per line and identified by the Illumina identifier that generally starts with *cg*. Each line can have one or two columns, the second one being the sample where the value related to the probe should be masked. In summary, a probe not related to any sample will be flagged but the values will be left. In case a probe is related to a sample, the value for that probe in that sample will be replaced by 'NA'. A probe can be related to multiple samples by adding a line for each sample. The 'BLACKLIST' file can be mixed with both types of probes to be masked, global or sample specific.
 * **RUN_CNV**: valid values are T/TRUE or F/FALSE and toggles the execution of CNV analysis
 * **RUN_DIFFERENTIAL_METHYLATION**: valid values are T/TRUE or F/FALSE and toggles the execution of differential analysis
@@ -88,12 +149,6 @@ Tumor6,1234567890,R06C02,Tumor,BBB
 * **USE_PREDICTED_SEX**: possible values are T/TRUE of F/FALSE, to define if the predicted sex has to be used as confounder
 * **BATCH_VARS**: comma separated list of columns, without spaces, from the sample sheet that will be used as confounders or batch effects
 * **SEED**: an integer to allow the repetition of results in random processes
-
-## Execution
-*yapima* is executed using a bash configuration file that needs to be sourced:
-```
-sh /path/to/yapima/yapima.sh -c /path/to/config_yapima.sh
-```
 
 ## Analysis steps
 Since the pipeline is implemented in R and the config file is just a bash front-end for the pipeline, the values passed to the variables that control the processess switching need valid R logical values or expressions that can be evaluated in R context, not in bash. However, to make it easier, it's also possible to switch off/on the processes with 0/1.
@@ -106,21 +161,21 @@ The data is loaded into the R environment using the *minfi* [@minfi] package fro
 * 2: crossreactive probes for the IlluminaHumanMethylation450k array [@450k], or for the IlluminaHumanMethylationEPIC array [@epic]
 * 1: if selected, probes with SNPs at the CpG or SBE position with an allelic frequency of 0.005 in the selected population for the IlluminaHumanMethylation450k array [@450k] or for the IlluminaHumanMethylationEPIC array [@epic]
 
-Afterwards, *ENmix* 'est' background correction [@ENmix] and 'RELIC' dye bias correction [@RELIC] are performed, and RCP normalization [@RCP] is applied, all them from the *[ENmix](https://bioconductor.org/packages/ENmix)* [@ENmix] Bioconductor package. Measures with low detection are replaced by 'NA'.
+Afterwards, *Noob* background correction [@noob] is performed, with an offset of 15 and dye bias correction without a reference sample. Afterwards, SWAN normalization [@SWAN] is applied, all them from the *[minfi](https://bioconductor.org/packages/minfi)* [@minfi] Bioconductor package. Measures with low detection are replaced by 'NA'.
 
 ### Copy Number Variation
 The CNV analysis is done using the *[conumee](https://bioconductor.org/packages/conumee)* [@conumee] package from bioconductor. Each sample may take around two minutes of processing, so when executing the pipeline for exploratory purposes or in large cohorts it may e convenient to switch off this part.
 
-*conumee* requires a sample set without chromosomal aberrations that are provided by *[CopyNeutralIMA](https://bioconductor.org/packages/CopyNeutralIMA)* [@cnima].
+*conumee* requires a sample set without chromosomal aberrations that are provided by *[CopyNeutralIMA](https://bioconductor.org/packages/CopyNeutralIMA)* [@CopyNeutralIMA].
 
 This analysis may provide a good idea about chromosomal aberrations although it should not replace an analysis at genomic level, and it proofs to be as valid to detect sample swaps as CNV analysis using sequencing data.
 
 ### Differential Methylation Analysis
 The analysis of differentially methylated positions (DMP) is done using the *[limma](https://bioconductor.org/packages/limma)* [@limma] package from Bioconductor and following the procedures detailed by the authors. It can perform only paired and unpaired analysis and reports tables with P-values and adjusted P-values [@fdr], and takes as variables of interest all sample information columns provided by the user in the SampleSheet except the ones in the **BATCH_VARS** variable, although these are also included in the linear model to account for possible confounding factors.
 
-The analysis on GO and KEGG is done with the package *[missMethyl](https://bioconductor.org/packages/missMethyl)* [@missMethyl], which takes into account the bias due to the number of probes per gene. The probes with an adjusted p-value below 0.05 are taken as the significant subset.
+The analysis on GO and KEGG is done with the package *[missMethyl](https://bioconductor.org/packages/missMethyl)* [@missMethyl2], which takes into account the bias due to the number of probes per gene. The probes with an adjusted p-value below 0.05 are taken as the significant subset.
 
-The detection of differentially methylated regions (DMR) is done using the *[DMRcate](https://www.bioconductor.org/packages/DMRcate)* [@dmr] package from Bioconductor. For two groups comparisons, the t statistics from the DMP analysis are used, and the beta log fold change is computed running the standard limma workflow on the beta values. For comparisons with more than two groups the squared F statistics from the DMP analysis are provided and the beta log fold change is set to 0. All the other parameters are left as default.
+The detection of differentially methylated regions (DMR) is done using the *[DMRcate](https://www.bioconductor.org/packages/DMRcate)* [@DMRcate] package from Bioconductor. For two groups comparisons, the t statistics from the DMP analysis are used, and the beta log fold change is computed running the standard limma workflow on the beta values. For comparisons with more than two groups the squared F statistics from the DMP analysis are provided and the beta log fold change is set to 0. All the other parameters are left as default.
 
 ## Output
 ### Basic output
@@ -179,7 +234,7 @@ Each column in the SampleSheet that does not correspond to a basic column or a b
 * **DMR/DMR_heatmap_?.pdf**: heatmap of CpGs from the top DMRs that sum up to 500 CpGs, being the top DMRs those with a smaller Stouffer.
 
 ### Dependencies
-The current version of yapima requires R-3.5.0 and Bioconductor 3.8. The following packages and their dependencies must be installed:
+The current version of yapima requires R-3.5.1 and Bioconductor 3.8. The following packages and their dependencies must be installed:
 
 * biomaRt
 * circlize
@@ -188,7 +243,6 @@ The current version of yapima requires R-3.5.0 and Bioconductor 3.8. The followi
 * conumee
 * CopyNeutralIMA
 * DMRcate
-* ENmix
 * fpc
 * GenomicRanges
 * ggplot2
@@ -199,11 +253,8 @@ The current version of yapima requires R-3.5.0 and Bioconductor 3.8. The followi
 * limma
 * minfi
 * missMethyl
-* parallel
-* rmarkup
-* tools
 
 Additionally, pandoc v2.2.1 or higher is necessary in order to produce the documentation of the execution.
 
 ## References
-* This pipeline has been developed by [Xavier Pastor](mailto:xavier.pastor@compbio-dev.com) at DKFZ, Heidelberg, Germany.
+* This pipeline has been developed by [Xavier Pastor](mailto:xpastor79@gmail.com) at DKFZ, Heidelberg, Germany.
